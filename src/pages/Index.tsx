@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Type, Film, ImageIcon } from "lucide-react";
+import { Type, Film, ImageIcon, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
 import VideoSection from "@/components/VideoSection";
 import ImagesSection from "@/components/ImagesSection";
+import { Button } from "@/components/ui/button";
 
 type Tab = "text" | "video" | "images";
 
@@ -14,11 +17,26 @@ const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("text");
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="pt-10 pb-6 text-center">
+      <header className="pt-10 pb-6 text-center relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleLogout}
+          className="absolute top-4 right-4"
+          title="Выйти"
+        >
+          <LogOut className="w-5 h-5" />
+        </Button>
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
           Media Hub
         </h1>
