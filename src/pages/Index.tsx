@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Type, Film, ImageIcon, LogOut } from "lucide-react";
+import { Type, Film, ImageIcon, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
 import VideoSection from "@/components/VideoSection";
 import ImagesSection from "@/components/ImagesSection";
 import { Button } from "@/components/ui/button";
+import { useProfile } from "@/hooks/useProfile";
+import { useUserRole } from "@/hooks/useUserRole";
 
 type Tab = "text" | "video" | "images";
 
@@ -18,7 +20,8 @@ const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
 const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("text");
   const navigate = useNavigate();
-
+  const { displayName } = useProfile();
+  const { role } = useUserRole();
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/login");
@@ -28,15 +31,23 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="pt-10 pb-6 text-center relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleLogout}
-          className="absolute top-4 right-4"
-          title="Выйти"
-        >
-          <LogOut className="w-5 h-5" />
-        </Button>
+        <div className="absolute top-4 right-4 flex items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <User className="w-4 h-4" />
+            <span>{displayName}</span>
+            {role && (
+              <span className="text-xs bg-muted px-2 py-0.5 rounded-full capitalize">{role}</span>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            title="Выйти"
+          >
+            <LogOut className="w-5 h-5" />
+          </Button>
+        </div>
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
           Media Hub
         </h1>
