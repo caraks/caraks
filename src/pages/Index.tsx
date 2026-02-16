@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Type, Film, ImageIcon, LogOut, User } from "lucide-react";
+import { Type, Film, ImageIcon, LogOut, User, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
@@ -8,6 +8,9 @@ import ImagesSection from "@/components/ImagesSection";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 type Tab = "text" | "video" | "images";
 
@@ -22,9 +25,31 @@ const Index = () => {
   const navigate = useNavigate();
   const { displayName } = useProfile();
   const { role } = useUserRole();
+  const [editOpen, setEditOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [saving, setSaving] = useState(false);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/login");
+  };
+
+  const handleSaveName = async () => {
+    setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSaving(false); return; }
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: newName.trim() })
+      .eq("id", user.id);
+    setSaving(false);
+    if (error) {
+      toast.error("Ошибка сохранения");
+    } else {
+      toast.success("Имя обновлено");
+      setEditOpen(false);
+      window.location.reload();
+    }
   };
 
   return (
@@ -47,7 +72,33 @@ const Index = () => {
           >
             <LogOut className="w-5 h-5" />
           </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => { setNewName(displayName ?? ""); setEditOpen(true); }}
+            title="Изменить имя"
+          >
+            <Pencil className="w-4 h-4" />
+          </Button>
         </div>
+
+        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Изменить имя</DialogTitle>
+            </DialogHeader>
+            <Input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Введите новое имя"
+            />
+            <DialogFooter>
+              <Button onClick={handleSaveName} disabled={saving || !newName.trim()}>
+                {saving ? "Сохранение..." : "Сохранить"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
           Media Hub
         </h1>
