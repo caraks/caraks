@@ -4,6 +4,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
+import { useLang } from "@/hooks/useLang";
 
 interface PollOption {
   id: string;
@@ -35,6 +36,7 @@ interface PollListProps {
 }
 
 const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
+  const { t } = useLang();
   const [polls, setPolls] = useState<PollWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
@@ -95,19 +97,19 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
     setVoting(null);
     if (error) {
       if (error.code === "23505") {
-        toast.error("Вы уже голосовали");
+        toast.error(t("already_voted"));
       } else {
-        toast.error("Ошибка голосования");
+        toast.error(t("vote_error"));
       }
     } else {
-      toast.success("Голос принят");
+      toast.success(t("vote_accepted"));
       fetchPolls();
     }
   };
 
   const handleDeactivate = async (pollId: string) => {
     await supabase.from("polls").update({ is_active: false }).eq("id", pollId);
-    toast.success("Опрос закрыт");
+    toast.success(t("poll_closed"));
     fetchPolls();
   };
 
@@ -122,7 +124,7 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
   if (polls.length === 0) {
     return (
       <p className="text-muted-foreground text-sm italic text-center py-4">
-        Нет активных опросов
+        {t("no_active_polls")}
       </p>
     );
   }
@@ -139,13 +141,12 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
               <h4 className="font-semibold text-foreground">{poll.question}</h4>
               {isAdmin && (
                 <Button variant="ghost" size="sm" onClick={() => handleDeactivate(poll.id)} className="text-xs text-muted-foreground shrink-0">
-                  Закрыть
+                  {t("close_poll")}
                 </Button>
               )}
             </div>
 
             {hasVoted || isAdmin ? (
-              // Show results
               <div className="space-y-2">
                 {poll.options.map((opt) => {
                   const count = poll.votes.filter((v) => v.option_id === opt.id).length;
@@ -171,11 +172,10 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                   );
                 })}
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <BarChart3 className="w-3 h-3" /> Всего голосов: {totalVotes}
+                  <BarChart3 className="w-3 h-3" /> {t("total_votes")}: {totalVotes}
                 </p>
               </div>
             ) : (
-              // Show voting form
               <>
                 <RadioGroup
                   value={selectedOptions[poll.id] ?? ""}
@@ -196,7 +196,7 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                   disabled={!selectedOptions[poll.id] || voting === poll.id}
                 >
                   {voting === poll.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-                  Голосовать
+                  {t("vote")}
                 </Button>
               </>
             )}
