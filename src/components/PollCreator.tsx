@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X, Send, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useLang } from "@/hooks/useLang";
 
 interface PollCreatorProps {
   onCreated: () => void;
 }
 
 const PollCreator = ({ onCreated }: PollCreatorProps) => {
+  const { t } = useLang();
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
   const [saving, setSaving] = useState(false);
@@ -32,7 +34,7 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
     const trimmedQ = question.trim();
     const trimmedOpts = options.map((o) => o.trim()).filter(Boolean);
     if (!trimmedQ || trimmedOpts.length < 2) {
-      toast.error("Введите вопрос и минимум 2 варианта");
+      toast.error(t("min_options_error"));
       return;
     }
 
@@ -47,7 +49,7 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
       .single();
 
     if (error || !poll) {
-      toast.error("Ошибка создания опроса");
+      toast.error(t("poll_create_error"));
       setSaving(false);
       return;
     }
@@ -64,9 +66,9 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
 
     setSaving(false);
     if (optError) {
-      toast.error("Ошибка добавления вариантов");
+      toast.error(t("poll_options_error"));
     } else {
-      toast.success("Опрос создан");
+      toast.success(t("poll_created"));
       setQuestion("");
       setOptions(["", ""]);
       onCreated();
@@ -75,11 +77,11 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
 
   return (
     <div className="space-y-4 rounded-xl border border-border bg-muted/30 p-4">
-      <h3 className="text-sm font-semibold text-foreground">Новый опрос</h3>
+      <h3 className="text-sm font-semibold text-foreground">{t("new_poll")}</h3>
       <Input
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        placeholder="Вопрос опроса..."
+        placeholder={t("poll_question_placeholder")}
         maxLength={200}
       />
       <div className="space-y-2">
@@ -88,7 +90,7 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
             <Input
               value={opt}
               onChange={(e) => updateOption(idx, e.target.value)}
-              placeholder={`Вариант ${idx + 1}`}
+              placeholder={`${t("option")} ${idx + 1}`}
               maxLength={100}
             />
             {options.length > 2 && (
@@ -102,12 +104,12 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
       <div className="flex gap-2">
         {options.length < 6 && (
           <Button variant="outline" size="sm" onClick={addOption}>
-            <Plus className="w-4 h-4 mr-1" /> Добавить вариант
+            <Plus className="w-4 h-4 mr-1" /> {t("add_option")}
           </Button>
         )}
         <Button size="sm" onClick={handleCreate} disabled={saving}>
           {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
-          Создать
+          {t("create")}
         </Button>
       </div>
     </div>

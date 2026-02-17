@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Type, Film, ImageIcon, LogOut, User, Pencil } from "lucide-react";
+import { Type, Film, ImageIcon, LogOut, User, Pencil, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
@@ -8,24 +8,26 @@ import ImagesSection from "@/components/ImagesSection";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useLang } from "@/hooks/useLang";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 type Tab = "text" | "video" | "images";
 
-const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  { id: "text", label: "Text", icon: <Type className="w-5 h-5" /> },
-  { id: "video", label: "Video", icon: <Film className="w-5 h-5" /> },
-  { id: "images", label: "Bilder", icon: <ImageIcon className="w-5 h-5" /> },
-];
-
 const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("text");
   const navigate = useNavigate();
   const { displayName } = useProfile();
   const { role } = useUserRole();
+  const { lang, setLang, t } = useLang();
   const [editOpen, setEditOpen] = useState(false);
+
+  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    { id: "text", label: t("text"), icon: <Type className="w-5 h-5" /> },
+    { id: "video", label: t("video"), icon: <Film className="w-5 h-5" /> },
+    { id: "images", label: t("images"), icon: <ImageIcon className="w-5 h-5" /> },
+  ];
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -44,9 +46,9 @@ const Index = () => {
       .eq("id", user.id);
     setSaving(false);
     if (error) {
-      toast.error("Ошибка сохранения");
+      toast.error(t("save_error"));
     } else {
-      toast.success("Имя обновлено");
+      toast.success(t("name_updated"));
       setEditOpen(false);
       window.location.reload();
     }
@@ -56,6 +58,19 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="pt-10 pb-6 text-center relative">
+        {/* Language toggle - top left */}
+        <div className="absolute top-4 left-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLang(lang === "de" ? "ru" : "de")}
+            title={lang === "de" ? "Auf Russisch wechseln" : "Переключить на немецкий"}
+            className="gap-1.5 text-xs"
+          >
+            <Globe className="w-4 h-4" />
+            {lang === "de" ? "RU" : "DE"}
+          </Button>
+        </div>
         <div className="absolute top-4 right-4 flex items-center gap-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <User className="w-4 h-4" />
@@ -68,7 +83,7 @@ const Index = () => {
             variant="ghost"
             size="icon"
             onClick={handleLogout}
-            title="Выйти"
+            title={t("logout")}
           >
             <LogOut className="w-5 h-5" />
           </Button>
@@ -76,7 +91,7 @@ const Index = () => {
             variant="ghost"
             size="icon"
             onClick={() => { setNewName(displayName ?? ""); setEditOpen(true); }}
-            title="Изменить имя"
+            title={t("edit_name")}
           >
             <Pencil className="w-4 h-4" />
           </Button>
@@ -85,16 +100,16 @@ const Index = () => {
         <Dialog open={editOpen} onOpenChange={setEditOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Изменить имя</DialogTitle>
+              <DialogTitle>{t("edit_name")}</DialogTitle>
             </DialogHeader>
             <Input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Введите новое имя"
+              placeholder={t("enter_new_name")}
             />
             <DialogFooter>
               <Button onClick={handleSaveName} disabled={saving || !newName.trim()}>
-                {saving ? "Сохранение..." : "Сохранить"}
+                {saving ? t("saving") : t("save")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -103,7 +118,7 @@ const Index = () => {
           Media Hub
         </h1>
         <p className="mt-2 text-muted-foreground text-lg">
-          Text · Video · Bilder
+          {t("subtitle")}
         </p>
       </header>
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useLang } from "@/hooks/useLang";
 import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import PollCreator from "@/components/PollCreator";
@@ -8,6 +9,7 @@ import PollList from "@/components/PollList";
 
 const AdminContentSection = () => {
   const { isAdmin, loading: roleLoading } = useUserRole();
+  const { t } = useLang();
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -36,8 +38,8 @@ const AdminContentSection = () => {
         .from("admin_content")
         .update({ content, updated_by: user?.id, updated_at: new Date().toISOString() })
         .eq("id", rows[0].id);
-      if (error) toast.error("Ошибка сохранения");
-      else toast.success("Сохранено");
+      if (error) toast.error(t("save_error"));
+      else toast.success(t("saved"));
     }
     setSaving(false);
   };
@@ -54,7 +56,7 @@ const AdminContentSection = () => {
     <div className="space-y-6">
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-foreground">
-          {isAdmin ? "Редактирование контента" : "Контент"}
+          {isAdmin ? t("edit_content") : t("content")}
         </h2>
         {isAdmin ? (
           <>
@@ -62,7 +64,7 @@ const AdminContentSection = () => {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="w-full min-h-[200px] rounded-xl border border-border bg-muted/50 p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
-              placeholder="Введите контент для пользователей..."
+              placeholder={t("content_placeholder")}
             />
             <button
               onClick={handleSave}
@@ -70,19 +72,18 @@ const AdminContentSection = () => {
               className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              Сохранить
+              {t("save")}
             </button>
           </>
         ) : (
           <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[200px] text-foreground whitespace-pre-wrap">
-            {content || <span className="text-muted-foreground italic">Контент пока не добавлен.</span>}
+            {content || <span className="text-muted-foreground italic">{t("no_content")}</span>}
           </div>
         )}
       </div>
 
-      {/* Polls section */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-foreground">Опросы</h2>
+        <h2 className="text-2xl font-bold text-foreground">{t("polls")}</h2>
         {isAdmin && <PollCreator onCreated={() => setPollRefresh((k) => k + 1)} />}
         <PollList refreshKey={pollRefresh} isAdmin={isAdmin} />
       </div>
