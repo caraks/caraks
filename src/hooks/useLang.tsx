@@ -53,6 +53,10 @@ const translations: Translations = {
   "question_sent": { ru: "Вопрос отправлен", de: "Frage gesendet" },
   "no_questions": { ru: "Вопросов пока нет", de: "Noch keine Fragen" },
   "my_questions": { ru: "Мои вопросы", de: "Meine Fragen" },
+  "ai_diagnostic": { ru: "AI-диагностика", de: "AI-Diagnose" },
+  "ai_diagnostic_hint": { ru: "Введите тему, которую не понимаете, и AI составит вопросы для диагностики", de: "Geben Sie ein Thema ein, das Sie nicht verstehen, und die KI erstellt Diagnosefragen" },
+  "topic_placeholder": { ru: "Например: дроби, уравнения...", de: "Z.B.: Brüche, Gleichungen..." },
+  "ai_error": { ru: "Ошибка генерации вопросов", de: "Fehler bei der Fragenerstellung" },
 };
 
 interface LangContextType {
