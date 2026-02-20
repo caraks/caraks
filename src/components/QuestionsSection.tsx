@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2, Send, MessageSquare, User, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
@@ -196,15 +197,52 @@ const QuestionsSection = () => {
         </div>
       )}
 
-      {isAdmin && questions.length > 0 && (
-        <div className="space-y-2">
-          {questions.map((q) => (
+      {isAdmin && questions.length > 0 && <AdminQuestionsTabs questions={questions} t={t} />}
+    </div>
+  );
+};
+
+/* ---------- Admin: tabs per student ---------- */
+const AdminQuestionsTabs = ({
+  questions,
+  t,
+}: {
+  questions: Question[];
+  t: (k: string) => string;
+}) => {
+  const students = useMemo(() => {
+    const map = new Map<string, { name: string; items: Question[] }>();
+    for (const q of questions) {
+      if (!map.has(q.user_id)) {
+        map.set(q.user_id, { name: q.display_name ?? "?", items: [] });
+      }
+      map.get(q.user_id)!.items.push(q);
+    }
+    return Array.from(map.entries()); // [userId, {name, items}][]
+  }, [questions]);
+
+  return (
+    <Tabs defaultValue={students[0]?.[0]} className="space-y-3">
+      <TabsList className="flex flex-wrap h-auto gap-1">
+        {students.map(([id, { name, items }]) => (
+          <TabsTrigger key={id} value={id} className="text-xs">
+            <User className="w-3 h-3 mr-1" />
+            {name} ({items.length})
+          </TabsTrigger>
+        ))}
+      </TabsList>
+
+      {students.map(([id, { items }]) => (
+        <TabsContent key={id} value={id} className="space-y-2">
+          {items.map((q) => (
             <div key={q.id} className="rounded-xl border border-border bg-muted/20 p-3 space-y-1">
               {q.ai_topic ? (
                 <>
                   <p className="text-sm text-foreground flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span><span className="font-medium">{t("ai_topic")}:</span> {q.ai_topic}</span>
+                    <span>
+                      <span className="font-medium">{t("ai_topic")}:</span> {q.ai_topic}
+                    </span>
                   </p>
                   {q.ai_questions && q.ai_questions.length > 0 && (
                     <div className="ml-5 space-y-1 mt-1">
@@ -219,17 +257,14 @@ const QuestionsSection = () => {
               ) : (
                 <p className="text-sm text-foreground">{q.question_text}</p>
               )}
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <User className="w-3 h-3" /> {q.display_name}
-                </span>
-                <span>{new Date(q.created_at).toLocaleString()}</span>
-              </div>
+              <p className="text-xs text-muted-foreground">
+                {new Date(q.created_at).toLocaleString()}
+              </p>
             </div>
           ))}
-        </div>
-      )}
-    </div>
+        </TabsContent>
+      ))}
+    </Tabs>
   );
 };
 
