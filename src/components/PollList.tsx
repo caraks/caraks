@@ -214,7 +214,12 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
               <>
                 <RadioGroup
                   value={selectedOptions[poll.id] ?? ""}
-                  onValueChange={(val) => setSelectedOptions((prev) => ({ ...prev, [poll.id]: val }))}
+                  onValueChange={(val) => {
+                    setSelectedOptions((prev) => ({ ...prev, [poll.id]: val }));
+                    if (val !== "__free_text__") {
+                      setFreeTexts((prev) => ({ ...prev, [poll.id]: "" }));
+                    }
+                  }}
                 >
                   {poll.options.map((opt) => (
                     <div key={opt.id} className="flex items-center gap-2">
@@ -224,39 +229,45 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                       </label>
                     </div>
                   ))}
-                </RadioGroup>
-                {poll.allow_free_text && (
-                  <div className="space-y-1">
-                    <Textarea
-                      value={freeTexts[poll.id] ?? ""}
-                      onChange={(e) => setFreeTexts((prev) => ({ ...prev, [poll.id]: e.target.value }))}
-                      placeholder={t("free_text_placeholder")}
-                      className="min-h-[60px] text-sm"
-                      maxLength={500}
-                    />
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => handleVote(poll.id)}
-                    disabled={!selectedOptions[poll.id] || voting === poll.id}
-                  >
-                    {voting === poll.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-                    {t("vote")}
-                  </Button>
                   {poll.allow_free_text && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleVote(poll.id, true)}
-                      disabled={!freeTexts[poll.id]?.trim() || voting === poll.id}
-                    >
-                      {voting === poll.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
-                      {t("submit_answer")}
-                    </Button>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="__free_text__" id={`${poll.id}-free`} />
+                        <label htmlFor={`${poll.id}-free`} className="text-sm text-foreground cursor-pointer flex items-center gap-1">
+                          <MessageSquare className="w-3.5 h-3.5" /> {t("free_text_placeholder")}
+                        </label>
+                      </div>
+                      {selectedOptions[poll.id] === "__free_text__" && (
+                        <Textarea
+                          value={freeTexts[poll.id] ?? ""}
+                          onChange={(e) => setFreeTexts((prev) => ({ ...prev, [poll.id]: e.target.value }))}
+                          placeholder={t("free_text_placeholder")}
+                          className="min-h-[60px] text-sm ml-6"
+                          maxLength={500}
+                          autoFocus
+                        />
+                      )}
+                    </div>
                   )}
-                </div>
+                </RadioGroup>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    if (selectedOptions[poll.id] === "__free_text__") {
+                      handleVote(poll.id, true);
+                    } else {
+                      handleVote(poll.id);
+                    }
+                  }}
+                  disabled={
+                    !selectedOptions[poll.id] ||
+                    (selectedOptions[poll.id] === "__free_text__" && !freeTexts[poll.id]?.trim()) ||
+                    voting === poll.id
+                  }
+                >
+                  {voting === poll.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+                  {t("vote")}
+                </Button>
               </>
             )}
           </div>
