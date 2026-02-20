@@ -1,4 +1,5 @@
 import { ImageIcon } from "lucide-react";
+import DrawingCanvas from "@/components/DrawingCanvas";
 
 const images = [
   { title: "Sonnenuntergang", color: "from-orange-400 to-pink-500" },
@@ -27,6 +28,8 @@ const ImagesSection = () => {
           </div>
         ))}
       </div>
+
+      <DrawingCanvas />
     </div>
   );
 };
