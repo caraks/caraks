@@ -2,9 +2,11 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, X, Send, Loader2 } from "lucide-react";
+import { Plus, X, Send, Loader2, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface PollCreatorProps {
   onCreated: () => void;
@@ -15,6 +17,7 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
   const [saving, setSaving] = useState(false);
+  const [allowFreeText, setAllowFreeText] = useState(false);
 
   const addOption = () => {
     if (options.length < 6) setOptions([...options, ""]);
@@ -44,7 +47,7 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
 
     const { data: poll, error } = await supabase
       .from("polls")
-      .insert({ question: trimmedQ, created_by: user.id })
+      .insert({ question: trimmedQ, created_by: user.id, allow_free_text: allowFreeText })
       .select("id")
       .single();
 
@@ -71,6 +74,7 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
       toast.success(t("poll_created"));
       setQuestion("");
       setOptions(["", ""]);
+      setAllowFreeText(false);
       onCreated();
     }
   };
@@ -100,6 +104,13 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
             )}
           </div>
         ))}
+      </div>
+      <div className="flex items-center gap-2">
+        <Switch id="free-text" checked={allowFreeText} onCheckedChange={setAllowFreeText} />
+        <Label htmlFor="free-text" className="text-sm text-muted-foreground flex items-center gap-1 cursor-pointer">
+          <MessageSquare className="w-3.5 h-3.5" />
+          {t("allow_free_text")}
+        </Label>
       </div>
       <div className="flex gap-2">
         {options.length < 6 && (

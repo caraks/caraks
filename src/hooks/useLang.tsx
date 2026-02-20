@@ -42,6 +42,10 @@ const translations: Translations = {
   "no_active_polls": { ru: "Нет активных опросов", de: "Keine aktiven Umfragen" },
   "close_poll": { ru: "Закрыть", de: "Schließen" },
   "poll_closed": { ru: "Опрос закрыт", de: "Umfrage geschlossen" },
+  "allow_free_text": { ru: "Свободный ответ", de: "Freitextantwort" },
+  "free_text_placeholder": { ru: "Напишите свой ответ...", de: "Schreiben Sie Ihre Antwort..." },
+  "submit_answer": { ru: "Отправить", de: "Absenden" },
+  "free_text_answers": { ru: "Ответы", de: "Antworten" },
 };
 
 interface LangContextType {
