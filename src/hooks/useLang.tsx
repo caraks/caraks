@@ -46,6 +46,13 @@ const translations: Translations = {
   "free_text_placeholder": { ru: "Напишите свой ответ...", de: "Schreiben Sie Ihre Antwort..." },
   "submit_answer": { ru: "Отправить", de: "Absenden" },
   "free_text_answers": { ru: "Ответы", de: "Antworten" },
+  "questions_tab": { ru: "Вопросы", de: "Fragen" },
+  "ask_question": { ru: "Задать вопрос", de: "Frage stellen" },
+  "question_placeholder": { ru: "Напишите ваш вопрос...", de: "Schreiben Sie Ihre Frage..." },
+  "send": { ru: "Отправить", de: "Senden" },
+  "question_sent": { ru: "Вопрос отправлен", de: "Frage gesendet" },
+  "no_questions": { ru: "Вопросов пока нет", de: "Noch keine Fragen" },
+  "my_questions": { ru: "Мои вопросы", de: "Meine Fragen" },
 };
 
 interface LangContextType {

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Type, Film, ImageIcon, LogOut, User, Pencil, Globe } from "lucide-react";
+import { Type, Film, ImageIcon, LogOut, User, Pencil, Globe, HelpCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
 import VideoSection from "@/components/VideoSection";
 import ImagesSection from "@/components/ImagesSection";
+import QuestionsSection from "@/components/QuestionsSection";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -13,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
-type Tab = "text" | "video" | "images";
+type Tab = "text" | "video" | "images" | "questions";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("text");
@@ -27,6 +28,7 @@ const Index = () => {
     { id: "text", label: t("text"), icon: <Type className="w-5 h-5" /> },
     { id: "video", label: t("video"), icon: <Film className="w-5 h-5" /> },
     { id: "images", label: t("images"), icon: <ImageIcon className="w-5 h-5" /> },
+    { id: "questions", label: t("questions_tab"), icon: <HelpCircle className="w-5 h-5" /> },
   ];
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -154,6 +156,7 @@ const Index = () => {
           {activeTab === "text" && <TextSection />}
           {activeTab === "video" && <VideoSection />}
           {activeTab === "images" && <ImagesSection />}
+          {activeTab === "questions" && <QuestionsSection />}
         </div>
       </main>
     </div>
