@@ -57,6 +57,7 @@ const translations: Translations = {
   "ai_diagnostic_hint": { ru: "Введите тему, которую не понимаете, и AI составит вопросы для диагностики", de: "Geben Sie ein Thema ein, das Sie nicht verstehen, und die KI erstellt Diagnosefragen" },
   "topic_placeholder": { ru: "Например: дроби, уравнения...", de: "Z.B.: Brüche, Gleichungen..." },
   "ai_error": { ru: "Ошибка генерации вопросов", de: "Fehler bei der Fragenerstellung" },
+  "ai_topic": { ru: "Тема для AI", de: "AI-Thema" },
 };
 
 interface LangContextType {

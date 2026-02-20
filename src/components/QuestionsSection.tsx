@@ -14,6 +14,8 @@ interface Question {
   created_at: string;
   user_id: string;
   display_name?: string;
+  ai_topic?: string | null;
+  ai_questions?: any | null;
 }
 
 const QuestionsSection = () => {
@@ -92,6 +94,17 @@ const QuestionsSection = () => {
       if (error) throw error;
       if (data?.questions) {
         setAiQuestions(data.questions);
+        // Save AI interaction to DB
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("questions").insert({
+            user_id: user.id,
+            question_text: `[AI] ${trimmed}`,
+            ai_topic: trimmed,
+            ai_questions: data.questions,
+          });
+          fetchQuestions();
+        }
       } else {
         toast.error(t("ai_error"));
       }
@@ -187,7 +200,25 @@ const QuestionsSection = () => {
         <div className="space-y-2">
           {questions.map((q) => (
             <div key={q.id} className="rounded-xl border border-border bg-muted/20 p-3 space-y-1">
-              <p className="text-sm text-foreground">{q.question_text}</p>
+              {q.ai_topic ? (
+                <>
+                  <p className="text-sm text-foreground flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span><span className="font-medium">{t("ai_topic")}:</span> {q.ai_topic}</span>
+                  </p>
+                  {q.ai_questions && q.ai_questions.length > 0 && (
+                    <div className="ml-5 space-y-1 mt-1">
+                      {q.ai_questions.map((aq: string, i: number) => (
+                        <p key={i} className="text-xs text-muted-foreground">
+                          {i + 1}. {aq}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-foreground">{q.question_text}</p>
+              )}
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <User className="w-3 h-3" /> {q.display_name}
