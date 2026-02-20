@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle2, BarChart3 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2, CheckCircle2, BarChart3, MessageSquare, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
 
@@ -17,11 +18,13 @@ interface Poll {
   question: string;
   is_active: boolean;
   created_at: string;
+  allow_free_text: boolean;
 }
 
 interface PollVote {
   option_id: string;
   user_id: string;
+  free_text: string | null;
 }
 
 interface PollWithDetails extends Poll {
@@ -41,6 +44,7 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
   const [loading, setLoading] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [voting, setVoting] = useState<string | null>(null);
+  const [freeTexts, setFreeTexts] = useState<Record<string, string>>({});
 
   const fetchPolls = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -62,7 +66,7 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
 
     const [{ data: optionsData }, { data: votesData }] = await Promise.all([
       supabase.from("poll_options").select("*").in("poll_id", pollIds).order("sort_order"),
-      supabase.from("poll_votes").select("option_id, user_id").in("poll_id", pollIds),
+      supabase.from("poll_votes").select("option_id, user_id, free_text").in("poll_id", pollIds),
     ]);
 
     const enriched: PollWithDetails[] = pollsData.map((poll) => {
@@ -82,17 +86,32 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
     fetchPolls();
   }, [refreshKey]);
 
-  const handleVote = async (pollId: string) => {
+  const handleVote = async (pollId: string, isFreeText = false) => {
     const optionId = selectedOptions[pollId];
-    if (!optionId) return;
+    const freeText = freeTexts[pollId]?.trim();
+
+    if (!isFreeText && !optionId) return;
+    if (isFreeText && !freeText) return;
 
     setVoting(pollId);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setVoting(null); return; }
 
+    const insertData: any = { poll_id: pollId, user_id: user.id };
+    if (isFreeText) {
+      // For free text, we still need an option_id. Use a dummy or first option.
+      // Actually let's use the first option as a placeholder and store free_text
+      const poll = polls.find(p => p.id === pollId);
+      if (!poll || poll.options.length === 0) { setVoting(null); return; }
+      insertData.option_id = poll.options[0].id;
+      insertData.free_text = freeText;
+    } else {
+      insertData.option_id = optionId;
+    }
+
     const { error } = await supabase
       .from("poll_votes")
-      .insert({ poll_id: pollId, option_id: optionId, user_id: user.id });
+      .insert(insertData);
 
     setVoting(null);
     if (error) {
@@ -149,7 +168,7 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
             {hasVoted || isAdmin ? (
               <div className="space-y-2">
                 {poll.options.map((opt) => {
-                  const count = poll.votes.filter((v) => v.option_id === opt.id).length;
+                  const count = poll.votes.filter((v) => v.option_id === opt.id && !v.free_text).length;
                   const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
                   const isUserChoice = poll.userVote === opt.id;
 
@@ -171,6 +190,22 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                     </div>
                   );
                 })}
+                {poll.allow_free_text && (() => {
+                  const freeTextVotes = poll.votes.filter((v) => v.free_text);
+                  if (freeTextVotes.length === 0) return null;
+                  return (
+                    <div className="mt-2 space-y-1">
+                      <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                        <MessageSquare className="w-3 h-3" /> {t("free_text_answers")}:
+                      </p>
+                      {freeTextVotes.map((v, i) => (
+                        <div key={i} className="text-sm text-foreground bg-muted/40 rounded-lg px-3 py-1.5">
+                          {v.free_text}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <BarChart3 className="w-3 h-3" /> {t("total_votes")}: {totalVotes}
                 </p>
@@ -190,14 +225,38 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                     </div>
                   ))}
                 </RadioGroup>
-                <Button
-                  size="sm"
-                  onClick={() => handleVote(poll.id)}
-                  disabled={!selectedOptions[poll.id] || voting === poll.id}
-                >
-                  {voting === poll.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-                  {t("vote")}
-                </Button>
+                {poll.allow_free_text && (
+                  <div className="space-y-1">
+                    <Textarea
+                      value={freeTexts[poll.id] ?? ""}
+                      onChange={(e) => setFreeTexts((prev) => ({ ...prev, [poll.id]: e.target.value }))}
+                      placeholder={t("free_text_placeholder")}
+                      className="min-h-[60px] text-sm"
+                      maxLength={500}
+                    />
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => handleVote(poll.id)}
+                    disabled={!selectedOptions[poll.id] || voting === poll.id}
+                  >
+                    {voting === poll.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+                    {t("vote")}
+                  </Button>
+                  {poll.allow_free_text && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleVote(poll.id, true)}
+                      disabled={!freeTexts[poll.id]?.trim() || voting === poll.id}
+                    >
+                      {voting === poll.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
+                      {t("submit_answer")}
+                    </Button>
+                  )}
+                </div>
               </>
             )}
           </div>

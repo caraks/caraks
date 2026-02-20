@@ -67,6 +67,7 @@ export type Database = {
       poll_votes: {
         Row: {
           created_at: string
+          free_text: string | null
           id: string
           option_id: string
           poll_id: string
@@ -74,6 +75,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          free_text?: string | null
           id?: string
           option_id: string
           poll_id: string
@@ -81,6 +83,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          free_text?: string | null
           id?: string
           option_id?: string
           poll_id?: string
@@ -105,6 +108,7 @@ export type Database = {
       }
       polls: {
         Row: {
+          allow_free_text: boolean
           created_at: string
           created_by: string
           id: string
@@ -112,6 +116,7 @@ export type Database = {
           question: string
         }
         Insert: {
+          allow_free_text?: boolean
           created_at?: string
           created_by: string
           id?: string
@@ -119,6 +124,7 @@ export type Database = {
           question: string
         }
         Update: {
+          allow_free_text?: boolean
           created_at?: string
           created_by?: string
           id?: string
