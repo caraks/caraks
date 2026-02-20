@@ -156,18 +156,24 @@ export type Database = {
       }
       questions: {
         Row: {
+          ai_questions: Json | null
+          ai_topic: string | null
           created_at: string
           id: string
           question_text: string
           user_id: string
         }
         Insert: {
+          ai_questions?: Json | null
+          ai_topic?: string | null
           created_at?: string
           id?: string
           question_text: string
           user_id: string
         }
         Update: {
+          ai_questions?: Json | null
+          ai_topic?: string | null
           created_at?: string
           id?: string
           question_text?: string
