@@ -35,6 +35,27 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_settings: {
+        Row: {
+          id: string
+          system_prompt: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          system_prompt?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          system_prompt?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       poll_options: {
         Row: {
           id: string

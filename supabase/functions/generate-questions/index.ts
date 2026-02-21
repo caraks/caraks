@@ -1,10 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const DEFAULT_PROMPT = `Ты помощник учителя. Ученик задаёт тебе интересующую его тему, а ты должен придумать пять вопросов — от простого к сложному. Чтобы понять, что именно ученик не знает. Выдавай ответ в виде JSON: {"questions": ["вопрос1", "вопрос2", "вопрос3", "вопрос4", "вопрос5"]}`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -25,6 +28,24 @@ serve(async (req) => {
       throw new Error("MISTRAL_API_KEY is not configured");
     }
 
+    // Read custom prompt from DB
+    let systemPrompt = DEFAULT_PROMPT;
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      const { data } = await supabase
+        .from("ai_settings")
+        .select("system_prompt")
+        .eq("id", "default")
+        .maybeSingle();
+      if (data?.system_prompt) {
+        systemPrompt = data.system_prompt;
+      }
+    } catch (e) {
+      console.error("Failed to read ai_settings, using default prompt:", e);
+    }
+
     const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -38,14 +59,8 @@ serve(async (req) => {
         top_p: 1,
         response_format: { type: "json_object" },
         messages: [
-          {
-            role: "system",
-            content: `Ты помощник учителя. Ученик задаёт тебе интересующую его тему, а ты должен придумать пять вопросов — от простого к сложному. Чтобы понять, что именно ученик не знает. Выдавай ответ в виде JSON: {"questions": ["вопрос1", "вопрос2", "вопрос3", "вопрос4", "вопрос5"]}`,
-          },
-          {
-            role: "user",
-            content: topic,
-          },
+          { role: "system", content: systemPrompt },
+          { role: "user", content: topic },
         ],
       }),
     });
@@ -55,10 +70,7 @@ serve(async (req) => {
       console.error("Mistral API error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: `Mistral API error: ${response.status}` }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -80,10 +92,7 @@ serve(async (req) => {
     console.error("generate-questions error:", e);
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
