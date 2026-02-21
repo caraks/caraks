@@ -183,10 +183,11 @@ const QuestionsSection = () => {
         </p>
       )}
 
-      {!isAdmin && questions.length > 0 && (
+      {/* Student: regular questions */}
+      {!isAdmin && questions.filter((q) => !q.ai_topic).length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-foreground">{t("my_questions")}</h3>
-          {questions.map((q) => (
+          {questions.filter((q) => !q.ai_topic).map((q) => (
             <div key={q.id} className="rounded-xl border border-border bg-muted/20 p-3 text-sm text-foreground">
               {q.question_text}
               <p className="text-xs text-muted-foreground mt-1">
@@ -197,10 +198,95 @@ const QuestionsSection = () => {
         </div>
       )}
 
+      {/* AI history — visible for both student and admin */}
+      <AiHistory questions={questions} t={t} isAdmin={isAdmin} />
+
       {isAdmin && questions.length > 0 && <AdminQuestionsTabs questions={questions} t={t} />}
     </div>
   );
 };
+
+
+
+/* ---------- AI History ---------- */
+const AiHistory = ({
+  questions,
+  t,
+  isAdmin,
+}: {
+  questions: Question[];
+  t: (k: string) => string;
+  isAdmin: boolean;
+}) => {
+  const aiItems = useMemo(() => questions.filter((q) => !!q.ai_topic), [questions]);
+
+  // For admin, group by student
+  const grouped = useMemo(() => {
+    if (!isAdmin) return null;
+    const map = new Map<string, { name: string; items: Question[] }>();
+    for (const q of aiItems) {
+      if (!map.has(q.user_id)) map.set(q.user_id, { name: q.display_name ?? "?", items: [] });
+      map.get(q.user_id)!.items.push(q);
+    }
+    return Array.from(map.entries());
+  }, [aiItems, isAdmin]);
+
+  if (aiItems.length === 0) return null;
+
+  return (
+    <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+      <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+        <Sparkles className="w-4 h-4 text-primary" />
+        {t("ai_history")}
+      </h3>
+
+      {isAdmin && grouped ? (
+        <Tabs defaultValue={grouped[0]?.[0]} className="space-y-2">
+          <TabsList className="flex flex-wrap h-auto gap-1">
+            {grouped.map(([id, { name, items }]) => (
+              <TabsTrigger key={id} value={id} className="text-xs">
+                <User className="w-3 h-3 mr-1" />
+                {name} ({items.length})
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {grouped.map(([id, { items }]) => (
+            <TabsContent key={id} value={id} className="space-y-2">
+              {items.map((q) => (
+                <AiHistoryItem key={q.id} q={q} t={t} />
+              ))}
+            </TabsContent>
+          ))}
+        </Tabs>
+      ) : (
+        <div className="space-y-2">
+          {aiItems.map((q) => (
+            <AiHistoryItem key={q.id} q={q} t={t} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const AiHistoryItem = ({ q, t }: { q: Question; t: (k: string) => string }) => (
+  <div className="rounded-lg border border-border bg-background p-3 space-y-1.5">
+    <p className="text-sm text-foreground font-medium flex items-center gap-1.5">
+      <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+      {q.ai_topic}
+    </p>
+    {q.ai_questions && q.ai_questions.length > 0 && (
+      <div className="ml-5 space-y-1">
+        {q.ai_questions.map((aq: string, i: number) => (
+          <p key={i} className="text-xs text-muted-foreground">
+            {i + 1}. {aq}
+          </p>
+        ))}
+      </div>
+    )}
+    <p className="text-xs text-muted-foreground">{new Date(q.created_at).toLocaleString()}</p>
+  </div>
+);
 
 /* ---------- Admin: tabs per student ---------- */
 const AdminQuestionsTabs = ({
