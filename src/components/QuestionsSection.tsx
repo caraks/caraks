@@ -179,31 +179,38 @@ const QuestionsSection = () => {
         </div>
       )}
 
-      {isAdmin && questions.length === 0 && (
-        <p className="text-muted-foreground text-sm italic text-center py-4">
-          {t("no_questions")}
-        </p>
+      {/* Regular questions section */}
+      {isAdmin ? (
+        <>
+          {questions.filter((q) => !q.ai_topic).length === 0 ? (
+            <p className="text-muted-foreground text-sm italic text-center py-4">
+              {t("no_questions")}
+            </p>
+          ) : (
+            <AdminQuestionsTabs questions={questions.filter((q) => !q.ai_topic)} t={t} />
+          )}
+        </>
+      ) : (
+        questions.filter((q) => !q.ai_topic).length > 0 && (
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+              <MessageSquare className="w-4 h-4 text-primary" />
+              {t("my_questions")}
+            </h3>
+            {questions.filter((q) => !q.ai_topic).map((q) => (
+              <div key={q.id} className="rounded-xl border border-border bg-muted/20 p-3 text-sm text-foreground">
+                {q.question_text}
+                <p className="text-xs text-muted-foreground mt-1">
+                  {new Date(q.created_at).toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        )
       )}
 
-      {/* Student: regular questions */}
-      {!isAdmin && questions.filter((q) => !q.ai_topic).length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-foreground">{t("my_questions")}</h3>
-          {questions.filter((q) => !q.ai_topic).map((q) => (
-            <div key={q.id} className="rounded-xl border border-border bg-muted/20 p-3 text-sm text-foreground">
-              {q.question_text}
-              <p className="text-xs text-muted-foreground mt-1">
-                {new Date(q.created_at).toLocaleString()}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* AI history — visible for both student and admin */}
+      {/* AI history — completely separate section */}
       <AiHistory questions={questions} t={t} isAdmin={isAdmin} />
-
-      {isAdmin && questions.length > 0 && <AdminQuestionsTabs questions={questions} t={t} />}
     </div>
   );
 };
