@@ -61,6 +61,9 @@ const translations: Translations = {
   "ai_history": { ru: "История AI", de: "AI-Verlauf" },
   "no_ai_history": { ru: "Нет запросов к AI", de: "Keine AI-Anfragen" },
   "ai_generated_questions": { ru: "Сгенерированные вопросы", de: "Generierte Fragen" },
+  "ai_prompt_settings": { ru: "Настройки промта AI", de: "AI-Prompt-Einstellungen" },
+  "ai_prompt_hint": { ru: "Этот промт используется при генерации диагностических вопросов", de: "Dieser Prompt wird bei der Generierung von Diagnosefragen verwendet" },
+  "prompt_saved": { ru: "Промт сохранён", de: "Prompt gespeichert" },
 };
 
 interface LangContextType {

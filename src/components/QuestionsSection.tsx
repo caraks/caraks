@@ -1,10 +1,10 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Send, MessageSquare, User, Sparkles } from "lucide-react";
+import { Loader2, Send, MessageSquare, User, Sparkles, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -126,7 +126,9 @@ const QuestionsSection = () => {
 
   return (
     <div className="space-y-6">
-      {/* AI diagnostic section for students */}
+      {/* Admin: AI prompt settings */}
+      {isAdmin && <AdminPromptEditor t={t} />}
+
       {!isAdmin && (
         <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
@@ -288,7 +290,63 @@ const AiHistoryItem = ({ q, t }: { q: Question; t: (k: string) => string }) => (
   </div>
 );
 
-/* ---------- Admin: tabs per student ---------- */
+/* ---------- Admin: AI Prompt Editor ---------- */
+const AdminPromptEditor = ({ t }: { t: (k: string) => string }) => {
+  const [prompt, setPrompt] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const fetch = async () => {
+      const { data } = await supabase
+        .from("ai_settings")
+        .select("system_prompt")
+        .eq("id", "default")
+        .maybeSingle();
+      if (data?.system_prompt) setPrompt(data.system_prompt);
+      setLoading(false);
+    };
+    fetch();
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("ai_settings")
+      .update({ system_prompt: prompt.trim(), updated_by: user?.id, updated_at: new Date().toISOString() })
+      .eq("id", "default");
+    setSaving(false);
+    if (error) {
+      toast.error(t("save_error"));
+    } else {
+      toast.success(t("prompt_saved"));
+    }
+  };
+
+  if (loading) return null;
+
+  return (
+    <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+      <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+        <Settings className="w-4 h-4 text-primary" />
+        {t("ai_prompt_settings")}
+      </h3>
+      <p className="text-xs text-muted-foreground">{t("ai_prompt_hint")}</p>
+      <Textarea
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        className="min-h-[120px] text-sm font-mono"
+      />
+      <Button size="sm" onClick={handleSave} disabled={saving || !prompt.trim()}>
+        {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+        {t("save")}
+      </Button>
+    </div>
+  );
+};
+
+
 const AdminQuestionsTabs = ({
   questions,
   t,
