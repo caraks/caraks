@@ -8,6 +8,7 @@ import { Loader2, Send, MessageSquare, User, Sparkles, Settings } from "lucide-r
 import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
 import { useUserRole } from "@/hooks/useUserRole";
+import QuestionThread from "@/components/QuestionThread";
 
 interface Question {
   id: string;
@@ -27,6 +28,7 @@ const QuestionsSection = () => {
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   // AI diagnostic
   const [topic, setTopic] = useState("");
@@ -57,6 +59,11 @@ const QuestionsSection = () => {
   };
 
   useEffect(() => {
+    const init = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setCurrentUserId(user.id);
+    };
+    init();
     fetchQuestions();
   }, [role]);
 
@@ -161,10 +168,13 @@ const QuestionsSection = () => {
         </div>
       )}
 
-      {/* Ask question to teacher */}
+      {/* Ask question / start dialogue */}
       {!isAdmin && (
         <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
-          <h3 className="text-sm font-semibold text-foreground">{t("ask_question")}</h3>
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+            <MessageSquare className="w-4 h-4 text-primary" />
+            {t("start_dialogue")}
+          </h3>
           <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -179,34 +189,14 @@ const QuestionsSection = () => {
         </div>
       )}
 
-      {/* Regular questions section */}
-      {isAdmin ? (
-        <>
-          {questions.filter((q) => !q.ai_topic).length === 0 ? (
-            <p className="text-muted-foreground text-sm italic text-center py-4">
-              {t("no_questions")}
-            </p>
-          ) : (
-            <AdminQuestionsTabs questions={questions.filter((q) => !q.ai_topic)} t={t} />
-          )}
-        </>
-      ) : (
-        questions.filter((q) => !q.ai_topic).length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-              <MessageSquare className="w-4 h-4 text-primary" />
-              {t("my_questions")}
-            </h3>
-            {questions.filter((q) => !q.ai_topic).map((q) => (
-              <div key={q.id} className="rounded-xl border border-border bg-muted/20 p-3 text-sm text-foreground">
-                {q.question_text}
-                <p className="text-xs text-muted-foreground mt-1">
-                  {new Date(q.created_at).toLocaleString()}
-                </p>
-              </div>
-            ))}
-          </div>
-        )
+      {/* Dialogues section */}
+      {currentUserId && (
+        <DialoguesSection
+          questions={questions.filter((q) => !q.ai_topic)}
+          isAdmin={isAdmin}
+          currentUserId={currentUserId}
+          t={t}
+        />
       )}
 
       {/* AI history — completely separate section */}
@@ -353,69 +343,76 @@ const AdminPromptEditor = ({ t }: { t: (k: string) => string }) => {
   );
 };
 
-
-const AdminQuestionsTabs = ({
+/* ---------- Dialogues Section ---------- */
+const DialoguesSection = ({
   questions,
+  isAdmin,
+  currentUserId,
   t,
 }: {
   questions: Question[];
+  isAdmin: boolean;
+  currentUserId: string;
   t: (k: string) => string;
 }) => {
-  const students = useMemo(() => {
-    const map = new Map<string, { name: string; items: Question[] }>();
+  if (questions.length === 0) {
+    return (
+      <p className="text-muted-foreground text-sm italic text-center py-4">
+        {t("no_questions")}
+      </p>
+    );
+  }
+
+  if (isAdmin) {
+    // Group by student
+    const students = new Map<string, { name: string; items: Question[] }>();
     for (const q of questions) {
-      if (!map.has(q.user_id)) {
-        map.set(q.user_id, { name: q.display_name ?? "?", items: [] });
+      if (!students.has(q.user_id)) {
+        students.set(q.user_id, { name: q.display_name ?? "?", items: [] });
       }
-      map.get(q.user_id)!.items.push(q);
+      students.get(q.user_id)!.items.push(q);
     }
-    return Array.from(map.entries()); // [userId, {name, items}][]
-  }, [questions]);
+    const grouped = Array.from(students.entries());
+
+    return (
+      <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+          <MessageSquare className="w-4 h-4 text-primary" />
+          {t("dialogues")}
+        </h3>
+        <Tabs defaultValue={grouped[0]?.[0]} className="space-y-3">
+          <TabsList className="flex flex-wrap h-auto gap-1">
+            {grouped.map(([id, { name, items }]) => (
+              <TabsTrigger key={id} value={id} className="text-xs">
+                <User className="w-3 h-3 mr-1" />
+                {name} ({items.length})
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {grouped.map(([id, { items }]) => (
+            <TabsContent key={id} value={id} className="space-y-2">
+              {items.map((q) => (
+                <QuestionThread key={q.id} question={q} isAdmin={isAdmin} currentUserId={currentUserId} />
+              ))}
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
+    );
+  }
 
   return (
-    <Tabs defaultValue={students[0]?.[0]} className="space-y-3">
-      <TabsList className="flex flex-wrap h-auto gap-1">
-        {students.map(([id, { name, items }]) => (
-          <TabsTrigger key={id} value={id} className="text-xs">
-            <User className="w-3 h-3 mr-1" />
-            {name} ({items.length})
-          </TabsTrigger>
+    <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+      <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+        <MessageSquare className="w-4 h-4 text-primary" />
+        {t("my_questions")}
+      </h3>
+      <div className="space-y-2">
+        {questions.map((q) => (
+          <QuestionThread key={q.id} question={q} isAdmin={isAdmin} currentUserId={currentUserId} />
         ))}
-      </TabsList>
-
-      {students.map(([id, { items }]) => (
-        <TabsContent key={id} value={id} className="space-y-2">
-          {items.map((q) => (
-            <div key={q.id} className="rounded-xl border border-border bg-muted/20 p-3 space-y-1">
-              {q.ai_topic ? (
-                <>
-                  <p className="text-sm text-foreground flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span>
-                      <span className="font-medium">{t("ai_topic")}:</span> {q.ai_topic}
-                    </span>
-                  </p>
-                  {q.ai_questions && q.ai_questions.length > 0 && (
-                    <div className="ml-5 space-y-1 mt-1">
-                      {q.ai_questions.map((aq: string, i: number) => (
-                        <p key={i} className="text-xs text-muted-foreground">
-                          {i + 1}. {aq}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <p className="text-sm text-foreground">{q.question_text}</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                {new Date(q.created_at).toLocaleString()}
-              </p>
-            </div>
-          ))}
-        </TabsContent>
-      ))}
-    </Tabs>
+      </div>
+    </div>
   );
 };
 
