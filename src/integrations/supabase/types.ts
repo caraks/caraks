@@ -175,6 +175,38 @@ export type Database = {
         }
         Relationships: []
       }
+      question_replies: {
+        Row: {
+          created_at: string
+          id: string
+          message_text: string
+          question_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message_text: string
+          question_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message_text?: string
+          question_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_replies_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questions: {
         Row: {
           ai_questions: Json | null
