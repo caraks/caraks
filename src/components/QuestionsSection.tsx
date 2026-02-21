@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,7 +8,7 @@ import { Loader2, Send, MessageSquare, User, Sparkles, Settings } from "lucide-r
 import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
 import { useUserRole } from "@/hooks/useUserRole";
-import QuestionThread from "@/components/QuestionThread";
+import AiChatDialog from "@/components/AiChatDialog";
 
 interface Question {
   id: string;
@@ -26,9 +26,6 @@ const QuestionsSection = () => {
   const isAdmin = role === "admin";
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const [text, setText] = useState("");
-  const [sending, setSending] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string>("");
 
   // AI diagnostic
   const [topic, setTopic] = useState("");
@@ -59,34 +56,8 @@ const QuestionsSection = () => {
   };
 
   useEffect(() => {
-    const init = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) setCurrentUserId(user.id);
-    };
-    init();
     fetchQuestions();
   }, [role]);
-
-  const handleSend = async () => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-    setSending(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setSending(false); return; }
-
-    const { error } = await supabase
-      .from("questions")
-      .insert({ user_id: user.id, question_text: trimmed });
-
-    setSending(false);
-    if (error) {
-      toast.error(t("save_error"));
-    } else {
-      toast.success(t("question_sent"));
-      setText("");
-      fetchQuestions();
-    }
-  };
 
   const handleGenerate = async () => {
     const trimmed = topic.trim();
@@ -136,6 +107,9 @@ const QuestionsSection = () => {
       {/* Admin: AI prompt settings */}
       {isAdmin && <AdminPromptEditor t={t} />}
 
+      {/* Student: AI Chat Dialog */}
+      {!isAdmin && <AiChatDialog />}
+
       {!isAdmin && (
         <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
@@ -166,37 +140,6 @@ const QuestionsSection = () => {
             </div>
           )}
         </div>
-      )}
-
-      {/* Ask question / start dialogue */}
-      {!isAdmin && (
-        <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
-          <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-            <MessageSquare className="w-4 h-4 text-primary" />
-            {t("start_dialogue")}
-          </h3>
-          <Textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={t("question_placeholder")}
-            className="min-h-[80px] text-sm"
-            maxLength={1000}
-          />
-          <Button size="sm" onClick={handleSend} disabled={sending || !text.trim()}>
-            {sending ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
-            {t("send")}
-          </Button>
-        </div>
-      )}
-
-      {/* Dialogues section */}
-      {currentUserId && (
-        <DialoguesSection
-          questions={questions.filter((q) => !q.ai_topic)}
-          isAdmin={isAdmin}
-          currentUserId={currentUserId}
-          t={t}
-        />
       )}
 
       {/* AI history — completely separate section */}
@@ -339,79 +282,6 @@ const AdminPromptEditor = ({ t }: { t: (k: string) => string }) => {
         {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
         {t("save")}
       </Button>
-    </div>
-  );
-};
-
-/* ---------- Dialogues Section ---------- */
-const DialoguesSection = ({
-  questions,
-  isAdmin,
-  currentUserId,
-  t,
-}: {
-  questions: Question[];
-  isAdmin: boolean;
-  currentUserId: string;
-  t: (k: string) => string;
-}) => {
-  if (questions.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm italic text-center py-4">
-        {t("no_questions")}
-      </p>
-    );
-  }
-
-  if (isAdmin) {
-    // Group by student
-    const students = new Map<string, { name: string; items: Question[] }>();
-    for (const q of questions) {
-      if (!students.has(q.user_id)) {
-        students.set(q.user_id, { name: q.display_name ?? "?", items: [] });
-      }
-      students.get(q.user_id)!.items.push(q);
-    }
-    const grouped = Array.from(students.entries());
-
-    return (
-      <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-          <MessageSquare className="w-4 h-4 text-primary" />
-          {t("dialogues")}
-        </h3>
-        <Tabs defaultValue={grouped[0]?.[0]} className="space-y-3">
-          <TabsList className="flex flex-wrap h-auto gap-1">
-            {grouped.map(([id, { name, items }]) => (
-              <TabsTrigger key={id} value={id} className="text-xs">
-                <User className="w-3 h-3 mr-1" />
-                {name} ({items.length})
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {grouped.map(([id, { items }]) => (
-            <TabsContent key={id} value={id} className="space-y-2">
-              {items.map((q) => (
-                <QuestionThread key={q.id} question={q} isAdmin={isAdmin} currentUserId={currentUserId} />
-              ))}
-            </TabsContent>
-          ))}
-        </Tabs>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
-      <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-        <MessageSquare className="w-4 h-4 text-primary" />
-        {t("my_questions")}
-      </h3>
-      <div className="space-y-2">
-        {questions.map((q) => (
-          <QuestionThread key={q.id} question={q} isAdmin={isAdmin} currentUserId={currentUserId} />
-        ))}
-      </div>
     </div>
   );
 };
