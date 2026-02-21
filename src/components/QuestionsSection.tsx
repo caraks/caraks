@@ -26,6 +26,8 @@ const QuestionsSection = () => {
   const isAdmin = role === "admin";
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [text, setText] = useState("");
+  const [sending, setSending] = useState(false);
 
   // AI diagnostic
   const [topic, setTopic] = useState("");
@@ -58,6 +60,27 @@ const QuestionsSection = () => {
   useEffect(() => {
     fetchQuestions();
   }, [role]);
+
+  const handleSend = async () => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setSending(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSending(false); return; }
+
+    const { error } = await supabase
+      .from("questions")
+      .insert({ user_id: user.id, question_text: trimmed });
+
+    setSending(false);
+    if (error) {
+      toast.error(t("save_error"));
+    } else {
+      toast.success(t("question_sent"));
+      setText("");
+      fetchQuestions();
+    }
+  };
 
   const handleGenerate = async () => {
     const trimmed = topic.trim();
@@ -140,6 +163,50 @@ const QuestionsSection = () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Ask question to teacher */}
+      {!isAdmin && (
+        <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+            <MessageSquare className="w-4 h-4 text-primary" />
+            {t("ask_question")}
+          </h3>
+          <Textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={t("question_placeholder")}
+            className="min-h-[80px] text-sm"
+            maxLength={1000}
+          />
+          <Button size="sm" onClick={handleSend} disabled={sending || !text.trim()}>
+            {sending ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
+            {t("send")}
+          </Button>
+        </div>
+      )}
+
+      {/* Student: own questions history */}
+      {!isAdmin && questions.filter((q) => !q.ai_topic).length > 0 && (
+        <div className="space-y-2 rounded-xl border border-border bg-muted/30 p-4">
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+            <MessageSquare className="w-4 h-4 text-primary" />
+            {t("my_questions")}
+          </h3>
+          {questions.filter((q) => !q.ai_topic).map((q) => (
+            <div key={q.id} className="rounded-lg border border-border bg-background p-3 text-sm text-foreground">
+              {q.question_text}
+              <p className="text-xs text-muted-foreground mt-1">
+                {new Date(q.created_at).toLocaleString()}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Admin: student questions grouped by student */}
+      {isAdmin && (
+        <TeacherQuestionsAdmin questions={questions.filter((q) => !q.ai_topic)} t={t} />
       )}
 
       {/* AI history — completely separate section */}
@@ -282,6 +349,65 @@ const AdminPromptEditor = ({ t }: { t: (k: string) => string }) => {
         {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
         {t("save")}
       </Button>
+    </div>
+  );
+};
+
+/* ---------- Admin: Teacher Questions grouped by student ---------- */
+const TeacherQuestionsAdmin = ({
+  questions,
+  t,
+}: {
+  questions: Question[];
+  t: (k: string) => string;
+}) => {
+  const students = useMemo(() => {
+    const map = new Map<string, { name: string; items: Question[] }>();
+    for (const q of questions) {
+      if (!map.has(q.user_id)) {
+        map.set(q.user_id, { name: q.display_name ?? "?", items: [] });
+      }
+      map.get(q.user_id)!.items.push(q);
+    }
+    return Array.from(map.entries());
+  }, [questions]);
+
+  if (questions.length === 0) {
+    return (
+      <p className="text-muted-foreground text-sm italic text-center py-4">
+        {t("no_questions")}
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+      <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+        <MessageSquare className="w-4 h-4 text-primary" />
+        {t("questions_tab")}
+      </h3>
+      <Tabs defaultValue={students[0]?.[0]} className="space-y-3">
+        <TabsList className="flex flex-wrap h-auto gap-1">
+          {students.map(([id, { name, items }]) => (
+            <TabsTrigger key={id} value={id} className="text-xs">
+              <User className="w-3 h-3 mr-1" />
+              {name} ({items.length})
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {students.map(([id, { items }]) => (
+          <TabsContent key={id} value={id} className="space-y-2">
+            {items.map((q) => (
+              <div key={q.id} className="rounded-lg border border-border bg-background p-3 text-sm text-foreground">
+                {q.question_text}
+                <p className="text-xs text-muted-foreground mt-1">
+                  {new Date(q.created_at).toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 };
