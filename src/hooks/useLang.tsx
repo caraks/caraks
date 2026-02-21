@@ -58,6 +58,9 @@ const translations: Translations = {
   "topic_placeholder": { ru: "Например: дроби, уравнения...", de: "Z.B.: Brüche, Gleichungen..." },
   "ai_error": { ru: "Ошибка генерации вопросов", de: "Fehler bei der Fragenerstellung" },
   "ai_topic": { ru: "Тема для AI", de: "AI-Thema" },
+  "ai_history": { ru: "История AI", de: "AI-Verlauf" },
+  "no_ai_history": { ru: "Нет запросов к AI", de: "Keine AI-Anfragen" },
+  "ai_generated_questions": { ru: "Сгенерированные вопросы", de: "Generierte Fragen" },
 };
 
 interface LangContextType {
