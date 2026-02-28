@@ -79,6 +79,12 @@ const translations: Translations = {
   "prompt_saved": { ru: "Промт сохранён", de: "Prompt gespeichert" },
   "answers_sent": { ru: "Ответы отправлены", de: "Antworten gesendet" },
   "your_answer": { ru: "Твой ответ", de: "Deine Antwort" },
+  "clear_history": { ru: "Очистить", de: "Löschen" },
+  "confirm_delete_title": { ru: "Подтверждение удаления", de: "Löschbestätigung" },
+  "confirm_delete_desc": { ru: "Вы уверены? Это действие нельзя отменить.", de: "Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden." },
+  "confirm_delete": { ru: "Удалить", de: "Löschen" },
+  "cancel": { ru: "Отмена", de: "Abbrechen" },
+  "history_cleared": { ru: "История очищена", de: "Verlauf gelöscht" },
 };
 
 interface LangContextType {

@@ -1,0 +1,1 @@
+CREATE POLICY "Admins can delete questions" ON public.questions FOR DELETE USING (public.has_role(auth.uid(), 'admin'::app_role));

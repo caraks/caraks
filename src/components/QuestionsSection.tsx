@@ -5,7 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { Loader2, Send, MessageSquare, User, Sparkles, Settings, Check, HelpCircle, X } from "lucide-react";
+import { Loader2, Send, MessageSquare, User, Sparkles, Settings, Check, HelpCircle, X, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -282,26 +283,64 @@ const QuestionsSection = () => {
 
       {/* Admin: student questions grouped by student */}
       {isAdmin && (
-        <TeacherQuestionsAdmin questions={questions.filter((q) => !q.ai_topic)} t={t} />
+        <TeacherQuestionsAdmin questions={questions.filter((q) => !q.ai_topic)} t={t} onClear={fetchQuestions} />
       )}
 
       {/* AI history — completely separate section */}
-      <AiHistory questions={questions} t={t} isAdmin={isAdmin} />
+      <AiHistory questions={questions} t={t} isAdmin={isAdmin} onClear={fetchQuestions} />
     </div>
   );
 };
 
 
+/* ---------- Clear History Button with confirmation ---------- */
+const ClearHistoryButton = ({ onConfirm, t }: { onConfirm: () => Promise<void>; t: (k: string) => string }) => {
+  const [deleting, setDeleting] = useState(false);
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" size="sm" className="text-xs gap-1 text-destructive hover:text-destructive">
+          <Trash2 className="w-3.5 h-3.5" />
+          {t("clear_history")}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t("confirm_delete_title")}</AlertDialogTitle>
+          <AlertDialogDescription>{t("confirm_delete_desc")}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            disabled={deleting}
+            onClick={async (e) => {
+              e.preventDefault();
+              setDeleting(true);
+              await onConfirm();
+              setDeleting(false);
+            }}
+          >
+            {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+            {t("confirm_delete")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 /* ---------- AI History ---------- */
 const AiHistory = ({
   questions,
   t,
   isAdmin,
+  onClear,
 }: {
   questions: Question[];
   t: (k: string) => string;
   isAdmin: boolean;
+  onClear: () => void;
 }) => {
   const aiItems = useMemo(() => questions.filter((q) => !!q.ai_topic), [questions]);
 
@@ -320,10 +359,23 @@ const AiHistory = ({
 
   return (
     <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
-      <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-        <Sparkles className="w-4 h-4 text-primary" />
-        {t("ai_history")}
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+          <Sparkles className="w-4 h-4 text-primary" />
+          {t("ai_history")}
+        </h3>
+        {isAdmin && (
+          <ClearHistoryButton
+            onConfirm={async () => {
+              const ids = aiItems.map((q) => q.id);
+              await supabase.from("questions").delete().in("id", ids);
+              onClear();
+              toast.success(t("history_cleared"));
+            }}
+            t={t}
+          />
+        )}
+      </div>
 
       {isAdmin && grouped ? (
         <Tabs defaultValue={grouped[0]?.[0]} className="space-y-2">
@@ -445,9 +497,11 @@ const AdminPromptEditor = ({ t }: { t: (k: string) => string }) => {
 const TeacherQuestionsAdmin = ({
   questions,
   t,
+  onClear,
 }: {
   questions: Question[];
   t: (k: string) => string;
+  onClear: () => void;
 }) => {
   const students = useMemo(() => {
     const map = new Map<string, { name: string; items: Question[] }>();
@@ -470,10 +524,21 @@ const TeacherQuestionsAdmin = ({
 
   return (
     <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
-      <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-        <MessageSquare className="w-4 h-4 text-primary" />
-        {t("questions_tab")}
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+          <MessageSquare className="w-4 h-4 text-primary" />
+          {t("questions_tab")}
+        </h3>
+        <ClearHistoryButton
+          onConfirm={async () => {
+            const ids = questions.map((q) => q.id);
+            await supabase.from("questions").delete().in("id", ids);
+            onClear();
+            toast.success(t("history_cleared"));
+          }}
+          t={t}
+        />
+      </div>
       <Tabs defaultValue={students[0]?.[0]} className="space-y-3">
         <TabsList className="flex flex-wrap h-auto gap-1">
           {students.map(([id, { name, items }]) => (
