@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Send, MessageSquare, User, Sparkles, Settings } from "lucide-react";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { Loader2, Send, MessageSquare, User, Sparkles, Settings, Check, HelpCircle, X } from "lucide-react";
 import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -33,6 +34,7 @@ const QuestionsSection = () => {
   const [topic, setTopic] = useState("");
   const [aiQuestions, setAiQuestions] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [answers, setAnswers] = useState<Record<number, "yes" | "unsure" | "no">>({});
 
   const fetchQuestions = async () => {
     const { data, error } = await supabase
@@ -87,6 +89,7 @@ const QuestionsSection = () => {
     if (!trimmed) return;
     setGenerating(true);
     setAiQuestions([]);
+    setAnswers({});
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-questions", {
@@ -153,13 +156,56 @@ const QuestionsSection = () => {
             </Button>
           </div>
           {aiQuestions.length > 0 && (
-            <div className="space-y-2 mt-2">
-              {aiQuestions.map((q, i) => (
-                <div key={i} className="rounded-lg border border-border bg-background p-3 text-sm text-foreground">
-                  <span className="font-medium text-primary mr-1.5">{i + 1}.</span>
-                  {q}
-                </div>
-              ))}
+            <div className="mt-3">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-foreground font-semibold">Знаешь ли ты?</TableHead>
+                    <TableHead className="w-[260px] text-center">{t("your_answer")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {aiQuestions.map((q, i) => (
+                    <TableRow key={i}>
+                      <TableCell className="text-sm">
+                        <span className="font-medium text-primary mr-1.5">{i + 1}.</span>
+                        {q}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1.5 justify-center">
+                          <Button
+                            size="sm"
+                            variant={answers[i] === "yes" ? "default" : "outline"}
+                            className="text-xs h-7 px-2.5"
+                            onClick={() => setAnswers((prev) => ({ ...prev, [i]: "yes" }))}
+                          >
+                            <Check className="w-3 h-3 mr-1" />
+                            Да
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={answers[i] === "unsure" ? "secondary" : "outline"}
+                            className="text-xs h-7 px-2.5"
+                            onClick={() => setAnswers((prev) => ({ ...prev, [i]: "unsure" }))}
+                          >
+                            <HelpCircle className="w-3 h-3 mr-1" />
+                            Не уверен
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={answers[i] === "no" ? "destructive" : "outline"}
+                            className="text-xs h-7 px-2.5"
+                            onClick={() => setAnswers((prev) => ({ ...prev, [i]: "no" }))}
+                          >
+                            <X className="w-3 h-3 mr-1" />
+                            Нет
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>
