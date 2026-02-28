@@ -286,9 +286,9 @@ const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) 
           <TableHeader>
             <TableRow>
               <TableHead className="text-foreground font-semibold">{t("question")}</TableHead>
-              <TableHead className="w-[100px] text-center text-green-600">Да</TableHead>
-              <TableHead className="w-[100px] text-center text-yellow-600">Не уверен</TableHead>
-              <TableHead className="w-[100px] text-center text-red-600">Нет</TableHead>
+              <TableHead className={`w-[100px] text-center ${responses.length > 0 && responses.some(r => Object.values(r.answers).includes("yes")) ? "text-green-600" : "text-muted-foreground"}`}>Да</TableHead>
+              <TableHead className={`w-[100px] text-center ${responses.length > 0 && responses.some(r => Object.values(r.answers).includes("unsure")) ? "text-yellow-600" : "text-muted-foreground"}`}>Не уверен</TableHead>
+              <TableHead className={`w-[100px] text-center ${responses.length > 0 && responses.some(r => Object.values(r.answers).includes("no")) ? "text-red-600" : "text-muted-foreground"}`}>Нет</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
