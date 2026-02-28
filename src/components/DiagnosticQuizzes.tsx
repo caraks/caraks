@@ -48,8 +48,9 @@ const DiagnosticQuizzes = () => {
 const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
-  const [title, setTitle] = useState("");
-  const [questions, setQuestions] = useState(["", ""]);
+  const [topic, setTopic] = useState("");
+  const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
+  const [generating, setGenerating] = useState(false);
   const [creating, setCreating] = useState(false);
 
   const fetchQuizzes = async () => {
@@ -63,10 +64,33 @@ const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
 
   useEffect(() => { fetchQuizzes(); }, []);
 
-  const handleCreate = async () => {
-    const trimmedTitle = title.trim();
-    const trimmedQs = questions.map(q => q.trim()).filter(Boolean);
-    if (!trimmedTitle || trimmedQs.length < 2) {
+  const handleGenerate = async () => {
+    const trimmed = topic.trim();
+    if (!trimmed) return;
+    setGenerating(true);
+    setGeneratedQuestions([]);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-questions", {
+        body: { topic: trimmed },
+      });
+      if (error) throw error;
+      if (data?.questions) {
+        setGeneratedQuestions(data.questions);
+      } else {
+        toast.error(t("ai_error"));
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error(t("ai_error"));
+    }
+    setGenerating(false);
+  };
+
+  const handlePublish = async () => {
+    const trimmedTopic = topic.trim();
+    const trimmedQs = generatedQuestions.map(q => q.trim()).filter(Boolean);
+    if (!trimmedTopic || trimmedQs.length < 2) {
       toast.error(t("min_quiz_questions"));
       return;
     }
@@ -75,7 +99,7 @@ const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
     if (!user) { setCreating(false); return; }
 
     const { error } = await supabase.from("diagnostic_quizzes").insert({
-      title: trimmedTitle,
+      title: trimmedTopic,
       questions: trimmedQs as any,
       created_by: user.id,
     });
@@ -84,8 +108,8 @@ const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
       toast.error(t("save_error"));
     } else {
       toast.success(t("quiz_created"));
-      setTitle("");
-      setQuestions(["", ""]);
+      setTopic("");
+      setGeneratedQuestions([]);
       fetchQuizzes();
     }
   };
@@ -106,50 +130,60 @@ const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
 
   return (
     <div className="space-y-6">
-      {/* Create new quiz */}
+      {/* Create new quiz via AI */}
       <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
           <Sparkles className="w-4 h-4 text-primary" />
           {t("create_quiz")}
         </h3>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder={t("quiz_title_placeholder")}
-          maxLength={200}
-        />
-        <div className="space-y-2">
-          {questions.map((q, i) => (
-            <div key={i} className="flex gap-2 items-center">
-              <span className="text-xs text-muted-foreground w-5">{i + 1}.</span>
-              <Input
-                value={q}
-                onChange={(e) => {
-                  const updated = [...questions];
-                  updated[i] = e.target.value;
-                  setQuestions(updated);
-                }}
-                placeholder={`${t("question")} ${i + 1}`}
-                maxLength={300}
-              />
-              {questions.length > 2 && (
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setQuestions(questions.filter((_, j) => j !== i))}>
-                  <X className="w-3.5 h-3.5" />
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
+        <p className="text-xs text-muted-foreground">{t("create_quiz_hint")}</p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setQuestions([...questions, ""])} className="text-xs">
-            <Plus className="w-3.5 h-3.5 mr-1" />
-            {t("add_question")}
-          </Button>
-          <Button size="sm" onClick={handleCreate} disabled={creating}>
-            {creating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Check className="w-4 h-4 mr-1" />}
-            {t("create")}
+          <Input
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder={t("topic_placeholder")}
+            maxLength={200}
+            onKeyDown={(e) => e.key === "Enter" && handleGenerate()}
+          />
+          <Button size="sm" onClick={handleGenerate} disabled={generating || !topic.trim()}>
+            {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           </Button>
         </div>
+
+        {generatedQuestions.length > 0 && (
+          <div className="space-y-2 mt-3">
+            <p className="text-xs font-medium text-foreground">{t("generated_questions_edit")}</p>
+            {generatedQuestions.map((q, i) => (
+              <div key={i} className="flex gap-2 items-center">
+                <span className="text-xs text-muted-foreground w-5">{i + 1}.</span>
+                <Input
+                  value={q}
+                  onChange={(e) => {
+                    const updated = [...generatedQuestions];
+                    updated[i] = e.target.value;
+                    setGeneratedQuestions(updated);
+                  }}
+                  maxLength={300}
+                />
+                {generatedQuestions.length > 2 && (
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => setGeneratedQuestions(generatedQuestions.filter((_, j) => j !== i))}>
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setGeneratedQuestions([...generatedQuestions, ""])} className="text-xs">
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                {t("add_question")}
+              </Button>
+              <Button size="sm" onClick={handlePublish} disabled={creating}>
+                {creating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Check className="w-4 h-4 mr-1" />}
+                {t("publish_quiz")}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Quiz list with stats */}
