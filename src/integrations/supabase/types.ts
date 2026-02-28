@@ -209,6 +209,7 @@ export type Database = {
       }
       questions: {
         Row: {
+          ai_answers: Json | null
           ai_questions: Json | null
           ai_topic: string | null
           created_at: string
@@ -217,6 +218,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_answers?: Json | null
           ai_questions?: Json | null
           ai_topic?: string | null
           created_at?: string
@@ -225,6 +227,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_answers?: Json | null
           ai_questions?: Json | null
           ai_topic?: string | null
           created_at?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.questions ADD COLUMN IF NOT EXISTS ai_answers jsonb DEFAULT NULL;
