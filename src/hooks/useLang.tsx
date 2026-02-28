@@ -77,6 +77,8 @@ const translations: Translations = {
   "ai_prompt_settings": { ru: "Настройки промта AI", de: "AI-Prompt-Einstellungen" },
   "ai_prompt_hint": { ru: "Этот промт используется при генерации диагностических вопросов", de: "Dieser Prompt wird bei der Generierung von Diagnosefragen verwendet" },
   "prompt_saved": { ru: "Промт сохранён", de: "Prompt gespeichert" },
+  "answers_sent": { ru: "Ответы отправлены", de: "Antworten gesendet" },
+  "your_answer": { ru: "Твой ответ", de: "Deine Antwort" },
 };
 
 interface LangContextType {

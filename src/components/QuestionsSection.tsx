@@ -19,6 +19,7 @@ interface Question {
   display_name?: string;
   ai_topic?: string | null;
   ai_questions?: any | null;
+  ai_answers?: any | null;
 }
 
 const QuestionsSection = () => {
@@ -35,6 +36,8 @@ const QuestionsSection = () => {
   const [aiQuestions, setAiQuestions] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
   const [answers, setAnswers] = useState<Record<number, "yes" | "unsure" | "no">>({});
+  const [submittingAnswers, setSubmittingAnswers] = useState(false);
+  const [lastGeneratedQuestionId, setLastGeneratedQuestionId] = useState<string | null>(null);
 
   const fetchQuestions = async () => {
     const { data, error } = await supabase
@@ -102,12 +105,13 @@ const QuestionsSection = () => {
         // Save AI interaction to DB
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          await supabase.from("questions").insert({
+          const { data: inserted } = await supabase.from("questions").insert({
             user_id: user.id,
             question_text: `[AI] ${trimmed}`,
             ai_topic: trimmed,
             ai_questions: data.questions,
-          });
+          }).select("id").single();
+          if (inserted) setLastGeneratedQuestionId(inserted.id);
           fetchQuestions();
         }
       } else {
@@ -118,6 +122,22 @@ const QuestionsSection = () => {
       toast.error(t("ai_error"));
     }
     setGenerating(false);
+  };
+
+  const handleSubmitAnswers = async () => {
+    if (!lastGeneratedQuestionId || Object.keys(answers).length === 0) return;
+    setSubmittingAnswers(true);
+    const { error } = await supabase
+      .from("questions")
+      .update({ ai_answers: answers } as any)
+      .eq("id", lastGeneratedQuestionId);
+    setSubmittingAnswers(false);
+    if (error) {
+      toast.error(t("save_error"));
+    } else {
+      toast.success(t("answers_sent"));
+      fetchQuestions();
+    }
   };
 
   if (loading) {
@@ -206,6 +226,16 @@ const QuestionsSection = () => {
                   ))}
                 </TableBody>
               </Table>
+              <div className="flex justify-end mt-3">
+                <Button
+                  size="sm"
+                  onClick={handleSubmitAnswers}
+                  disabled={submittingAnswers || Object.keys(answers).length === 0}
+                >
+                  {submittingAnswers ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
+                  {t("send")}
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -324,6 +354,12 @@ const AiHistory = ({
   );
 };
 
+const ANSWER_LABELS: Record<string, { label: string; color: string }> = {
+  yes: { label: "Да", color: "text-green-600" },
+  unsure: { label: "Не уверен", color: "text-yellow-600" },
+  no: { label: "Нет", color: "text-red-600" },
+};
+
 const AiHistoryItem = ({ q, t }: { q: Question; t: (k: string) => string }) => (
   <div className="rounded-lg border border-border bg-background p-3 space-y-1.5">
     <p className="text-sm text-foreground font-medium flex items-center gap-1.5">
@@ -332,17 +368,23 @@ const AiHistoryItem = ({ q, t }: { q: Question; t: (k: string) => string }) => (
     </p>
     {q.ai_questions && q.ai_questions.length > 0 && (
       <div className="ml-5 space-y-1">
-        {q.ai_questions.map((aq: string, i: number) => (
-          <p key={i} className="text-xs text-muted-foreground">
-            {i + 1}. {aq}
-          </p>
-        ))}
+        {q.ai_questions.map((aq: string, i: number) => {
+          const ans = q.ai_answers?.[i];
+          const info = ans ? ANSWER_LABELS[ans] : null;
+          return (
+            <p key={i} className="text-xs text-muted-foreground flex items-center gap-2">
+              <span>{i + 1}. {aq}</span>
+              {info && (
+                <span className={`font-semibold ${info.color}`}>— {info.label}</span>
+              )}
+            </p>
+          );
+        })}
       </div>
     )}
     <p className="text-xs text-muted-foreground">{new Date(q.created_at).toLocaleString()}</p>
   </div>
 );
-
 /* ---------- Admin: AI Prompt Editor ---------- */
 const AdminPromptEditor = ({ t }: { t: (k: string) => string }) => {
   const [prompt, setPrompt] = useState("");
