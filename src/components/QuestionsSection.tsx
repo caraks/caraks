@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
 import { useUserRole } from "@/hooks/useUserRole";
 import AiChatDialog from "@/components/AiChatDialog";
-import DiagnosticQuizzes from "@/components/DiagnosticQuizzes";
 
 interface Question {
   id: string;
@@ -155,8 +154,6 @@ const QuestionsSection = () => {
       {/* Admin: AI prompt settings */}
       {isAdmin && <AdminPromptEditor t={t} />}
 
-      {/* Diagnostic Quizzes */}
-      <DiagnosticQuizzes />
 
       {/* Student: AI Chat Dialog */}
       {!isAdmin && <AiChatDialog />}
