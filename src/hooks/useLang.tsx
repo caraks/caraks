@@ -85,6 +85,19 @@ const translations: Translations = {
   "confirm_delete": { ru: "Удалить", de: "Löschen" },
   "cancel": { ru: "Отмена", de: "Abbrechen" },
   "history_cleared": { ru: "История очищена", de: "Verlauf gelöscht" },
+  "create_quiz": { ru: "Создать опрос-диагностику", de: "Diagnosequiz erstellen" },
+  "quiz_title_placeholder": { ru: "Название опроса...", de: "Quiztitel..." },
+  "question": { ru: "Вопрос", de: "Frage" },
+  "add_question": { ru: "Добавить вопрос", de: "Frage hinzufügen" },
+  "quiz_created": { ru: "Опрос создан", de: "Quiz erstellt" },
+  "quiz_closed": { ru: "Опрос закрыт", de: "Quiz geschlossen" },
+  "min_quiz_questions": { ru: "Введите название и минимум 2 вопроса", de: "Titel und mindestens 2 Fragen eingeben" },
+  "total_responses": { ru: "Всего ответов", de: "Antworten gesamt" },
+  "no_responses": { ru: "Пока нет ответов", de: "Noch keine Antworten" },
+  "individual_responses": { ru: "Индивидуальные ответы", de: "Einzelantworten" },
+  "update_answers": { ru: "Обновить ответы", de: "Antworten aktualisieren" },
+  "closed": { ru: "закрыт", de: "geschlossen" },
+  "diagnostic_quizzes": { ru: "Опросы-диагностика", de: "Diagnosequiz" },
 };
 
 interface LangContextType {
