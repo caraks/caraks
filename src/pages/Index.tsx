@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { Type, Film, ImageIcon, LogOut, User, Pencil, Globe, HelpCircle } from "lucide-react";
+import { Type, LogOut, User, Pencil, Globe, HelpCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
-import VideoSection from "@/components/VideoSection";
-import ImagesSection from "@/components/ImagesSection";
 import QuestionsSection from "@/components/QuestionsSection";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
@@ -14,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
-type Tab = "text" | "video" | "images" | "questions";
+type Tab = "text" | "questions";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("text");
@@ -26,8 +24,6 @@ const Index = () => {
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "text", label: t("text"), icon: <Type className="w-5 h-5" /> },
-    { id: "video", label: t("video"), icon: <Film className="w-5 h-5" /> },
-    { id: "images", label: t("images"), icon: <ImageIcon className="w-5 h-5" /> },
     { id: "questions", label: t("questions_tab"), icon: <HelpCircle className="w-5 h-5" /> },
   ];
   const [newName, setNewName] = useState("");
@@ -135,11 +131,7 @@ const Index = () => {
               font-[var(--font-display)]
               ${
                 activeTab === tab.id
-                  ? tab.id === "text"
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
-                    : tab.id === "video"
-                    ? "bg-secondary text-secondary-foreground shadow-lg shadow-secondary/30 scale-105"
-                    : "bg-accent text-accent-foreground shadow-lg shadow-accent/30 scale-105"
+                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
                   : "bg-card text-muted-foreground hover:bg-muted border border-border"
               }
             `}
@@ -154,8 +146,6 @@ const Index = () => {
       <main className="flex-1 px-4 pb-12 max-w-4xl mx-auto w-full">
         <div className="bg-card rounded-2xl border border-border shadow-sm p-6 md:p-10 min-h-[400px] animate-fade-in">
           {activeTab === "text" && <TextSection />}
-          {activeTab === "video" && <VideoSection />}
-          {activeTab === "images" && <ImagesSection />}
           {activeTab === "questions" && <QuestionsSection />}
         </div>
       </main>
