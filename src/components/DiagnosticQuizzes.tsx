@@ -455,7 +455,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                               key={val}
                               size="sm"
                               variant={isSelected ? "default" : "outline"}
-                              className={`text-xs h-7 px-2.5 ${isSelected ? cfg.color : ""}`}
+                              className={`text-xs h-7 px-2.5 ${isSelected ? cfg.color : "text-muted-foreground border-muted"}`}
                               onClick={() => setLocalAnswers(prev => ({
                                 ...prev,
                                 [quiz.id]: { ...(prev[quiz.id] ?? savedAnswers ?? {}), [i]: val }
