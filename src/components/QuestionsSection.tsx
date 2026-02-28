@@ -197,7 +197,7 @@ const QuestionsSection = () => {
                           <Button
                             size="sm"
                             variant={answers[i] === "yes" ? "default" : "outline"}
-                            className="text-xs h-7 px-2.5"
+                            className={`text-xs h-7 px-2.5 ${answers[i] === "yes" ? "bg-green-600 hover:bg-green-700 text-white border-green-600" : ""}`}
                             onClick={() => setAnswers((prev) => ({ ...prev, [i]: "yes" }))}
                           >
                             <Check className="w-3 h-3 mr-1" />
@@ -205,8 +205,8 @@ const QuestionsSection = () => {
                           </Button>
                           <Button
                             size="sm"
-                            variant={answers[i] === "unsure" ? "secondary" : "outline"}
-                            className="text-xs h-7 px-2.5"
+                            variant={answers[i] === "unsure" ? "default" : "outline"}
+                            className={`text-xs h-7 px-2.5 ${answers[i] === "unsure" ? "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500" : ""}`}
                             onClick={() => setAnswers((prev) => ({ ...prev, [i]: "unsure" }))}
                           >
                             <HelpCircle className="w-3 h-3 mr-1" />
@@ -214,8 +214,8 @@ const QuestionsSection = () => {
                           </Button>
                           <Button
                             size="sm"
-                            variant={answers[i] === "no" ? "destructive" : "outline"}
-                            className="text-xs h-7 px-2.5"
+                            variant={answers[i] === "no" ? "default" : "outline"}
+                            className={`text-xs h-7 px-2.5 ${answers[i] === "no" ? "bg-red-600 hover:bg-red-700 text-white border-red-600" : ""}`}
                             onClick={() => setAnswers((prev) => ({ ...prev, [i]: "no" }))}
                           >
                             <X className="w-3 h-3 mr-1" />
