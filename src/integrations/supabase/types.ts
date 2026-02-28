@@ -56,6 +56,65 @@ export type Database = {
         }
         Relationships: []
       }
+      diagnostic_quizzes: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          questions: Json
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          questions?: Json
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          questions?: Json
+          title?: string
+        }
+        Relationships: []
+      }
+      diagnostic_responses: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          quiz_id: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          quiz_id: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          quiz_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnostic_responses_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poll_options: {
         Row: {
           id: string
