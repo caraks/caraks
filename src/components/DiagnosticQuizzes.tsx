@@ -301,24 +301,24 @@ const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) 
                     <span className="font-medium text-primary mr-1.5">{i + 1}.</span>
                     {q}
                   </TableCell>
-                  <TableCell>
-                    <div className="text-center">
-                      <span className="text-sm font-semibold text-green-600">{s.counts.yes}</span>
-                      <Progress value={s.total ? (s.counts.yes / s.total) * 100 : 0} className="h-1.5 mt-1 [&>div]:bg-green-500" />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-center">
-                      <span className="text-sm font-semibold text-yellow-600">{s.counts.unsure}</span>
-                      <Progress value={s.total ? (s.counts.unsure / s.total) * 100 : 0} className="h-1.5 mt-1 [&>div]:bg-yellow-500" />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-center">
-                      <span className="text-sm font-semibold text-red-600">{s.counts.no}</span>
-                      <Progress value={s.total ? (s.counts.no / s.total) * 100 : 0} className="h-1.5 mt-1 [&>div]:bg-red-500" />
-                    </div>
-                  </TableCell>
+                    <TableCell>
+                      <div className="text-center">
+                        <span className={`text-sm font-semibold ${s.counts.yes > 0 ? "text-green-600" : "text-muted-foreground"}`}>{s.counts.yes}</span>
+                        <Progress value={s.total ? (s.counts.yes / s.total) * 100 : 0} className={`h-1.5 mt-1 ${s.counts.yes > 0 ? "[&>div]:bg-green-500" : "[&>div]:bg-muted"}`} />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-center">
+                        <span className={`text-sm font-semibold ${s.counts.unsure > 0 ? "text-yellow-600" : "text-muted-foreground"}`}>{s.counts.unsure}</span>
+                        <Progress value={s.total ? (s.counts.unsure / s.total) * 100 : 0} className={`h-1.5 mt-1 ${s.counts.unsure > 0 ? "[&>div]:bg-yellow-500" : "[&>div]:bg-muted"}`} />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-center">
+                        <span className={`text-sm font-semibold ${s.counts.no > 0 ? "text-red-600" : "text-muted-foreground"}`}>{s.counts.no}</span>
+                        <Progress value={s.total ? (s.counts.no / s.total) * 100 : 0} className={`h-1.5 mt-1 ${s.counts.no > 0 ? "[&>div]:bg-red-500" : "[&>div]:bg-muted"}`} />
+                      </div>
+                    </TableCell>
                 </TableRow>
               );
             })}
