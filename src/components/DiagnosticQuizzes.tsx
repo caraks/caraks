@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { Loader2, Plus, Trash2, Check, HelpCircle, X, BarChart3, Sparkles, Send } from "lucide-react";
+import { Loader2, Plus, Trash2, Check, HelpCircle, X, BarChart3, Sparkles, Send, MessageSquare } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
@@ -52,6 +52,22 @@ const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
+
+  const handleTestDiscord = async () => {
+    setSendingTest(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-discord-message", {
+        body: { message: "🔔 Тестовое сообщение из приложения! Уведомления работают ✅" },
+      });
+      if (error) throw error;
+      toast.success("Тестовое сообщение отправлено в Discord!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Ошибка отправки в Discord");
+    }
+    setSendingTest(false);
+  };
 
   const fetchQuizzes = async () => {
     const { data } = await supabase
@@ -130,6 +146,14 @@ const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
 
   return (
     <div className="space-y-6">
+      {/* Discord test button */}
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={handleTestDiscord} disabled={sendingTest}>
+          {sendingTest ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <MessageSquare className="w-4 h-4 mr-1" />}
+          Тест Discord
+        </Button>
+      </div>
+
       {/* Create new quiz via AI */}
       <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
