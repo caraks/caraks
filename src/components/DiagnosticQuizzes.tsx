@@ -133,6 +133,11 @@ const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
       setTopic("");
       setGeneratedQuestions([]);
       fetchQuizzes();
+
+      // Discord notification
+      const qList = trimmedQs.map((q, i) => `${i + 1}. ${q}`).join("\n");
+      const msg = `📋 **Новый опрос-диагностика!**\n\n📝 ${trimmedTopic}\n\n${qList}`;
+      supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
     }
   };
 
