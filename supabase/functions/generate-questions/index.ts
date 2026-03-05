@@ -7,6 +7,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const LANG_INSTRUCTIONS: Record<string, string> = {
+  ru: "Генерируй вопросы на русском языке.",
+  de: "Generiere die Fragen auf Deutsch. Antworte immer auf Deutsch, unabhängig von der Eingabesprache.",
+};
+
 const DEFAULT_PROMPT = `Ты помощник учителя. Ученик задаёт тебе интересующую его тему, а ты должен придумать пять вопросов — от простого к сложному. Чтобы понять, что именно ученик не знает. Выдавай ответ в виде JSON: {"questions": ["вопрос1", "вопрос2", "вопрос3", "вопрос4", "вопрос5"]}`;
 
 serve(async (req) => {

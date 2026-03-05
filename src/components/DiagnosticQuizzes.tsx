@@ -94,7 +94,7 @@ const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string })
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-questions", {
-        body: { topic: trimmed },
+        body: { topic: trimmed, lang },
       });
       if (error) throw error;
       if (data?.questions) {
