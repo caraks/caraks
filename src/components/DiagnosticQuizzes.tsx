@@ -146,6 +146,14 @@ const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
 
   return (
     <div className="space-y-6">
+      {/* Discord test button */}
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={handleTestDiscord} disabled={sendingTest}>
+          {sendingTest ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <MessageSquare className="w-4 h-4 mr-1" />}
+          Тест Discord
+        </Button>
+      </div>
+
       {/* Create new quiz via AI */}
       <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
