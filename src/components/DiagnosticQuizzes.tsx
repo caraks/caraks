@@ -45,7 +45,7 @@ const DiagnosticQuizzes = () => {
 
   return (
     <div className="space-y-6">
-      {isAdmin ? <AdminQuizPanel t={t} /> : <StudentQuizPanel t={t} />}
+      {isAdmin ? <AdminQuizPanel t={t} lang={lang} /> : <StudentQuizPanel t={t} />}
     </div>
   );
 };
