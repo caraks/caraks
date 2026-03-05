@@ -441,17 +441,6 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
     } else {
       toast.success(t("answers_sent"));
       setMyResponses(prev => new Map(prev).set(quizId, answers as any));
-
-      // Send Discord notification
-      const quiz = quizzes.find(q => q.id === quizId);
-      const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", user.id).single();
-      const name = profile?.display_name || user.email || "Студент";
-      const summary = Object.entries(answers).map(([q, a]) => {
-        const emoji = a === "yes" ? "✅" : a === "no" ? "❌" : "🤔";
-        return `${emoji} ${q}`;
-      }).join("\n");
-      const msg = `📋 **${quiz?.title ?? "Тест"}**\n👤 ${name}\n\n${summary}`;
-      supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
     }
   };
 
