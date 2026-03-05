@@ -52,6 +52,22 @@ const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
   const [generatedQuestions, setGeneratedQuestions] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
+
+  const handleTestDiscord = async () => {
+    setSendingTest(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-discord-message", {
+        body: { message: "🔔 Тестовое сообщение из приложения! Уведомления работают ✅" },
+      });
+      if (error) throw error;
+      toast.success("Тестовое сообщение отправлено в Discord!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Ошибка отправки в Discord");
+    }
+    setSendingTest(false);
+  };
 
   const fetchQuizzes = async () => {
     const { data } = await supabase
