@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const LANG_INSTRUCTIONS: Record<string, string> = {
   ru: "Генерируй вопросы на русском языке.",
-  de: "Generiere die Fragen auf Deutsch. Antworte immer auf Deutsch, unabhängig von der Eingabesprache.",
+  de: "Generiere die Fragen auf Deutsch. Antworte immer auf Deutsch, unabhängig von der Eingabesprache. Wenn die Eingabe jedoch auf Russisch in kyrillischer Schrift geschrieben ist, antworte auf Russisch.",
 };
 
 const DEFAULT_PROMPT = `Ты помощник учителя. Ученик задаёт тебе интересующую его тему, а ты должен придумать пять вопросов — от простого к сложному. Чтобы понять, что именно ученик не знает. Выдавай ответ в виде JSON: {"questions": ["вопрос1", "вопрос2", "вопрос3", "вопрос4", "вопрос5"]}`;
