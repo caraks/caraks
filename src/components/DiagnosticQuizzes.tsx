@@ -51,7 +51,7 @@ const DiagnosticQuizzes = () => {
 };
 
 /* ---------- Admin Panel ---------- */
-const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
+const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string }) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
   const [topic, setTopic] = useState("");
