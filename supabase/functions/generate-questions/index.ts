@@ -7,6 +7,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const LANG_INSTRUCTIONS: Record<string, string> = {
+  ru: "Генерируй вопросы на русском языке.",
+  de: "Generiere die Fragen auf Deutsch. Antworte immer auf Deutsch, unabhängig von der Eingabesprache.",
+};
+
 const DEFAULT_PROMPT = `Ты помощник учителя. Ученик задаёт тебе интересующую его тему, а ты должен придумать пять вопросов — от простого к сложному. Чтобы понять, что именно ученик не знает. Выдавай ответ в виде JSON: {"questions": ["вопрос1", "вопрос2", "вопрос3", "вопрос4", "вопрос5"]}`;
 
 serve(async (req) => {
@@ -15,13 +20,15 @@ serve(async (req) => {
   }
 
   try {
-    const { topic } = await req.json();
+    const { topic, lang } = await req.json();
     if (!topic || typeof topic !== "string") {
       return new Response(JSON.stringify({ error: "Topic is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const langInstruction = LANG_INSTRUCTIONS[lang] || LANG_INSTRUCTIONS["de"];
 
     const MISTRAL_API_KEY = Deno.env.get("MISTRAL_API_KEY");
     if (!MISTRAL_API_KEY) {
@@ -59,7 +66,7 @@ serve(async (req) => {
         top_p: 1,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: `${systemPrompt}\n\n${langInstruction}` },
           { role: "user", content: topic },
         ],
       }),

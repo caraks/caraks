@@ -40,18 +40,18 @@ const getAnswerConfig = (t: (k: string) => string) => ({
 });
 
 const DiagnosticQuizzes = () => {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { isAdmin } = useUserRole();
 
   return (
     <div className="space-y-6">
-      {isAdmin ? <AdminQuizPanel t={t} /> : <StudentQuizPanel t={t} />}
+      {isAdmin ? <AdminQuizPanel t={t} lang={lang} /> : <StudentQuizPanel t={t} />}
     </div>
   );
 };
 
 /* ---------- Admin Panel ---------- */
-const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
+const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string }) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
   const [topic, setTopic] = useState("");
@@ -94,7 +94,7 @@ const AdminQuizPanel = ({ t }: { t: (k: string) => string }) => {
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-questions", {
-        body: { topic: trimmed },
+        body: { topic: trimmed, lang },
       });
       if (error) throw error;
       if (data?.questions) {
