@@ -40,7 +40,7 @@ const getAnswerConfig = (t: (k: string) => string) => ({
 });
 
 const DiagnosticQuizzes = () => {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { isAdmin } = useUserRole();
 
   return (
