@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.chat-with-ai]
 verify_jwt = false
+
+[functions.send-discord-message]
+verify_jwt = false
