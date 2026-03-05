@@ -27,11 +27,17 @@ interface QuizResponse {
   display_name?: string;
 }
 
-const ANSWER_CONFIG = {
-  yes: { label: "Да", color: "bg-green-600 hover:bg-green-700 text-white border-green-600", textColor: "text-green-600" },
-  unsure: { label: "Не уверен", color: "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500", textColor: "text-yellow-600" },
-  no: { label: "Нет", color: "bg-red-600 hover:bg-red-700 text-white border-red-600", textColor: "text-red-600" },
+const ANSWER_STYLES = {
+  yes: { color: "bg-green-600 hover:bg-green-700 text-white border-green-600", textColor: "text-green-600" },
+  unsure: { color: "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-500", textColor: "text-yellow-600" },
+  no: { color: "bg-red-600 hover:bg-red-700 text-white border-red-600", textColor: "text-red-600" },
 };
+
+const getAnswerConfig = (t: (k: string) => string) => ({
+  yes: { label: t("answer_yes"), ...ANSWER_STYLES.yes },
+  unsure: { label: t("answer_unsure"), ...ANSWER_STYLES.unsure },
+  no: { label: t("answer_no"), ...ANSWER_STYLES.no },
+});
 
 const DiagnosticQuizzes = () => {
   const { t } = useLang();
@@ -365,7 +371,7 @@ const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) 
                 <div className="flex flex-wrap gap-2 mt-1">
                   {quiz.questions.map((_, i) => {
                     const ans = r.answers[String(i)];
-                    const cfg = ans ? ANSWER_CONFIG[ans] : null;
+                    const cfg = ans ? getAnswerConfig(t)[ans] : null;
                     return (
                       <span key={i} className={`${cfg?.textColor ?? "text-muted-foreground"} font-medium`}>
                         {i + 1}: {cfg?.label ?? "—"}
@@ -482,7 +488,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                     <TableCell>
                       <div className="flex gap-1.5 justify-center">
                         {(["yes", "unsure", "no"] as const).map(val => {
-                          const cfg = ANSWER_CONFIG[val];
+                          const cfg = getAnswerConfig(t)[val];
                           const isSelected = currentAnswers[String(i)] === val;
                           const Icon = val === "yes" ? Check : val === "unsure" ? HelpCircle : X;
                           return (

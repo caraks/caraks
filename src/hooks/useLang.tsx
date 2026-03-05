@@ -101,6 +101,9 @@ const translations: Translations = {
   "update_answers": { ru: "Обновить ответы", de: "Antworten aktualisieren" },
   "closed": { ru: "закрыт", de: "geschlossen" },
   "diagnostic_quizzes": { ru: "Опросы-диагностика", de: "Diagnosequiz" },
+  "answer_yes": { ru: "Да", de: "Ja" },
+  "answer_unsure": { ru: "Не уверен", de: "Nicht sicher" },
+  "answer_no": { ru: "Нет", de: "Nein" },
 };
 
 interface LangContextType {
