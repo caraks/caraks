@@ -20,13 +20,15 @@ serve(async (req) => {
   }
 
   try {
-    const { topic } = await req.json();
+    const { topic, lang } = await req.json();
     if (!topic || typeof topic !== "string") {
       return new Response(JSON.stringify({ error: "Topic is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const langInstruction = LANG_INSTRUCTIONS[lang] || LANG_INSTRUCTIONS["de"];
 
     const MISTRAL_API_KEY = Deno.env.get("MISTRAL_API_KEY");
     if (!MISTRAL_API_KEY) {
