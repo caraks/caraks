@@ -371,7 +371,7 @@ const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) 
                 <div className="flex flex-wrap gap-2 mt-1">
                   {quiz.questions.map((_, i) => {
                     const ans = r.answers[String(i)];
-                    const cfg = ans ? ANSWER_CONFIG[ans] : null;
+                    const cfg = ans ? getAnswerConfig(t)[ans] : null;
                     return (
                       <span key={i} className={`${cfg?.textColor ?? "text-muted-foreground"} font-medium`}>
                         {i + 1}: {cfg?.label ?? "—"}
@@ -488,7 +488,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                     <TableCell>
                       <div className="flex gap-1.5 justify-center">
                         {(["yes", "unsure", "no"] as const).map(val => {
-                          const cfg = ANSWER_CONFIG[val];
+                          const cfg = getAnswerConfig(t)[val];
                           const isSelected = currentAnswers[String(i)] === val;
                           const Icon = val === "yes" ? Check : val === "unsure" ? HelpCircle : X;
                           return (
