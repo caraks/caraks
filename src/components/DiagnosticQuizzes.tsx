@@ -446,6 +446,15 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
     } else {
       toast.success(t("answers_sent"));
       setMyResponses(prev => new Map(prev).set(quizId, answers as any));
+
+      // Discord notification (without showing answers)
+      if (!existing) {
+        const quiz = quizzes.find(q => q.id === quizId);
+        const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", user.id).single();
+        const name = profile?.display_name || user.email || "Ученик";
+        const msg = `✅ **${name}** прошёл опрос «${quiz?.title ?? "Без названия"}»`;
+        supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
+      }
     }
   };
 
