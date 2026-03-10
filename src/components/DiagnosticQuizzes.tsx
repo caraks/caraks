@@ -232,6 +232,7 @@ const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string })
 /* ---------- Quiz Stats (Admin) ---------- */
 const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) => string; onClose: () => void; onDelete: () => void }) => {
   const [responses, setResponses] = useState<QuizResponse[]>([]);
+  const [taskRatings, setTaskRatings] = useState<Record<string, { task_index: number; difficulty: string; display_name: string }[]>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
