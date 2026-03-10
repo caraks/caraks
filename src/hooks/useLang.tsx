@@ -108,6 +108,10 @@ const translations: Translations = {
   "follow_up_tasks": { ru: "Задачи для проверки знаний", de: "Aufgaben zur Wissensüberprüfung" },
   "follow_up_tasks_hint": { ru: "AI составил задачи на основе ваших ответов:", de: "Die KI hat Aufgaben basierend auf Ihren Antworten erstellt:" },
   "task_generation_error": { ru: "Ошибка генерации задач", de: "Fehler bei der Aufgabenerstellung" },
+  "rate_difficulty": { ru: "Оцените сложность:", de: "Schwierigkeit bewerten:" },
+  "difficulty_easy": { ru: "Элементарная", de: "Elementar" },
+  "difficulty_think": { ru: "Нужно подумать", de: "Muss nachdenken" },
+  "difficulty_impossible": { ru: "Не решаемая", de: "Unlösbar" },
 };
 
 interface LangContextType {

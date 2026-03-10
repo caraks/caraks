@@ -403,6 +403,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [generatingTasks, setGeneratingTasks] = useState<string | null>(null);
   const [followUpTasks, setFollowUpTasks] = useState<Record<string, string[]>>({});
+  const [taskDifficulty, setTaskDifficulty] = useState<Record<string, "easy" | "think" | "impossible">>({});
 
   useEffect(() => {
     const fetch = async () => {
@@ -578,9 +579,32 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                 <p className="text-xs text-muted-foreground">{t("follow_up_tasks_hint")}</p>
                 <ol className="space-y-2 mt-2">
                   {tasks.map((task, i) => (
-                    <li key={i} className="text-sm text-foreground flex gap-2">
-                      <span className="font-semibold text-primary shrink-0">{i + 1}.</span>
-                      <span>{task}</span>
+                    <li key={i} className="text-sm text-foreground space-y-1.5">
+                      <div className="flex gap-2">
+                        <span className="font-semibold text-primary shrink-0">{i + 1}.</span>
+                        <span>{task}</span>
+                      </div>
+                      <div className="flex gap-1.5 ml-5">
+                        {(["easy", "think", "impossible"] as const).map(level => {
+                          const key = `${quiz.id}-${i}`;
+                          const selected = taskDifficulty[key] === level;
+                          const labels = {
+                            easy: { text: t("difficulty_easy"), cls: "bg-green-500/10 text-green-700 border-green-300 hover:bg-green-500/20" },
+                            think: { text: t("difficulty_think"), cls: "bg-yellow-500/10 text-yellow-700 border-yellow-300 hover:bg-yellow-500/20" },
+                            impossible: { text: t("difficulty_impossible"), cls: "bg-red-500/10 text-red-700 border-red-300 hover:bg-red-500/20" },
+                          };
+                          const cfg = labels[level];
+                          return (
+                            <button
+                              key={level}
+                              onClick={() => setTaskDifficulty(prev => ({ ...prev, [key]: level }))}
+                              className={`text-xs px-2.5 py-1 rounded-full border transition-all ${selected ? cfg.cls + " font-semibold ring-1 ring-offset-1 ring-current" : "border-muted text-muted-foreground hover:text-foreground"}`}
+                            >
+                              {cfg.text}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </li>
                   ))}
                 </ol>
