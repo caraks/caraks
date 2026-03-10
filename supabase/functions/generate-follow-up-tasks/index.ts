@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { questions, answers, title, lang } = await req.json();
+    const { questions, answers, title, lang, previousTasks, round } = await req.json();
 
     if (!questions || !answers) {
       return new Response(JSON.stringify({ error: "questions and answers are required" }), {
@@ -26,7 +26,6 @@ serve(async (req) => {
       throw new Error("MISTRAL_API_KEY is not configured");
     }
 
-    // Build summary of student answers
     const summary = questions.map((q: string, i: number) => {
       const ans = answers[String(i)];
       const label = ans === "yes" ? "Да/Знаю" : ans === "unsure" ? "Не уверен" : "Нет/Не знаю";
@@ -38,6 +37,16 @@ serve(async (req) => {
       ? "Отвечай на русском языке."
       : "Antworte auf Deutsch.";
 
+    const roundNum = round || 1;
+    let difficultyHint = "";
+    if (roundNum > 1 && previousTasks && previousTasks.length > 0) {
+      difficultyHint = `\n\nВНИМАНИЕ: Ученик уже решал задачи и оценил большинство из них как "элементарные". Это раунд ${roundNum}. 
+Предыдущие задачи, которые были слишком лёгкими:
+${previousTasks.map((t: string, i: number) => `${i + 1}. ${t}`).join("\n")}
+
+Составь ЗНАЧИТЕЛЬНО БОЛЕЕ СЛОЖНЫЕ задачи, чем предыдущие. Каждый новый раунд должен быть существенно сложнее предыдущего.`;
+    }
+
     const systemPrompt = `Ты — помощник учителя. Ученик прошёл диагностический опрос по теме "${title || "неизвестная тема"}". 
 Ниже его ответы на вопросы (Да = знает, Не уверен = сомневается, Нет = не знает).
 
@@ -45,6 +54,7 @@ serve(async (req) => {
 - Задачи должны быть направлены на слабые места ученика (где он ответил "Нет" или "Не уверен").
 - Задачи должны быть разного уровня сложности: лёгкая, средняя и сложная.
 - Формулируй задачи конкретно, с числами или примерами, чтобы ученик мог решить их.
+${difficultyHint}
 
 ${langHint}
 

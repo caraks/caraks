@@ -112,6 +112,7 @@ const translations: Translations = {
   "difficulty_easy": { ru: "Элементарная", de: "Elementar" },
   "difficulty_think": { ru: "Нужно подумать", de: "Muss nachdenken" },
   "difficulty_impossible": { ru: "Не решаемая", de: "Unlösbar" },
+  "round": { ru: "раунд", de: "Runde" },
   "task_ratings_title": { ru: "Оценки сложности задач", de: "Aufgaben-Schwierigkeitsbewertungen" },
   "task_label": { ru: "Задача", de: "Aufgabe" },
 };
