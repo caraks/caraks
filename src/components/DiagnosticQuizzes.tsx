@@ -463,7 +463,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
   const [localAnswers, setLocalAnswers] = useState<Record<string, Record<number, "yes" | "unsure" | "no">>>({});
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [generatingTasks, setGeneratingTasks] = useState<string | null>(null);
-  const [followUpTasks, setFollowUpTasks] = useState<Record<string, string[]>>({});
+  const [followUpTasks, setFollowUpTasks] = useState<Record<string, string[][]>>({});
   const [taskDifficulty, setTaskDifficulty] = useState<Record<string, "easy" | "think" | "impossible">>({});
 
   useEffect(() => {
