@@ -141,6 +141,7 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
   }
 
   if (polls.length === 0) {
+    if (!isAdmin) return null;
     return (
       <p className="text-muted-foreground text-sm italic text-center py-4">
         {t("no_active_polls")}
