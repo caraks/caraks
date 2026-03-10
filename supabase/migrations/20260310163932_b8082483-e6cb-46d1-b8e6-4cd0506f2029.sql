@@ -1,0 +1,1 @@
+ALTER TABLE public.diagnostic_responses ADD COLUMN IF NOT EXISTS follow_up_tasks jsonb DEFAULT NULL;
