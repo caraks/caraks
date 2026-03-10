@@ -233,6 +233,7 @@ const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string })
 const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) => string; onClose: () => void; onDelete: () => void }) => {
   const [responses, setResponses] = useState<QuizResponse[]>([]);
   const [taskRatings, setTaskRatings] = useState<Record<string, { task_index: number; difficulty: string; display_name: string }[]>>({});
+  const [followUpTasksByUser, setFollowUpTasksByUser] = useState<Record<string, { tasks: string[]; display_name: string }>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -267,6 +268,18 @@ const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) 
           answers: (r.answers as any) || {},
           display_name: profileMap.get(r.user_id) ?? "?"
         })));
+
+        // Extract follow_up_tasks per user
+        const tasksMap: Record<string, { tasks: string[]; display_name: string }> = {};
+        data.forEach((r: any) => {
+          if (r.follow_up_tasks && Array.isArray(r.follow_up_tasks) && r.follow_up_tasks.length > 0) {
+            tasksMap[r.user_id] = {
+              tasks: r.follow_up_tasks,
+              display_name: profileMap.get(r.user_id) ?? "?",
+            };
+          }
+        });
+        setFollowUpTasksByUser(tasksMap);
       } else {
         setResponses([]);
       }
