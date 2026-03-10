@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.send-discord-message]
 verify_jwt = false
+
+[functions.generate-follow-up-tasks]
+verify_jwt = false

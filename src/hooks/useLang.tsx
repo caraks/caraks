@@ -104,6 +104,10 @@ const translations: Translations = {
   "answer_yes": { ru: "Да", de: "Ja" },
   "answer_unsure": { ru: "Не уверен", de: "Nicht sicher" },
   "answer_no": { ru: "Нет", de: "Nein" },
+  "generating_tasks": { ru: "AI генерирует задачи...", de: "KI generiert Aufgaben..." },
+  "follow_up_tasks": { ru: "Задачи для проверки знаний", de: "Aufgaben zur Wissensüberprüfung" },
+  "follow_up_tasks_hint": { ru: "AI составил задачи на основе ваших ответов:", de: "Die KI hat Aufgaben basierend auf Ihren Antworten erstellt:" },
+  "task_generation_error": { ru: "Ошибка генерации задач", de: "Fehler bei der Aufgabenerstellung" },
 };
 
 interface LangContextType {
