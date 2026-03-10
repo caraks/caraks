@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { questions, answers, title, lang, previousTasks, round } = await req.json();
+    const { questions, answers, title, lang } = await req.json();
 
     if (!questions || !answers) {
       return new Response(JSON.stringify({ error: "questions and answers are required" }), {
