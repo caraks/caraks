@@ -681,22 +681,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                                       difficulty: level,
                                     } as any, { onConflict: "quiz_id,user_id,task_index" });
 
-                                    // Check if all tasks in this round are rated and 2+ are easy
-                                    let easyCount = 0;
-                                    let allRated = true;
-                                    for (let ti = 0; ti < roundTasks.length; ti++) {
-                                      const k = `${quiz.id}-${globalOffset + ti}`;
-                                      const val = k === key ? level : newDifficulty[k];
-                                      if (!val) { allRated = false; break; }
-                                      if (val === "easy") easyCount++;
-                                    }
-                                    // Only generate if this is the latest round, 2+ easy, and not already generating
-                                    if (allRated && easyCount >= 2 && roundIndex === taskRounds.length - 1 && generatingTasks !== quiz.id) {
-                                      const savedAnswers = myResponses.get(quiz.id);
-                                      if (savedAnswers) {
-                                        generateFollowUpTasks(quiz.id, savedAnswers, roundTasks, roundIndex + 2);
-                                      }
-                                    }
+                                    // No additional rounds - single round only
                                   }}
                                   className={`text-xs px-2.5 py-1 rounded-full border transition-all ${selected ? cfg.cls + " font-semibold ring-1 ring-offset-1 ring-current" : "border-muted text-muted-foreground hover:text-foreground"}`}
                                 >
