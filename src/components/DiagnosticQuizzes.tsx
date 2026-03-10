@@ -521,8 +521,6 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
     setGeneratingTasks(null);
   };
 
-  const checkAndGenerateHarder = async (quizId: string, roundIndex: number) => {
-
 
 
   const handleSubmit = async (quizId: string) => {
