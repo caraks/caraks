@@ -597,7 +597,17 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                           return (
                             <button
                               key={level}
-                              onClick={() => setTaskDifficulty(prev => ({ ...prev, [key]: level }))}
+                              onClick={async () => {
+                                setTaskDifficulty(prev => ({ ...prev, [key]: level }));
+                                const { data: { user } } = await supabase.auth.getUser();
+                                if (!user) return;
+                                await supabase.from("task_difficulty_ratings" as any).upsert({
+                                  quiz_id: quiz.id,
+                                  user_id: user.id,
+                                  task_index: i,
+                                  difficulty: level,
+                                } as any, { onConflict: "quiz_id,user_id,task_index" });
+                              }}
                               className={`text-xs px-2.5 py-1 rounded-full border transition-all ${selected ? cfg.cls + " font-semibold ring-1 ring-offset-1 ring-current" : "border-muted text-muted-foreground hover:text-foreground"}`}
                             >
                               {cfg.text}
