@@ -429,34 +429,42 @@ const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) 
         </details>
       )}
 
-      {/* Task difficulty ratings from students */}
+      {/* Task ratings with task texts */}
       {Object.keys(taskRatings).length > 0 && (
         <details className="mt-2">
           <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
             {t("task_ratings_title")} ({Object.keys(taskRatings).length})
           </summary>
-          <div className="mt-2 space-y-2">
+          <div className="mt-2 space-y-3">
             {Object.entries(taskRatings).map(([userId, ratings]) => {
               const diffLabels: Record<string, { text: string; cls: string }> = {
                 easy: { text: t("difficulty_easy"), cls: "text-green-700" },
                 think: { text: t("difficulty_think"), cls: "text-yellow-700" },
                 impossible: { text: t("difficulty_impossible"), cls: "text-red-700" },
               };
+              const userTasks = followUpTasksByUser[userId]?.tasks ?? [];
               return (
-                <div key={userId} className="rounded-lg border border-border bg-background p-2 text-xs">
-                  <span className="font-medium text-foreground">{ratings[0]?.display_name ?? "?"}</span>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                <div key={userId} className="rounded-lg border border-border bg-background p-3 text-xs space-y-2">
+                  <span className="font-semibold text-foreground">{ratings[0]?.display_name ?? "?"}</span>
+                  <ol className="space-y-1.5 mt-1">
                     {ratings
                       .sort((a, b) => a.task_index - b.task_index)
                       .map(r => {
                         const d = diffLabels[r.difficulty];
+                        const taskText = userTasks[r.task_index];
                         return (
-                          <span key={r.task_index} className={`${d?.cls ?? "text-muted-foreground"} font-medium`}>
-                            {t("task_label")} {r.task_index + 1}: {d?.text ?? r.difficulty}
-                          </span>
+                          <li key={r.task_index} className="flex flex-col gap-0.5">
+                            <span className="text-foreground">
+                              <span className="font-medium text-primary">{r.task_index + 1}.</span>{" "}
+                              {taskText ?? `${t("task_label")} ${r.task_index + 1}`}
+                            </span>
+                            <span className={`${d?.cls ?? "text-muted-foreground"} font-medium ml-4`}>
+                              → {d?.text ?? r.difficulty}
+                            </span>
+                          </li>
                         );
                       })}
-                  </div>
+                  </ol>
                 </div>
               );
             })}
