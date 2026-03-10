@@ -489,7 +489,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
     fetch();
   }, []);
 
-  const generateFollowUpTasks = async (quizId: string, answers: Record<string, "yes" | "unsure" | "no">) => {
+  const generateFollowUpTasks = async (quizId: string, answers: Record<string, "yes" | "unsure" | "no">, previousTasks?: string[], round?: number) => {
     const quiz = quizzes.find(q => q.id === quizId);
     if (!quiz) return;
 
@@ -501,11 +501,16 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
           answers,
           title: quiz.title,
           lang,
+          previousTasks,
+          round: round || 1,
         },
       });
       if (error) throw error;
       if (data?.tasks) {
-        setFollowUpTasks(prev => ({ ...prev, [quizId]: data.tasks }));
+        setFollowUpTasks(prev => ({
+          ...prev,
+          [quizId]: [...(prev[quizId] ?? []), data.tasks],
+        }));
       } else {
         toast.error(t("task_generation_error"));
       }
@@ -514,6 +519,34 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
       toast.error(t("task_generation_error"));
     }
     setGeneratingTasks(null);
+  };
+
+  const checkAndGenerateHarder = async (quizId: string, roundIndex: number) => {
+    const rounds = followUpTasks[quizId];
+    if (!rounds || !rounds[roundIndex]) return;
+    const currentRoundTasks = rounds[roundIndex];
+    
+    // Count easy ratings in this round
+    let easyCount = 0;
+    const globalOffset = rounds.slice(0, roundIndex).reduce((sum, r) => sum + r.length, 0);
+    for (let i = 0; i < currentRoundTasks.length; i++) {
+      const key = `${quizId}-${globalOffset + i}`;
+      if (taskDifficulty[key] === "easy") easyCount++;
+    }
+
+    // Check all tasks in current round are rated
+    let allRated = true;
+    for (let i = 0; i < currentRoundTasks.length; i++) {
+      const key = `${quizId}-${globalOffset + i}`;
+      if (!taskDifficulty[key]) { allRated = false; break; }
+    }
+
+    if (allRated && easyCount >= 2) {
+      const savedAnswers = myResponses.get(quizId);
+      if (savedAnswers) {
+        generateFollowUpTasks(quizId, savedAnswers, currentRoundTasks, roundIndex + 2);
+      }
+    }
   };
 
   const handleSubmit = async (quizId: string) => {
