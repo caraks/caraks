@@ -403,6 +403,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [generatingTasks, setGeneratingTasks] = useState<string | null>(null);
   const [followUpTasks, setFollowUpTasks] = useState<Record<string, string[]>>({});
+  const [taskDifficulty, setTaskDifficulty] = useState<Record<string, "easy" | "think" | "impossible">>({});
 
   useEffect(() => {
     const fetch = async () => {
