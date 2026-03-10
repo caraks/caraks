@@ -595,7 +595,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
         const savedAnswers = myResponses.get(quiz.id);
         const currentAnswers = localAnswers[quiz.id] ?? savedAnswers ?? {};
         const hasSaved = !!savedAnswers;
-        const tasks = followUpTasks[quiz.id];
+        const taskRounds = followUpTasks[quiz.id] ?? [];
         const isGenerating = generatingTasks === quiz.id;
 
         return (
