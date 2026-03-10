@@ -236,19 +236,32 @@ const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data } = await supabase
         .from("diagnostic_responses")
         .select("*")
         .eq("quiz_id", quiz.id);
-      
-      if (data && data.length > 0) {
-        const userIds = [...new Set(data.map(r => r.user_id))];
+
+      // Fetch task difficulty ratings
+      const { data: ratingsData } = await supabase
+        .from("task_difficulty_ratings" as any)
+        .select("*")
+        .eq("quiz_id", quiz.id) as any;
+
+      const allUserIds = new Set<string>();
+      data?.forEach((r: any) => allUserIds.add(r.user_id));
+      ratingsData?.forEach((r: any) => allUserIds.add(r.user_id));
+
+      let profileMap = new Map<string, string>();
+      if (allUserIds.size > 0) {
         const { data: profiles } = await supabase
           .from("profiles")
           .select("id, display_name")
-          .in("id", userIds);
-        const profileMap = new Map(profiles?.map(p => [p.id, p.display_name]) ?? []);
+          .in("id", [...allUserIds]);
+        profileMap = new Map(profiles?.map(p => [p.id, p.display_name ?? "?"]) ?? []);
+      }
+
+      if (data && data.length > 0) {
         setResponses(data.map(r => ({
           ...r,
           answers: (r.answers as any) || {},
@@ -257,9 +270,21 @@ const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) 
       } else {
         setResponses([]);
       }
+
+      // Group ratings by user
+      if (ratingsData && ratingsData.length > 0) {
+        const grouped: Record<string, { task_index: number; difficulty: string; display_name: string }[]> = {};
+        ratingsData.forEach((r: any) => {
+          const name = profileMap.get(r.user_id) ?? "?";
+          if (!grouped[r.user_id]) grouped[r.user_id] = [];
+          grouped[r.user_id].push({ task_index: r.task_index, difficulty: r.difficulty, display_name: name });
+        });
+        setTaskRatings(grouped);
+      }
+
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, [quiz.id]);
 
   const stats = useMemo(() => {
