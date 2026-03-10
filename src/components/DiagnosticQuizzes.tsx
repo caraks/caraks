@@ -491,7 +491,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
 
   const generateFollowUpTasks = async (quizId: string, answers: Record<string, "yes" | "unsure" | "no">, previousTasks?: string[], round?: number) => {
     const quiz = quizzes.find(q => q.id === quizId);
-    if (!quiz) return;
+    if (!quiz || generatingTasks) return;
 
     setGeneratingTasks(quizId);
     try {
