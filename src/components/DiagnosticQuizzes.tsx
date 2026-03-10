@@ -664,56 +664,80 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                 {t("generating_tasks")}
               </div>
             )}
-            {tasks && tasks.length > 0 && (
-              <div className="mt-3 p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-2">
-                <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  {t("follow_up_tasks")}
-                </h4>
-                <p className="text-xs text-muted-foreground">{t("follow_up_tasks_hint")}</p>
-                <ol className="space-y-2 mt-2">
-                  {tasks.map((task, i) => (
-                    <li key={i} className="text-sm text-foreground space-y-1.5">
-                      <div className="flex gap-2">
-                        <span className="font-semibold text-primary shrink-0">{i + 1}.</span>
-                        <span>{task}</span>
-                      </div>
-                      <div className="flex gap-1.5 ml-5">
-                        {(["easy", "think", "impossible"] as const).map(level => {
-                          const key = `${quiz.id}-${i}`;
-                          const selected = taskDifficulty[key] === level;
-                          const labels = {
-                            easy: { text: t("difficulty_easy"), cls: "bg-green-500/10 text-green-700 border-green-300 hover:bg-green-500/20" },
-                            think: { text: t("difficulty_think"), cls: "bg-yellow-500/10 text-yellow-700 border-yellow-300 hover:bg-yellow-500/20" },
-                            impossible: { text: t("difficulty_impossible"), cls: "bg-red-500/10 text-red-700 border-red-300 hover:bg-red-500/20" },
-                          };
-                          const cfg = labels[level];
-                          return (
-                            <button
-                              key={level}
-                              onClick={async () => {
-                                setTaskDifficulty(prev => ({ ...prev, [key]: level }));
-                                const { data: { user } } = await supabase.auth.getUser();
-                                if (!user) return;
-                                await supabase.from("task_difficulty_ratings" as any).upsert({
-                                  quiz_id: quiz.id,
-                                  user_id: user.id,
-                                  task_index: i,
-                                  difficulty: level,
-                                } as any, { onConflict: "quiz_id,user_id,task_index" });
-                              }}
-                              className={`text-xs px-2.5 py-1 rounded-full border transition-all ${selected ? cfg.cls + " font-semibold ring-1 ring-offset-1 ring-current" : "border-muted text-muted-foreground hover:text-foreground"}`}
-                            >
-                              {cfg.text}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
+            {taskRounds.length > 0 && taskRounds.map((roundTasks, roundIndex) => {
+              const globalOffset = taskRounds.slice(0, roundIndex).reduce((sum, r) => sum + r.length, 0);
+              return (
+                <div key={roundIndex} className="mt-3 p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-2">
+                  <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    {t("follow_up_tasks")} {roundIndex > 0 && `(${t("round")} ${roundIndex + 1})`}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">{t("follow_up_tasks_hint")}</p>
+                  <ol className="space-y-2 mt-2">
+                    {roundTasks.map((task, i) => {
+                      const globalIndex = globalOffset + i;
+                      return (
+                        <li key={i} className="text-sm text-foreground space-y-1.5">
+                          <div className="flex gap-2">
+                            <span className="font-semibold text-primary shrink-0">{i + 1}.</span>
+                            <span>{task}</span>
+                          </div>
+                          <div className="flex gap-1.5 ml-5">
+                            {(["easy", "think", "impossible"] as const).map(level => {
+                              const key = `${quiz.id}-${globalIndex}`;
+                              const selected = taskDifficulty[key] === level;
+                              const labels = {
+                                easy: { text: t("difficulty_easy"), cls: "bg-green-500/10 text-green-700 border-green-300 hover:bg-green-500/20" },
+                                think: { text: t("difficulty_think"), cls: "bg-yellow-500/10 text-yellow-700 border-yellow-300 hover:bg-yellow-500/20" },
+                                impossible: { text: t("difficulty_impossible"), cls: "bg-red-500/10 text-red-700 border-red-300 hover:bg-red-500/20" },
+                              };
+                              const cfg = labels[level];
+                              return (
+                                <button
+                                  key={level}
+                                  onClick={async () => {
+                                    const newDifficulty = { ...taskDifficulty, [key]: level };
+                                    setTaskDifficulty(newDifficulty);
+                                    const { data: { user } } = await supabase.auth.getUser();
+                                    if (!user) return;
+                                    await supabase.from("task_difficulty_ratings" as any).upsert({
+                                      quiz_id: quiz.id,
+                                      user_id: user.id,
+                                      task_index: globalIndex,
+                                      difficulty: level,
+                                    } as any, { onConflict: "quiz_id,user_id,task_index" });
+
+                                    // Check if all tasks in this round are rated and 2+ are easy
+                                    let easyCount = 0;
+                                    let allRated = true;
+                                    for (let ti = 0; ti < roundTasks.length; ti++) {
+                                      const k = `${quiz.id}-${globalOffset + ti}`;
+                                      const val = k === key ? level : newDifficulty[k];
+                                      if (!val) { allRated = false; break; }
+                                      if (val === "easy") easyCount++;
+                                    }
+                                    // Only generate if this is the latest round (no next round yet)
+                                    if (allRated && easyCount >= 2 && roundIndex === taskRounds.length - 1) {
+                                      const savedAnswers = myResponses.get(quiz.id);
+                                      if (savedAnswers) {
+                                        generateFollowUpTasks(quiz.id, savedAnswers, roundTasks, roundIndex + 2);
+                                      }
+                                    }
+                                  }}
+                                  className={`text-xs px-2.5 py-1 rounded-full border transition-all ${selected ? cfg.cls + " font-semibold ring-1 ring-offset-1 ring-current" : "border-muted text-muted-foreground hover:text-foreground"}`}
+                                >
+                                  {cfg.text}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </div>
+              );
+            })}
           </div>
         );
       })}
