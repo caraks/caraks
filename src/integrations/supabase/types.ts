@@ -87,6 +87,7 @@ export type Database = {
         Row: {
           answers: Json
           created_at: string
+          follow_up_tasks: Json | null
           id: string
           quiz_id: string
           user_id: string
@@ -94,6 +95,7 @@ export type Database = {
         Insert: {
           answers?: Json
           created_at?: string
+          follow_up_tasks?: Json | null
           id?: string
           quiz_id: string
           user_id: string
@@ -101,6 +103,7 @@ export type Database = {
         Update: {
           answers?: Json
           created_at?: string
+          follow_up_tasks?: Json | null
           id?: string
           quiz_id?: string
           user_id?: string
