@@ -511,6 +511,14 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
           ...prev,
           [quizId]: [...(prev[quizId] ?? []), data.tasks],
         }));
+        // Save tasks to DB so admin can see them
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await supabase.from("diagnostic_responses")
+            .update({ follow_up_tasks: data.tasks } as any)
+            .eq("quiz_id", quizId)
+            .eq("user_id", user.id);
+        }
       } else {
         toast.error(t("task_generation_error"));
       }
