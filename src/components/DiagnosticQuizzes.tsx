@@ -395,11 +395,14 @@ const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) 
 
 /* ---------- Student Panel ---------- */
 const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
+  const { lang } = useLang();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [myResponses, setMyResponses] = useState<Map<string, Record<string, "yes" | "unsure" | "no">>>(new Map());
   const [loading, setLoading] = useState(true);
   const [localAnswers, setLocalAnswers] = useState<Record<string, Record<number, "yes" | "unsure" | "no">>>({});
   const [submitting, setSubmitting] = useState<string | null>(null);
+  const [generatingTasks, setGeneratingTasks] = useState<string | null>(null);
+  const [followUpTasks, setFollowUpTasks] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     const fetch = async () => {
@@ -424,6 +427,33 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
     fetch();
   }, []);
 
+  const generateFollowUpTasks = async (quizId: string, answers: Record<string, "yes" | "unsure" | "no">) => {
+    const quiz = quizzes.find(q => q.id === quizId);
+    if (!quiz) return;
+
+    setGeneratingTasks(quizId);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-follow-up-tasks", {
+        body: {
+          questions: quiz.questions,
+          answers,
+          title: quiz.title,
+          lang,
+        },
+      });
+      if (error) throw error;
+      if (data?.tasks) {
+        setFollowUpTasks(prev => ({ ...prev, [quizId]: data.tasks }));
+      } else {
+        toast.error(t("task_generation_error"));
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error(t("task_generation_error"));
+    }
+    setGeneratingTasks(null);
+  };
+
   const handleSubmit = async (quizId: string) => {
     const answers = localAnswers[quizId];
     if (!answers || Object.keys(answers).length === 0) return;
@@ -447,6 +477,9 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
       toast.success(t("answers_sent"));
       setMyResponses(prev => new Map(prev).set(quizId, answers as any));
 
+      // Generate follow-up tasks via AI
+      generateFollowUpTasks(quizId, answers as any);
+
       // Discord notification (without showing answers)
       if (!existing) {
         const quiz = quizzes.find(q => q.id === quizId);
@@ -467,6 +500,8 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
         const savedAnswers = myResponses.get(quiz.id);
         const currentAnswers = localAnswers[quiz.id] ?? savedAnswers ?? {};
         const hasSaved = !!savedAnswers;
+        const tasks = followUpTasks[quiz.id];
+        const isGenerating = generatingTasks === quiz.id;
 
         return (
           <div key={quiz.id} className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
@@ -526,6 +561,31 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                 {hasSaved ? t("update_answers") : t("send")}
               </Button>
             </div>
+
+            {/* AI-generated follow-up tasks */}
+            {isGenerating && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2 p-3 rounded-lg border border-border bg-background">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                {t("generating_tasks")}
+              </div>
+            )}
+            {tasks && tasks.length > 0 && (
+              <div className="mt-3 p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-2">
+                <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  {t("follow_up_tasks")}
+                </h4>
+                <p className="text-xs text-muted-foreground">{t("follow_up_tasks_hint")}</p>
+                <ol className="space-y-2 mt-2">
+                  {tasks.map((task, i) => (
+                    <li key={i} className="text-sm text-foreground flex gap-2">
+                      <span className="font-semibold text-primary shrink-0">{i + 1}.</span>
+                      <span>{task}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </div>
         );
       })}
