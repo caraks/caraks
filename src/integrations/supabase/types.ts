@@ -296,6 +296,41 @@ export type Database = {
         }
         Relationships: []
       }
+      task_difficulty_ratings: {
+        Row: {
+          created_at: string
+          difficulty: string
+          id: string
+          quiz_id: string
+          task_index: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty: string
+          id?: string
+          quiz_id: string
+          task_index: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          difficulty?: string
+          id?: string
+          quiz_id?: string
+          task_index?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_difficulty_ratings_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
