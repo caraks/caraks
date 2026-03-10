@@ -491,7 +491,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
 
   const generateFollowUpTasks = async (quizId: string, answers: Record<string, "yes" | "unsure" | "no">, previousTasks?: string[], round?: number) => {
     const quiz = quizzes.find(q => q.id === quizId);
-    if (!quiz) return;
+    if (!quiz || generatingTasks) return;
 
     setGeneratingTasks(quizId);
     try {
@@ -690,8 +690,8 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                                       if (!val) { allRated = false; break; }
                                       if (val === "easy") easyCount++;
                                     }
-                                    // Only generate if this is the latest round (no next round yet)
-                                    if (allRated && easyCount >= 2 && roundIndex === taskRounds.length - 1) {
+                                    // Only generate if this is the latest round, 2+ easy, and not already generating
+                                    if (allRated && easyCount >= 2 && roundIndex === taskRounds.length - 1 && generatingTasks !== quiz.id) {
                                       const savedAnswers = myResponses.get(quiz.id);
                                       if (savedAnswers) {
                                         generateFollowUpTasks(quiz.id, savedAnswers, roundTasks, roundIndex + 2);
