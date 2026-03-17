@@ -48,15 +48,15 @@ const AdminContentSection = () => {
   const handleGenerateLecture = async () => {
     setGenerating(true);
     try {
-      // Fetch active polls with options and votes
+      // Fetch closed (inactive) polls
       const { data: pollsData } = await supabase
         .from("polls")
         .select("*")
-        .eq("is_active", true)
+        .eq("is_active", false)
         .order("created_at", { ascending: false });
 
       if (!pollsData || pollsData.length === 0) {
-        toast.error(t("no_active_polls") || "Нет активных опросов");
+        toast.error("Нет закрытых опросов");
         setGenerating(false);
         return;
       }
