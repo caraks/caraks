@@ -15,6 +15,8 @@ const AdminContentSection = () => {
   const [saving, setSaving] = useState(false);
   const [pollRefresh, setPollRefresh] = useState(0);
   const [generating, setGenerating] = useState(false);
+  const [closedPolls, setClosedPolls] = useState<{ id: string; question: string }[]>([]);
+  const [selectedPollId, setSelectedPollId] = useState<string>("");
 
   useEffect(() => {
     const fetch = async () => {
