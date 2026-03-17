@@ -25,6 +25,7 @@ interface PollVote {
   option_id: string;
   user_id: string;
   free_text: string | null;
+  display_name?: string | null;
 }
 
 interface PollWithDetails extends Poll {
@@ -66,14 +67,24 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
 
     const [{ data: optionsData }, { data: votesData }] = await Promise.all([
       supabase.from("poll_options").select("*").in("poll_id", pollIds).order("sort_order"),
-      supabase.from("poll_votes").select("option_id, user_id, free_text").in("poll_id", pollIds),
+      supabase.from("poll_votes").select("option_id, user_id, free_text, poll_id").in("poll_id", pollIds),
     ]);
+
+    // Fetch profiles for voter names (admin only)
+    let profileMap: Record<string, string> = {};
+    if (isAdmin && votesData && votesData.length > 0) {
+      const userIds = [...new Set(votesData.map(v => v.user_id))];
+      const { data: profiles } = await supabase.from("profiles").select("id, display_name").in("id", userIds);
+      if (profiles) {
+        profiles.forEach(p => { profileMap[p.id] = p.display_name || "—"; });
+      }
+    }
 
     const enriched: PollWithDetails[] = pollsData.map((poll) => {
       const options = (optionsData ?? []).filter((o) => o.poll_id === poll.id);
-      const votes = (votesData ?? []).filter((v) =>
-        options.some((o) => o.id === v.option_id)
-      );
+      const votes: PollVote[] = (votesData ?? [])
+        .filter((v) => v.poll_id === poll.id)
+        .map((v) => ({ ...v, display_name: profileMap[v.user_id] || null }));
       const userVote = votes.find((v) => v.user_id === user.id)?.option_id ?? null;
       return { ...poll, options, votes, userVote };
     });
@@ -168,23 +179,34 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                   const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
                   const isUserChoice = poll.userVote === opt.id;
 
-                  return (
-                    <div key={opt.id} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className={`${isUserChoice ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
-                          {isUserChoice && <CheckCircle2 className="w-3.5 h-3.5 inline mr-1 text-primary" />}
-                          {opt.option_text}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{count} ({pct}%)</span>
+                    return (
+                      <div key={opt.id} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className={`${isUserChoice ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
+                            {isUserChoice && <CheckCircle2 className="w-3.5 h-3.5 inline mr-1 text-primary" />}
+                            {opt.option_text}
+                          </span>
+                          <span className="text-xs text-muted-foreground">{count} ({pct}%)</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-primary/70 transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        {isAdmin && count > 0 && (
+                          <div className="flex flex-wrap gap-1 ml-1">
+                            {poll.votes
+                              .filter((v) => v.option_id === opt.id && !v.free_text)
+                              .map((v, i) => (
+                                <span key={i} className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
+                                  {v.display_name || v.user_id.slice(0, 6)}
+                                </span>
+                              ))}
+                          </div>
+                        )}
                       </div>
-                      <div className="h-2 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-primary/70 transition-all duration-500"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
+                    );
                 })}
                 {poll.allow_free_text && (() => {
                   const freeTextVotes = poll.votes.filter((v) => v.free_text);
@@ -196,6 +218,9 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                       </p>
                       {freeTextVotes.map((v, i) => (
                         <div key={i} className="text-sm text-foreground bg-muted/40 rounded-lg px-3 py-1.5">
+                          {isAdmin && v.display_name && (
+                            <span className="text-xs font-medium text-muted-foreground mr-2">{v.display_name}:</span>
+                          )}
                           {v.free_text}
                         </div>
                       ))}
