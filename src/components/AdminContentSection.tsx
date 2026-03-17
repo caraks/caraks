@@ -31,6 +31,23 @@ const AdminContentSection = () => {
     fetch();
   }, []);
 
+  // Fetch closed polls for the dropdown
+  useEffect(() => {
+    if (!isAdmin) return;
+    const fetchClosed = async () => {
+      const { data } = await supabase
+        .from("polls")
+        .select("id, question")
+        .eq("is_active", false)
+        .order("created_at", { ascending: false });
+      setClosedPolls(data ?? []);
+      if (data && data.length > 0 && !selectedPollId) {
+        setSelectedPollId(data[0].id);
+      }
+    };
+    fetchClosed();
+  }, [isAdmin, pollRefresh]);
+
   const handleSave = async () => {
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
