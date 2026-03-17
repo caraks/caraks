@@ -157,17 +157,26 @@ const AdminContentSection = () => {
         <h2 className="text-2xl font-bold text-foreground">{t("polls")}</h2>
         {isAdmin && <PollCreator onCreated={() => setPollRefresh((k) => k + 1)} />}
         <PollList refreshKey={pollRefresh} isAdmin={isAdmin} />
-        {isAdmin && (
-          <button
-            onClick={handleGenerateLecture}
-            disabled={generating}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookOpen className="w-4 h-4" />}
-            {generating
-              ? (t("generating") || "Генерация...")
-              : (t("generate_lecture") || "Сгенерировать конспект по опросу")}
-          </button>
+        {isAdmin && closedPolls.length > 0 && (
+          <div className="flex items-center gap-3 flex-wrap">
+            <select
+              value={selectedPollId}
+              onChange={(e) => setSelectedPollId(e.target.value)}
+              className="rounded-xl border border-border bg-muted/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
+              {closedPolls.map((p) => (
+                <option key={p.id} value={p.id}>{p.question}</option>
+              ))}
+            </select>
+            <button
+              onClick={handleGenerateLecture}
+              disabled={generating || !selectedPollId}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookOpen className="w-4 h-4" />}
+              {generating ? "Генерация..." : "Сгенерировать конспект"}
+            </button>
+          </div>
         )}
       </div>
     </div>
