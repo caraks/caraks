@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { pollQuestion, options, votes, freeTextAnswers } = await req.json();
+    const { pollQuestion, quizQuestions, options, freeTextAnswers } = await req.json();
 
     if (!pollQuestion) {
       return new Response(JSON.stringify({ error: "pollQuestion is required" }), {
@@ -27,9 +27,18 @@ serve(async (req) => {
       throw new Error("MISTRAL_API_KEY is not configured");
     }
 
-    // Build a summary of poll results
-    let resultsSummary = `Тема опроса: "${pollQuestion}"\n\nРезультаты голосования:\n`;
+    // Build a summary based on quiz questions + student answers
+    let resultsSummary = `Тема: "${pollQuestion}"\n\n`;
+
+    if (quizQuestions && Array.isArray(quizQuestions)) {
+      resultsSummary += `Результаты диагностики учеников:\n`;
+      for (const q of quizQuestions) {
+        resultsSummary += `- "${q.question}": Да — ${q.yes}, Не уверен — ${q.not_sure}, Нет — ${q.no}\n`;
+      }
+    }
+
     if (options && Array.isArray(options)) {
+      resultsSummary += `\nРезультаты голосования:\n`;
       for (const opt of options) {
         resultsSummary += `- "${opt.text}": ${opt.count} голосов\n`;
       }
@@ -41,10 +50,10 @@ serve(async (req) => {
       }
     }
 
-    const systemPrompt = `Ты опытный учитель. На основе темы опроса и ответов учеников создай подробный, структурированный конспект лекции.
+    const systemPrompt = `Ты опытный учитель. На основе темы и результатов диагностики учеников создай подробный, структурированный конспект лекции.
 Конспект должен:
-- Раскрывать тему, указанную в опросе
-- Учитывать ответы и уровень понимания учеников (на основе их голосов и свободных ответов)
+- Раскрывать тему, указанную в заголовке
+- Уделять больше внимания вопросам, на которые ученики ответили "Нет" или "Не уверен"
 - Быть структурированным с заголовками и пунктами
 - Содержать примеры и пояснения
 - Быть на русском языке`;

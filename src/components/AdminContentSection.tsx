@@ -15,8 +15,8 @@ const AdminContentSection = () => {
   const [saving, setSaving] = useState(false);
   const [pollRefresh, setPollRefresh] = useState(0);
   const [generating, setGenerating] = useState(false);
-  const [closedPolls, setClosedPolls] = useState<{ id: string; question: string }[]>([]);
-  const [selectedPollId, setSelectedPollId] = useState<string>("");
+  const [closedQuizzes, setClosedQuizzes] = useState<{ id: string; title: string; questions: any }[]>([]);
+  const [selectedQuizId, setSelectedQuizId] = useState<string>("");
 
   useEffect(() => {
     const fetch = async () => {
@@ -31,18 +31,18 @@ const AdminContentSection = () => {
     fetch();
   }, []);
 
-  // Fetch closed polls for the dropdown
+  // Fetch closed (inactive) diagnostic quizzes for the dropdown
   useEffect(() => {
     if (!isAdmin) return;
     const fetchClosed = async () => {
       const { data } = await supabase
-        .from("polls")
-        .select("id, question")
+        .from("diagnostic_quizzes")
+        .select("id, title, questions")
         .eq("is_active", false)
         .order("created_at", { ascending: false });
-      setClosedPolls(data ?? []);
-      if (data && data.length > 0 && !selectedPollId) {
-        setSelectedPollId(data[0].id);
+      setClosedQuizzes(data ?? []);
+      if (data && data.length > 0 && !selectedQuizId) {
+        setSelectedQuizId(data[0].id);
       }
     };
     fetchClosed();
@@ -67,34 +67,38 @@ const AdminContentSection = () => {
   const handleGenerateLecture = async () => {
     setGenerating(true);
     try {
-      if (!selectedPollId) {
+      if (!selectedQuizId) {
         toast.error("Выберите опрос");
         setGenerating(false);
         return;
       }
 
-      const poll = closedPolls.find((p) => p.id === selectedPollId);
-      if (!poll) { setGenerating(false); return; }
+      const quiz = closedQuizzes.find((q) => q.id === selectedQuizId);
+      if (!quiz) { setGenerating(false); return; }
 
-      const [{ data: optionsData }, { data: votesData }] = await Promise.all([
-        supabase.from("poll_options").select("*").eq("poll_id", selectedPollId),
-        supabase.from("poll_votes").select("option_id, free_text").eq("poll_id", selectedPollId),
-      ]);
+      // Fetch student responses for this quiz
+      const { data: responses } = await supabase
+        .from("diagnostic_responses")
+        .select("answers, user_id")
+        .eq("quiz_id", selectedQuizId);
 
-      const options = (optionsData ?? []).map((opt) => ({
-        text: opt.option_text,
-        count: (votesData ?? []).filter((v) => v.option_id === opt.id && !v.free_text).length,
-      }));
-
-      const freeTextAnswers = (votesData ?? [])
-        .filter((v) => v.free_text)
-        .map((v) => v.free_text);
+      // Build summary of questions and student answers
+      const questions = Array.isArray(quiz.questions) ? quiz.questions as string[] : [];
+      const answersSummary = questions.map((q, i) => {
+        const counts = { yes: 0, not_sure: 0, no: 0 };
+        (responses ?? []).forEach((r) => {
+          const ans = (r.answers as Record<string, string>)?.[String(i)];
+          if (ans === "yes") counts.yes++;
+          else if (ans === "not_sure") counts.not_sure++;
+          else if (ans === "no") counts.no++;
+        });
+        return { question: q, yes: counts.yes, not_sure: counts.not_sure, no: counts.no };
+      });
 
       const { data, error } = await supabase.functions.invoke("generate-lecture", {
         body: {
-          pollQuestion: poll.question,
-          options,
-          freeTextAnswers,
+          pollQuestion: quiz.title,
+          quizQuestions: answersSummary,
         },
       });
 
@@ -157,20 +161,20 @@ const AdminContentSection = () => {
         <h2 className="text-2xl font-bold text-foreground">{t("polls")}</h2>
         {isAdmin && <PollCreator onCreated={() => setPollRefresh((k) => k + 1)} />}
         <PollList refreshKey={pollRefresh} isAdmin={isAdmin} />
-        {isAdmin && closedPolls.length > 0 && (
+        {isAdmin && closedQuizzes.length > 0 && (
           <div className="flex items-center gap-3 flex-wrap">
             <select
-              value={selectedPollId}
-              onChange={(e) => setSelectedPollId(e.target.value)}
+              value={selectedQuizId}
+              onChange={(e) => setSelectedQuizId(e.target.value)}
               className="rounded-xl border border-border bg-muted/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
-              {closedPolls.map((p) => (
-                <option key={p.id} value={p.id}>{p.question}</option>
+              {closedQuizzes.map((q) => (
+                <option key={q.id} value={q.id}>{q.title}</option>
               ))}
             </select>
             <button
               onClick={handleGenerateLecture}
-              disabled={generating || !selectedPollId}
+              disabled={generating || !selectedQuizId}
               className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookOpen className="w-4 h-4" />}
