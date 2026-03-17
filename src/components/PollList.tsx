@@ -67,14 +67,24 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
 
     const [{ data: optionsData }, { data: votesData }] = await Promise.all([
       supabase.from("poll_options").select("*").in("poll_id", pollIds).order("sort_order"),
-      supabase.from("poll_votes").select("option_id, user_id, free_text").in("poll_id", pollIds),
+      supabase.from("poll_votes").select("option_id, user_id, free_text, poll_id").in("poll_id", pollIds),
     ]);
+
+    // Fetch profiles for voter names (admin only)
+    let profileMap: Record<string, string> = {};
+    if (isAdmin && votesData && votesData.length > 0) {
+      const userIds = [...new Set(votesData.map(v => v.user_id))];
+      const { data: profiles } = await supabase.from("profiles").select("id, display_name").in("id", userIds);
+      if (profiles) {
+        profiles.forEach(p => { profileMap[p.id] = p.display_name || "—"; });
+      }
+    }
 
     const enriched: PollWithDetails[] = pollsData.map((poll) => {
       const options = (optionsData ?? []).filter((o) => o.poll_id === poll.id);
-      const votes = (votesData ?? []).filter((v) =>
-        options.some((o) => o.id === v.option_id)
-      );
+      const votes: PollVote[] = (votesData ?? [])
+        .filter((v) => v.poll_id === poll.id)
+        .map((v) => ({ ...v, display_name: profileMap[v.user_id] || null }));
       const userVote = votes.find((v) => v.user_id === user.id)?.option_id ?? null;
       return { ...poll, options, votes, userVote };
     });
