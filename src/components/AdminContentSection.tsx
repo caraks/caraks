@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useLang } from "@/hooks/useLang";
-import { Loader2, Save, BookOpen, ChevronDown } from "lucide-react";
+import { Loader2, Save, BookOpen, Eye, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 import PollCreator from "@/components/PollCreator";
 import PollList from "@/components/PollList";
 
