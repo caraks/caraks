@@ -25,6 +25,7 @@ interface PollVote {
   option_id: string;
   user_id: string;
   free_text: string | null;
+  display_name?: string | null;
 }
 
 interface PollWithDetails extends Poll {
