@@ -31,18 +31,18 @@ const AdminContentSection = () => {
     fetch();
   }, []);
 
-  // Fetch closed polls for the dropdown
+  // Fetch closed (inactive) diagnostic quizzes for the dropdown
   useEffect(() => {
     if (!isAdmin) return;
     const fetchClosed = async () => {
       const { data } = await supabase
-        .from("polls")
-        .select("id, question")
+        .from("diagnostic_quizzes")
+        .select("id, title, questions")
         .eq("is_active", false)
         .order("created_at", { ascending: false });
-      setClosedPolls(data ?? []);
-      if (data && data.length > 0 && !selectedPollId) {
-        setSelectedPollId(data[0].id);
+      setClosedQuizzes(data ?? []);
+      if (data && data.length > 0 && !selectedQuizId) {
+        setSelectedQuizId(data[0].id);
       }
     };
     fetchClosed();
