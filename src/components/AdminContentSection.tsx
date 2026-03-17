@@ -135,12 +135,34 @@ const AdminContentSection = () => {
         </h2>
         {isAdmin ? (
           <>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full min-h-[200px] rounded-xl border border-border bg-muted/50 p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
-              placeholder={t("content_placeholder")}
-            />
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                onClick={() => setPreviewMode(false)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${!previewMode ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                {t("edit") || "Редактировать"}
+              </button>
+              <button
+                onClick={() => setPreviewMode(true)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${previewMode ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                {t("preview") || "Предпросмотр"}
+              </button>
+            </div>
+            {previewMode ? (
+              <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[200px] text-foreground prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+                <ReactMarkdown>{content}</ReactMarkdown>
+              </div>
+            ) : (
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="w-full min-h-[200px] rounded-xl border border-border bg-muted/50 p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y font-mono text-sm"
+                placeholder={t("content_placeholder")}
+              />
+            )}
             <div className="flex items-center gap-3 flex-wrap">
               <button
                 onClick={handleSave}
@@ -153,8 +175,8 @@ const AdminContentSection = () => {
             </div>
           </>
         ) : (
-          <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[200px] text-foreground whitespace-pre-wrap">
-            {content || <span className="text-muted-foreground italic">{t("no_content")}</span>}
+          <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[200px] text-foreground prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+            {content ? <ReactMarkdown>{content}</ReactMarkdown> : <span className="text-muted-foreground italic">{t("no_content")}</span>}
           </div>
         )}
       </div>
