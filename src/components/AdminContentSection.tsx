@@ -67,34 +67,38 @@ const AdminContentSection = () => {
   const handleGenerateLecture = async () => {
     setGenerating(true);
     try {
-      if (!selectedPollId) {
+      if (!selectedQuizId) {
         toast.error("Выберите опрос");
         setGenerating(false);
         return;
       }
 
-      const poll = closedPolls.find((p) => p.id === selectedPollId);
-      if (!poll) { setGenerating(false); return; }
+      const quiz = closedQuizzes.find((q) => q.id === selectedQuizId);
+      if (!quiz) { setGenerating(false); return; }
 
-      const [{ data: optionsData }, { data: votesData }] = await Promise.all([
-        supabase.from("poll_options").select("*").eq("poll_id", selectedPollId),
-        supabase.from("poll_votes").select("option_id, free_text").eq("poll_id", selectedPollId),
-      ]);
+      // Fetch student responses for this quiz
+      const { data: responses } = await supabase
+        .from("diagnostic_responses")
+        .select("answers, user_id")
+        .eq("quiz_id", selectedQuizId);
 
-      const options = (optionsData ?? []).map((opt) => ({
-        text: opt.option_text,
-        count: (votesData ?? []).filter((v) => v.option_id === opt.id && !v.free_text).length,
-      }));
-
-      const freeTextAnswers = (votesData ?? [])
-        .filter((v) => v.free_text)
-        .map((v) => v.free_text);
+      // Build summary of questions and student answers
+      const questions = Array.isArray(quiz.questions) ? quiz.questions as string[] : [];
+      const answersSummary = questions.map((q, i) => {
+        const counts = { yes: 0, not_sure: 0, no: 0 };
+        (responses ?? []).forEach((r) => {
+          const ans = (r.answers as Record<string, string>)?.[String(i)];
+          if (ans === "yes") counts.yes++;
+          else if (ans === "not_sure") counts.not_sure++;
+          else if (ans === "no") counts.no++;
+        });
+        return { question: q, yes: counts.yes, not_sure: counts.not_sure, no: counts.no };
+      });
 
       const { data, error } = await supabase.functions.invoke("generate-lecture", {
         body: {
-          pollQuestion: poll.question,
-          options,
-          freeTextAnswers,
+          pollQuestion: quiz.title,
+          quizQuestions: answersSummary,
         },
       });
 
