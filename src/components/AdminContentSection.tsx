@@ -56,7 +56,7 @@ const AdminContentSection = () => {
         .order("created_at", { ascending: false });
 
       if (!pollsData || pollsData.length === 0) {
-        toast.error(t("no_active_polls") || "Нет активных опросов");
+        toast.error("Нет закрытых опросов");
         setGenerating(false);
         return;
       }
