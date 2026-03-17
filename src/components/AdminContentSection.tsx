@@ -67,26 +67,18 @@ const AdminContentSection = () => {
   const handleGenerateLecture = async () => {
     setGenerating(true);
     try {
-      // Fetch closed (inactive) polls
-      const { data: pollsData } = await supabase
-        .from("polls")
-        .select("*")
-        .eq("is_active", false)
-        .order("created_at", { ascending: false });
-
-      if (!pollsData || pollsData.length === 0) {
-        toast.error("Нет закрытых опросов");
+      if (!selectedPollId) {
+        toast.error("Выберите опрос");
         setGenerating(false);
         return;
       }
 
-      // Use the most recent active poll
-      const poll = pollsData[0];
-      const pollIds = [poll.id];
+      const poll = closedPolls.find((p) => p.id === selectedPollId);
+      if (!poll) { setGenerating(false); return; }
 
       const [{ data: optionsData }, { data: votesData }] = await Promise.all([
-        supabase.from("poll_options").select("*").in("poll_id", pollIds),
-        supabase.from("poll_votes").select("option_id, free_text").in("poll_id", pollIds),
+        supabase.from("poll_options").select("*").eq("poll_id", selectedPollId),
+        supabase.from("poll_votes").select("option_id, free_text").eq("poll_id", selectedPollId),
       ]);
 
       const options = (optionsData ?? []).map((opt) => ({
