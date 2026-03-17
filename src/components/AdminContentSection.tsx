@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useLang } from "@/hooks/useLang";
-import { Loader2, Save, BookOpen, ChevronDown } from "lucide-react";
+import { Loader2, Save, BookOpen, Eye, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 import PollCreator from "@/components/PollCreator";
 import PollList from "@/components/PollList";
 
@@ -17,6 +18,7 @@ const AdminContentSection = () => {
   const [generating, setGenerating] = useState(false);
   const [closedQuizzes, setClosedQuizzes] = useState<{ id: string; title: string; questions: any }[]>([]);
   const [selectedQuizId, setSelectedQuizId] = useState<string>("");
+  const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -133,12 +135,34 @@ const AdminContentSection = () => {
         </h2>
         {isAdmin ? (
           <>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full min-h-[200px] rounded-xl border border-border bg-muted/50 p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
-              placeholder={t("content_placeholder")}
-            />
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                onClick={() => setPreviewMode(false)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${!previewMode ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                {t("edit") || "Редактировать"}
+              </button>
+              <button
+                onClick={() => setPreviewMode(true)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${previewMode ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                {t("preview") || "Предпросмотр"}
+              </button>
+            </div>
+            {previewMode ? (
+              <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[200px] text-foreground prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+                <ReactMarkdown>{content}</ReactMarkdown>
+              </div>
+            ) : (
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="w-full min-h-[200px] rounded-xl border border-border bg-muted/50 p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y font-mono text-sm"
+                placeholder={t("content_placeholder")}
+              />
+            )}
             <div className="flex items-center gap-3 flex-wrap">
               <button
                 onClick={handleSave}
@@ -151,8 +175,8 @@ const AdminContentSection = () => {
             </div>
           </>
         ) : (
-          <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[200px] text-foreground whitespace-pre-wrap">
-            {content || <span className="text-muted-foreground italic">{t("no_content")}</span>}
+          <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[200px] text-foreground prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+            {content ? <ReactMarkdown>{content}</ReactMarkdown> : <span className="text-muted-foreground italic">{t("no_content")}</span>}
           </div>
         )}
       </div>
