@@ -218,6 +218,9 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                       </p>
                       {freeTextVotes.map((v, i) => (
                         <div key={i} className="text-sm text-foreground bg-muted/40 rounded-lg px-3 py-1.5">
+                          {isAdmin && v.display_name && (
+                            <span className="text-xs font-medium text-muted-foreground mr-2">{v.display_name}:</span>
+                          )}
                           {v.free_text}
                         </div>
                       ))}
