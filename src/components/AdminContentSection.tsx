@@ -18,6 +18,7 @@ const AdminContentSection = () => {
   const [generating, setGenerating] = useState(false);
   const [closedQuizzes, setClosedQuizzes] = useState<{ id: string; title: string; questions: any }[]>([]);
   const [selectedQuizId, setSelectedQuizId] = useState<string>("");
+  const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
