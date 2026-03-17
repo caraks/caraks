@@ -179,23 +179,34 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                   const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
                   const isUserChoice = poll.userVote === opt.id;
 
-                  return (
-                    <div key={opt.id} className="space-y-1">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className={`${isUserChoice ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
-                          {isUserChoice && <CheckCircle2 className="w-3.5 h-3.5 inline mr-1 text-primary" />}
-                          {opt.option_text}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{count} ({pct}%)</span>
+                    return (
+                      <div key={opt.id} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className={`${isUserChoice ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
+                            {isUserChoice && <CheckCircle2 className="w-3.5 h-3.5 inline mr-1 text-primary" />}
+                            {opt.option_text}
+                          </span>
+                          <span className="text-xs text-muted-foreground">{count} ({pct}%)</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-primary/70 transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                        {isAdmin && count > 0 && (
+                          <div className="flex flex-wrap gap-1 ml-1">
+                            {poll.votes
+                              .filter((v) => v.option_id === opt.id && !v.free_text)
+                              .map((v, i) => (
+                                <span key={i} className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">
+                                  {v.display_name || v.user_id.slice(0, 6)}
+                                </span>
+                              ))}
+                          </div>
+                        )}
                       </div>
-                      <div className="h-2 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-primary/70 transition-all duration-500"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
+                    );
                 })}
                 {poll.allow_free_text && (() => {
                   const freeTextVotes = poll.votes.filter((v) => v.free_text);
