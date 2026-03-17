@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useLang } from "@/hooks/useLang";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import PollCreator from "@/components/PollCreator";
 import PollList from "@/components/PollList";
@@ -14,6 +14,7 @@ const AdminContentSection = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pollRefresh, setPollRefresh] = useState(0);
+  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -44,6 +45,63 @@ const AdminContentSection = () => {
     setSaving(false);
   };
 
+  const handleGenerateLecture = async () => {
+    setGenerating(true);
+    try {
+      // Fetch active polls with options and votes
+      const { data: pollsData } = await supabase
+        .from("polls")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (!pollsData || pollsData.length === 0) {
+        toast.error(t("no_active_polls") || "Нет активных опросов");
+        setGenerating(false);
+        return;
+      }
+
+      // Use the most recent active poll
+      const poll = pollsData[0];
+      const pollIds = [poll.id];
+
+      const [{ data: optionsData }, { data: votesData }] = await Promise.all([
+        supabase.from("poll_options").select("*").in("poll_id", pollIds),
+        supabase.from("poll_votes").select("option_id, free_text").in("poll_id", pollIds),
+      ]);
+
+      const options = (optionsData ?? []).map((opt) => ({
+        text: opt.option_text,
+        count: (votesData ?? []).filter((v) => v.option_id === opt.id && !v.free_text).length,
+      }));
+
+      const freeTextAnswers = (votesData ?? [])
+        .filter((v) => v.free_text)
+        .map((v) => v.free_text);
+
+      const { data, error } = await supabase.functions.invoke("generate-lecture", {
+        body: {
+          pollQuestion: poll.question,
+          options,
+          freeTextAnswers,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.lecture) {
+        setContent((prev) => (prev ? prev + "\n\n" + data.lecture : data.lecture));
+        toast.success(t("lecture_generated") || "Конспект сгенерирован");
+      } else {
+        toast.error("Не удалось сгенерировать конспект");
+      }
+    } catch (e) {
+      console.error("Generate lecture error:", e);
+      toast.error("Ошибка генерации конспекта");
+    }
+    setGenerating(false);
+  };
+
   if (loading || roleLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -66,14 +124,16 @@ const AdminContentSection = () => {
               className="w-full min-h-[200px] rounded-xl border border-border bg-muted/50 p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-y"
               placeholder={t("content_placeholder")}
             />
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              {t("save")}
-            </button>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {t("save")}
+              </button>
+            </div>
           </>
         ) : (
           <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[200px] text-foreground whitespace-pre-wrap">
@@ -86,6 +146,18 @@ const AdminContentSection = () => {
         <h2 className="text-2xl font-bold text-foreground">{t("polls")}</h2>
         {isAdmin && <PollCreator onCreated={() => setPollRefresh((k) => k + 1)} />}
         <PollList refreshKey={pollRefresh} isAdmin={isAdmin} />
+        {isAdmin && (
+          <button
+            onClick={handleGenerateLecture}
+            disabled={generating}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookOpen className="w-4 h-4" />}
+            {generating
+              ? (t("generating") || "Генерация...")
+              : (t("generate_lecture") || "Сгенерировать конспект по опросу")}
+          </button>
+        )}
       </div>
     </div>
   );

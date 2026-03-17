@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.generate-follow-up-tasks]
 verify_jwt = false
+
+[functions.generate-lecture]
+verify_jwt = false
