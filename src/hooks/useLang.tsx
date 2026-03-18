@@ -67,7 +67,7 @@ const translations: Translations = {
   "ai_chat_empty": { ru: "Начните диалог с AI — напишите вопрос или тему", de: "Starten Sie einen Dialog mit der KI – schreiben Sie eine Frage oder ein Thema" },
   "clear_chat": { ru: "Очистить", de: "Löschen" },
   "you": { ru: "Вы", de: "Sie" },
-  "ai_diagnostic": { ru: "AI-диагностика", de: "AI-Diagnose" },
+  "ai_diagnostic": { ru: "ИИ анонимная самодиагностика", de: "KI anonyme Selbstdiagnose" },
   "ai_diagnostic_hint": { ru: "Введите тему, которую не понимаете, и AI составит вопросы для диагностики", de: "Geben Sie ein Thema ein, das Sie nicht verstehen, und die KI erstellt Diagnosefragen" },
   "topic_placeholder": { ru: "Например: дроби, уравнения...", de: "Z.B.: Brüche, Gleichungen..." },
   "ai_error": { ru: "Ошибка генерации вопросов", de: "Fehler bei der Fragenerstellung" },
