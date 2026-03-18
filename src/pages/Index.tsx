@@ -115,9 +115,7 @@ const Index = () => {
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
           LernPhy
         </h1>
-        <p className="mt-2 text-muted-foreground text-lg">
-          {t("subtitle")}
-        </p>
+        
       </header>
 
       {/* Tab Buttons */}
