@@ -155,8 +155,8 @@ const QuestionsSection = () => {
       {isAdmin && <AdminPromptEditor t={t} />}
 
 
-      {/* Student: AI Chat Dialog */}
-      {!isAdmin && <AiChatDialog />}
+
+
 
       {!isAdmin && (
         <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
