@@ -267,10 +267,21 @@ const QuestionsSection = () => {
       {/* Student: own questions history */}
       {!isAdmin && questions.filter((q) => !q.ai_topic).length > 0 && (
         <div className="space-y-2 rounded-xl border border-border bg-muted/30 p-4">
-          <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-            <MessageSquare className="w-4 h-4 text-primary" />
-            {t("my_questions")}
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+              <MessageSquare className="w-4 h-4 text-primary" />
+              {t("my_questions")}
+            </h3>
+            <ClearHistoryButton
+              onConfirm={async () => {
+                const ids = questions.filter((q) => !q.ai_topic).map((q) => q.id);
+                await supabase.from("questions").delete().in("id", ids);
+                fetchQuestions();
+                toast.success(t("history_cleared"));
+              }}
+              t={t}
+            />
+          </div>
           {questions.filter((q) => !q.ai_topic).map((q) => (
             <div key={q.id} className="rounded-lg border border-border bg-background p-3 text-sm text-foreground">
               {q.question_text}
