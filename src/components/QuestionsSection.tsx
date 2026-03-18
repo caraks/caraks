@@ -247,8 +247,8 @@ const QuestionsSection = () => {
 
 
 
-      {/* AI history — completely separate section */}
-      <AiHistory questions={questions} t={t} isAdmin={isAdmin} onClear={fetchQuestions} />
+      {/* AI history — only for students */}
+      {!isAdmin && <AiHistory questions={questions} t={t} isAdmin={isAdmin} onClear={fetchQuestions} />}
     </div>
   );
 };
