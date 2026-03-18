@@ -113,7 +113,7 @@ const Index = () => {
           </DialogContent>
         </Dialog>
         <h1 className="text-4xl font-bold tracking-tight text-foreground">
-          Media Hub
+          LernPhy
         </h1>
         <p className="mt-2 text-muted-foreground text-lg">
           {t("subtitle")}
