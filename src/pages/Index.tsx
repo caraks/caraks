@@ -23,7 +23,7 @@ const Index = () => {
   const [editOpen, setEditOpen] = useState(false);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "text", label: t("text"), icon: <Type className="w-5 h-5" /> },
+    { id: "text", label: role === "admin" ? t("text_admin") : t("text"), icon: <Type className="w-5 h-5" /> },
     { id: "questions", label: t("questions_tab"), icon: <HelpCircle className="w-5 h-5" /> },
   ];
   const [newName, setNewName] = useState("");

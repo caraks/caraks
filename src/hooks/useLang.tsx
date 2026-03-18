@@ -10,6 +10,7 @@ const translations: Translations = {
   "media_hub": { ru: "Media Hub", de: "Media Hub" },
   "subtitle": { ru: "Текст · Видео · Изображения", de: "Text · Video · Bilder" },
   "text": { ru: "Общение с учителем", de: "Kommunikation mit dem Lehrer" },
+  "text_admin": { ru: "Общение с учениками", de: "Kommunikation mit Schülern" },
   "video": { ru: "Видео", de: "Video" },
   "images": { ru: "Изображения", de: "Bilder" },
   "logout": { ru: "Выйти", de: "Abmelden" },
