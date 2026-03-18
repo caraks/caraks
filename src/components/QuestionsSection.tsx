@@ -376,17 +376,15 @@ const AiHistory = ({
           <Sparkles className="w-4 h-4 text-primary" />
           {t("ai_history")}
         </h3>
-        {isAdmin && (
-          <ClearHistoryButton
-            onConfirm={async () => {
-              const ids = aiItems.map((q) => q.id);
-              await supabase.from("questions").delete().in("id", ids);
-              onClear();
-              toast.success(t("history_cleared"));
-            }}
-            t={t}
-          />
-        )}
+        <ClearHistoryButton
+          onConfirm={async () => {
+            const ids = aiItems.map((q) => q.id);
+            await supabase.from("questions").delete().in("id", ids);
+            onClear();
+            toast.success(t("history_cleared"));
+          }}
+          t={t}
+        />
       </div>
 
       {isAdmin && grouped ? (
