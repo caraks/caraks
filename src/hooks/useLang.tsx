@@ -53,7 +53,7 @@ const translations: Translations = {
   "question_sent": { ru: "Вопрос отправлен", de: "Frage gesendet" },
   "no_questions": { ru: "Вопросов пока нет", de: "Noch keine Fragen" },
   "my_questions": { ru: "Мои вопросы учителю", de: "Meine Fragen an den Lehrer" },
-  "dialogues": { ru: "Диалоги", de: "Dialoge" },
+  "dialogues": { ru: "Вопросы от учеников", de: "Fragen von Schülern" },
   "start_dialogue": { ru: "Начать диалог", de: "Dialog starten" },
   "reply_placeholder": { ru: "Написать ответ...", de: "Antwort schreiben..." },
   "no_replies": { ru: "Нет ответов. Напишите первое сообщение!", de: "Keine Antworten. Schreibe die erste Nachricht!" },
