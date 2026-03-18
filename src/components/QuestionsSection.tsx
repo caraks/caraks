@@ -244,10 +244,8 @@ const QuestionsSection = () => {
       )}
 
 
-      {/* Admin: student questions grouped by student */}
-      {isAdmin && (
-        <TeacherQuestionsAdmin questions={questions.filter((q) => !q.ai_topic)} t={t} onClear={fetchQuestions} />
-      )}
+
+
 
       {/* AI history — completely separate section */}
       <AiHistory questions={questions} t={t} isAdmin={isAdmin} onClear={fetchQuestions} />
