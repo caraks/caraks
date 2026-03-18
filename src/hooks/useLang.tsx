@@ -9,7 +9,7 @@ interface Translations {
 const translations: Translations = {
   "media_hub": { ru: "Media Hub", de: "Media Hub" },
   "subtitle": { ru: "Текст · Видео · Изображения", de: "Text · Video · Bilder" },
-  "text": { ru: "Текст", de: "Text" },
+  "text": { ru: "Общение с учителем", de: "Kommunikation mit dem Lehrer" },
   "video": { ru: "Видео", de: "Video" },
   "images": { ru: "Изображения", de: "Bilder" },
   "logout": { ru: "Выйти", de: "Abmelden" },
