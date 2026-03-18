@@ -47,7 +47,7 @@ const translations: Translations = {
   "free_text_placeholder": { ru: "Напишите свой ответ...", de: "Schreiben Sie Ihre Antwort..." },
   "submit_answer": { ru: "Отправить", de: "Absenden" },
   "free_text_answers": { ru: "Ответы", de: "Antworten" },
-  "questions_tab": { ru: "Вопросы", de: "Fragen" },
+  "questions_tab": { ru: "Самодиагностика", de: "Selbstdiagnose" },
   "ask_question": { ru: "Задать вопрос учителю", de: "Frage an den Lehrer stellen" },
   "question_placeholder": { ru: "Напишите ваш вопрос...", de: "Schreiben Sie Ihre Frage..." },
   "send": { ru: "Отправить", de: "Senden" },
