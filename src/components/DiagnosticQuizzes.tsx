@@ -64,7 +64,7 @@ const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string })
     setSendingTest(true);
     try {
       const { error } = await supabase.functions.invoke("send-discord-message", {
-        body: { message: "🔔 Тестовое сообщение из приложения! Уведомления работают ✅" },
+        body: { message: "🔔 Testnachricht aus der App! Benachrichtigungen funktionieren ✅" },
       });
       if (error) throw error;
       toast.success("Тестовое сообщение отправлено в Discord!");
@@ -136,7 +136,7 @@ const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string })
 
       // Discord notification
       const qList = trimmedQs.map((q, i) => `${i + 1}. ${q}`).join("\n");
-      const msg = `📋 **Новый опрос-диагностика!**\n\n📝 ${trimmedTopic}\n\n${qList}`;
+      const msg = `📋 **Neues Diagnosequiz!**\n\n📝 ${trimmedTopic}\n\n${qList}`;
       supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
     }
   };
@@ -582,8 +582,8 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
       if (!existing) {
         const quiz = quizzes.find(q => q.id === quizId);
         const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", user.id).single();
-        const name = profile?.display_name || user.email || "Ученик";
-        const msg = `✅ **${name}** прошёл опрос «${quiz?.title ?? "Без названия"}»`;
+        const name = profile?.display_name || user.email || "Schüler";
+        const msg = `✅ **${name}** hat das Quiz «${quiz?.title ?? "Ohne Titel"}» abgeschlossen`;
         supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
       }
     }
