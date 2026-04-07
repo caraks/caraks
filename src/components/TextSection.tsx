@@ -4,7 +4,7 @@ import StudentTeacherChat from "@/components/StudentTeacherChat";
 import AdminStudentQuestions from "@/components/AdminStudentQuestions";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useLang } from "@/hooks/useLang";
-import { MessageSquare } from "lucide-react";
+import { BarChart3, MessageSquare } from "lucide-react";
 
 const TextSection = () => {
   const { isAdmin } = useUserRole();
@@ -21,18 +21,24 @@ const TextSection = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Polls section */}
-      <AdminContentSection />
+      <section className="rounded-xl border border-border bg-muted/20 p-5 space-y-4">
+        <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-primary" />
+          {t("polls")}
+        </h2>
+        <AdminContentSection />
+      </section>
 
-      {/* Separator + Questions to teacher section */}
-      <div className="border-t border-border pt-6 space-y-4">
-        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+      {/* Questions to teacher section */}
+      <section className="rounded-xl border border-border bg-muted/20 p-5 space-y-4">
+        <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-primary" />
           {t("questions_to_teacher")}
         </h2>
         <StudentTeacherChat />
-      </div>
+      </section>
     </div>
   );
 };
