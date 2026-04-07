@@ -26,6 +26,7 @@ const translations: Translations = {
   "saved": { ru: "Сохранено", de: "Gespeichert" },
   "no_content": { ru: "Контент пока не добавлен.", de: "Noch kein Inhalt hinzugefügt." },
   "polls": { ru: "Опросы", de: "Umfragen" },
+  "questions_to_teacher": { ru: "Вопросы учителю", de: "Fragen an den Lehrer" },
   "new_poll": { ru: "Новый опрос", de: "Neue Umfrage" },
   "poll_question_placeholder": { ru: "Вопрос опроса...", de: "Umfragefrage..." },
   "option": { ru: "Вариант", de: "Option" },
