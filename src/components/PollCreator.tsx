@@ -79,7 +79,7 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
 
       // Discord notification
       const optsList = trimmedOpts.map((o, i) => `${i + 1}. ${o}`).join("\n");
-      const msg = `📊 **Новый опрос создан!**\n\n❓ ${trimmedQ}\n\n${optsList}${allowFreeText ? "\n\n✏️ Свободный ответ: включён" : ""}`;
+      const msg = `📊 **Neue Umfrage erstellt!**\n\n❓ ${trimmedQ}\n\n${optsList}${allowFreeText ? "\n\n✏️ Freitextantwort: aktiviert" : ""}`;
       supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
     }
   };
