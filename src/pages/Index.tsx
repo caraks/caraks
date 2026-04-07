@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Type, LogOut, User, Pencil, Globe, HelpCircle } from "lucide-react";
+import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
@@ -55,7 +55,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="pt-10 pb-6 text-center relative">
+      <header className="pt-14 pb-8 text-center relative hero-gradient">
         {/* Language toggle - top left */}
         <div className="absolute top-4 left-4">
           <Button
@@ -63,7 +63,7 @@ const Index = () => {
             size="sm"
             onClick={() => setLang(lang === "de" ? "ru" : "de")}
             title={lang === "de" ? "Auf Russisch wechseln" : "Переключить на немецкий"}
-            className="gap-1.5 text-xs"
+            className="gap-1.5 text-xs backdrop-blur-sm bg-card/60"
           >
             <Globe className="w-4 h-4" />
             {lang === "de" ? "RU" : "DE"}
@@ -74,7 +74,7 @@ const Index = () => {
             <User className="w-4 h-4" />
             <span>{displayName}</span>
             {role && (
-              <span className="text-xs bg-muted px-2 py-0.5 rounded-full capitalize">{role}</span>
+              <span className="text-xs bg-primary/10 text-primary px-2.5 py-0.5 rounded-full capitalize font-medium">{role}</span>
             )}
           </div>
           <Button
@@ -112,27 +112,31 @@ const Index = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        <h1 className="text-4xl font-bold tracking-tight text-foreground">
-          LernPhy
-        </h1>
-        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+
+        <div className="flex items-center justify-center gap-3 mb-3">
+          <Atom className="w-10 h-10 text-primary animate-[spin_8s_linear_infinite]" />
+          <h1 className="text-5xl font-bold tracking-tight text-foreground">
+            LernPhy
+          </h1>
+        </div>
+        <p className="text-base text-muted-foreground mt-3 max-w-lg mx-auto leading-relaxed">
           {t("site_description")}
         </p>
       </header>
 
       {/* Tab Buttons */}
-      <nav className="flex justify-center gap-3 px-4 pb-8">
+      <nav className="flex justify-center gap-3 px-4 py-8">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
-              flex items-center gap-2 px-6 py-3 rounded-full font-medium text-sm transition-all duration-300
+              flex items-center gap-2 px-7 py-3.5 rounded-full font-medium text-sm transition-all duration-300
               font-[var(--font-display)]
               ${
                 activeTab === tab.id
-                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-105"
-                  : "bg-card text-muted-foreground hover:bg-muted border border-border"
+                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105"
+                  : "bg-card text-muted-foreground hover:bg-muted border border-border hover:shadow-md"
               }
             `}
           >
@@ -144,7 +148,7 @@ const Index = () => {
 
       {/* Content */}
       <main className="flex-1 px-4 pb-12 max-w-4xl mx-auto w-full">
-        <div className="bg-card rounded-2xl border border-border shadow-sm p-6 md:p-10 min-h-[400px] animate-fade-in">
+        <div className="bg-card rounded-2xl border border-border shadow-sm hover:shadow-md transition-shadow duration-300 p-6 md:p-10 min-h-[400px] animate-fade-in">
           {activeTab === "text" && <TextSection />}
           {activeTab === "questions" && <QuestionsSection />}
         </div>

@@ -6,33 +6,33 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 25% 10%;
+    --background: 225 25% 96%;
+    --foreground: 225 30% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 225 30% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover-foreground: 225 30% 10%;
 
-    --primary: 220 70% 50%;
+    --primary: 230 75% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 340 65% 55%;
+    --secondary: 280 60% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 15% 92%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 225 20% 92%;
+    --muted-foreground: 225 12% 45%;
 
-    --accent: 160 50% 45%;
+    --accent: 170 55% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 220 70% 50%;
+    --border: 225 15% 88%;
+    --input: 225 15% 88%;
+    --ring: 230 75% 55%;
 
     --radius: 1rem;
 
@@ -47,28 +47,32 @@
 
     --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
+
+    --gradient-hero: linear-gradient(135deg, hsl(230 75% 55% / 0.08), hsl(280 60% 55% / 0.06), hsl(170 55% 42% / 0.05));
   }
 
   .dark {
-    --background: 220 25% 8%;
-    --foreground: 220 15% 95%;
-    --card: 220 25% 12%;
-    --card-foreground: 220 15% 95%;
-    --popover: 220 25% 12%;
-    --popover-foreground: 220 15% 95%;
-    --primary: 220 70% 60%;
+    --background: 225 30% 7%;
+    --foreground: 225 15% 95%;
+    --card: 225 28% 12%;
+    --card-foreground: 225 15% 95%;
+    --popover: 225 28% 12%;
+    --popover-foreground: 225 15% 95%;
+    --primary: 230 75% 62%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 340 65% 60%;
+    --secondary: 280 60% 62%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 220 20% 18%;
-    --muted-foreground: 220 10% 55%;
-    --accent: 160 50% 50%;
+    --muted: 225 22% 18%;
+    --muted-foreground: 225 12% 55%;
+    --accent: 170 55% 48%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 220 20% 20%;
-    --input: 220 20% 20%;
-    --ring: 220 70% 60%;
+    --border: 225 22% 20%;
+    --input: 225 22% 20%;
+    --ring: 230 75% 62%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(230 75% 62% / 0.12), hsl(280 60% 62% / 0.08), hsl(170 55% 48% / 0.06));
   }
 }
 
@@ -84,5 +88,11 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  .hero-gradient {
+    background: var(--gradient-hero);
   }
 }
