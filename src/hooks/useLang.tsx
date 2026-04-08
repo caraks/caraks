@@ -88,6 +88,7 @@ const translations: Translations = {
   "confirm_delete": { ru: "Удалить", de: "Löschen" },
   "cancel": { ru: "Отмена", de: "Abbrechen" },
   "history_cleared": { ru: "История очищена", de: "Verlauf gelöscht" },
+  "deleted": { ru: "Удалено", de: "Gelöscht" },
   "create_quiz_hint": { ru: "Введите тему — AI сгенерирует вопросы для диагностики учеников", de: "Geben Sie ein Thema ein – die KI generiert Diagnosefragen für Schüler" },
   "generated_questions_edit": { ru: "Сгенерированные вопросы (можно отредактировать):", de: "Generierte Fragen (bearbeitbar):" },
   "publish_quiz": { ru: "Опубликовать", de: "Veröffentlichen" },
