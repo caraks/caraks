@@ -97,7 +97,19 @@ const StudentTeacherChat = () => {
             />
           </div>
           {questions.map((q) => (
-            <div key={q.id} className="rounded-lg border border-border bg-background p-3 text-sm text-foreground">
+            <div key={q.id} className="rounded-lg border border-border bg-background p-3 text-sm text-foreground relative group">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                onClick={async () => {
+                  await supabase.from("questions").delete().eq("id", q.id);
+                  fetchQuestions();
+                  toast.success(t("deleted"));
+                }}
+              >
+                <X className="w-3.5 h-3.5" />
+              </Button>
               {q.question_text}
               <p className="text-xs text-muted-foreground mt-1">
                 {new Date(q.created_at).toLocaleString()}
