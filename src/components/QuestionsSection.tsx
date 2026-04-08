@@ -182,7 +182,7 @@ const QuestionsSection = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-foreground font-semibold">Знаешь ли ты?</TableHead>
+                    <TableHead className="text-foreground font-semibold">Weißt du das?</TableHead>
                     <TableHead className="w-[260px] text-center">{t("your_answer")}</TableHead>
                   </TableRow>
                 </TableHeader>
