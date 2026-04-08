@@ -202,7 +202,7 @@ const QuestionsSection = () => {
                             onClick={() => setAnswers((prev) => ({ ...prev, [i]: "yes" }))}
                           >
                             <Check className="w-3 h-3 mr-1" />
-                            Да
+                            Ja
                           </Button>
                           <Button
                             size="sm"
@@ -211,7 +211,7 @@ const QuestionsSection = () => {
                             onClick={() => setAnswers((prev) => ({ ...prev, [i]: "unsure" }))}
                           >
                             <HelpCircle className="w-3 h-3 mr-1" />
-                            Не уверен
+                            Nicht sicher
                           </Button>
                           <Button
                             size="sm"
@@ -220,7 +220,7 @@ const QuestionsSection = () => {
                             onClick={() => setAnswers((prev) => ({ ...prev, [i]: "no" }))}
                           >
                             <X className="w-3 h-3 mr-1" />
-                            Нет
+                            Nein
                           </Button>
                         </div>
                       </TableCell>
@@ -366,9 +366,9 @@ const AiHistory = ({
 };
 
 const ANSWER_LABELS: Record<string, { label: string; color: string }> = {
-  yes: { label: "Да", color: "text-green-600" },
-  unsure: { label: "Не уверен", color: "text-yellow-600" },
-  no: { label: "Нет", color: "text-red-600" },
+  yes: { label: "Ja", color: "text-green-600" },
+  unsure: { label: "Nicht sicher", color: "text-yellow-600" },
+  no: { label: "Nein", color: "text-red-600" },
 };
 
 const AiHistoryItem = ({ q, t }: { q: Question; t: (k: string) => string }) => (
