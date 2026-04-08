@@ -479,38 +479,28 @@ const QuizStats = ({ quiz, t, onClose, onDelete }: { quiz: Quiz; t: (k: string) 
 const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
   const { lang } = useLang();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [myResponses, setMyResponses] = useState<Map<string, Record<string, "yes" | "unsure" | "no">>>(new Map());
   const [loading, setLoading] = useState(true);
   const [localAnswers, setLocalAnswers] = useState<Record<string, Record<number, "yes" | "unsure" | "no">>>({});
-  const [submitting, setSubmitting] = useState<string | null>(null);
   const [generatingTasks, setGeneratingTasks] = useState<string | null>(null);
   const [followUpTasks, setFollowUpTasks] = useState<Record<string, string[][]>>({});
   const [taskDifficulty, setTaskDifficulty] = useState<Record<string, "easy" | "think" | "impossible">>({});
+  const [answeredQuizzes, setAnsweredQuizzes] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data: quizData } = await supabase
         .from("diagnostic_quizzes")
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false });
 
-      const { data: responseData } = await supabase
-        .from("diagnostic_responses")
-        .select("*");
-
       if (quizData) setQuizzes(quizData.map(q => ({ ...q, questions: (q.questions as any) || [] })));
-      if (responseData) {
-        const map = new Map<string, Record<string, "yes" | "unsure" | "no">>();
-        responseData.forEach(r => map.set(r.quiz_id, (r.answers as any) || {}));
-        setMyResponses(map);
-      }
       setLoading(false);
     };
-    fetch();
+    fetchData();
   }, []);
 
-  const generateFollowUpTasks = async (quizId: string, answers: Record<string, "yes" | "unsure" | "no">, previousTasks?: string[], round?: number) => {
+  const generateFollowUpTasks = async (quizId: string, answers: Record<string, "yes" | "unsure" | "no">) => {
     const quiz = quizzes.find(q => q.id === quizId);
     if (!quiz || generatingTasks) return;
 
@@ -522,8 +512,6 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
           answers,
           title: quiz.title,
           lang,
-          previousTasks,
-          round: round || 1,
         },
       });
       if (error) throw error;
@@ -532,14 +520,6 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
           ...prev,
           [quizId]: [...(prev[quizId] ?? []), data.tasks],
         }));
-        // Save tasks to DB so admin can see them
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase.from("diagnostic_responses")
-            .update({ follow_up_tasks: data.tasks } as any)
-            .eq("quiz_id", quizId)
-            .eq("user_id", user.id);
-        }
       } else {
         toast.error(t("task_generation_error"));
       }
@@ -550,43 +530,11 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
     setGeneratingTasks(null);
   };
 
-
-
-  const handleSubmit = async (quizId: string) => {
+  const handleContinue = (quizId: string) => {
     const answers = localAnswers[quizId];
     if (!answers || Object.keys(answers).length === 0) return;
-    setSubmitting(quizId);
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setSubmitting(null); return; }
-
-    const existing = myResponses.has(quizId);
-    let error;
-    if (existing) {
-      ({ error } = await supabase.from("diagnostic_responses").update({ answers: answers as any }).eq("quiz_id", quizId).eq("user_id", user.id));
-    } else {
-      ({ error } = await supabase.from("diagnostic_responses").insert({ quiz_id: quizId, user_id: user.id, answers: answers as any }));
-    }
-
-    setSubmitting(null);
-    if (error) {
-      toast.error(t("save_error"));
-    } else {
-      toast.success(t("answers_sent"));
-      setMyResponses(prev => new Map(prev).set(quizId, answers as any));
-
-      // Generate follow-up tasks via AI
-      generateFollowUpTasks(quizId, answers as any);
-
-      // Discord notification (without showing answers)
-      if (!existing) {
-        const quiz = quizzes.find(q => q.id === quizId);
-        const { data: profile } = await supabase.from("profiles").select("display_name").eq("id", user.id).single();
-        const name = profile?.display_name || user.email || "Schüler";
-        const msg = `✅ **${name}** hat das Quiz «${quiz?.title ?? "Ohne Titel"}» abgeschlossen`;
-        supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
-      }
-    }
+    setAnsweredQuizzes(prev => new Set(prev).add(quizId));
+    generateFollowUpTasks(quizId, answers as any);
   };
 
   if (loading) return <Loader2 className="w-5 h-5 animate-spin text-muted-foreground mx-auto" />;
@@ -595,9 +543,9 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
   return (
     <div className="space-y-4">
       {quizzes.map(quiz => {
-        const savedAnswers = myResponses.get(quiz.id);
-        const currentAnswers = localAnswers[quiz.id] ?? savedAnswers ?? {};
-        const hasSaved = !!savedAnswers;
+        const currentAnswers = localAnswers[quiz.id] ?? {};
+        const allAnswered = quiz.questions.length > 0 && Object.keys(currentAnswers).length === quiz.questions.length;
+        const hasSubmitted = answeredQuizzes.has(quiz.id);
         const taskRounds = followUpTasks[quiz.id] ?? [];
         const isGenerating = generatingTasks === quiz.id;
 
@@ -607,61 +555,68 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
               <Sparkles className="w-4 h-4 text-primary" />
               {quiz.title}
             </h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-foreground font-semibold">{t("question")}</TableHead>
-                  <TableHead className="w-[260px] text-center">{t("your_answer")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {quiz.questions.map((q, i) => (
-                  <TableRow key={i}>
-                    <TableCell className="text-sm">
-                      <span className="font-medium text-primary mr-1.5">{i + 1}.</span>
-                      {q}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1.5 justify-center">
-                        {(["yes", "unsure", "no"] as const).map(val => {
-                          const cfg = getAnswerConfig(t)[val];
-                          const isSelected = currentAnswers[String(i)] === val;
-                          const Icon = val === "yes" ? Check : val === "unsure" ? HelpCircle : X;
-                          return (
-                            <Button
-                              key={val}
-                              size="sm"
-                              variant={isSelected ? "default" : "outline"}
-                              className={`text-xs h-7 px-2.5 ${isSelected ? cfg.color : "text-muted-foreground border-muted"}`}
-                              onClick={() => setLocalAnswers(prev => ({
-                                ...prev,
-                                [quiz.id]: { ...(prev[quiz.id] ?? savedAnswers ?? {}), [i]: val }
-                              }))}
-                            >
-                              <Icon className="w-3 h-3 mr-1" />
-                              {cfg.label}
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <div className="flex justify-end">
-              <Button
-                size="sm"
-                onClick={() => handleSubmit(quiz.id)}
-                disabled={submitting === quiz.id || Object.keys(localAnswers[quiz.id] ?? {}).length === 0}
-              >
-                {submitting === quiz.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
-                {hasSaved ? t("update_answers") : t("send")}
-              </Button>
-            </div>
+
+            {!hasSubmitted && (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-foreground font-semibold">{t("question")}</TableHead>
+                      <TableHead className="w-[260px] text-center">{t("your_answer")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {quiz.questions.map((q, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="text-sm">
+                          <span className="font-medium text-primary mr-1.5">{i + 1}.</span>
+                          {q}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1.5 justify-center">
+                            {(["yes", "unsure", "no"] as const).map(val => {
+                              const cfg = getAnswerConfig(t)[val];
+                              const isSelected = currentAnswers[String(i)] === val;
+                              const Icon = val === "yes" ? Check : val === "unsure" ? HelpCircle : X;
+                              return (
+                                <Button
+                                  key={val}
+                                  size="sm"
+                                  variant={isSelected ? "default" : "outline"}
+                                  className={`text-xs h-7 px-2.5 ${isSelected ? cfg.color : "text-muted-foreground border-muted"}`}
+                                  onClick={() => setLocalAnswers(prev => ({
+                                    ...prev,
+                                    [quiz.id]: { ...(prev[quiz.id] ?? {}), [i]: val }
+                                  }))}
+                                >
+                                  <Icon className="w-3 h-3 mr-1" />
+                                  {cfg.label}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {allAnswered && (
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      onClick={() => handleContinue(quiz.id)}
+                      disabled={isGenerating}
+                    >
+                      {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                      {t("continue")}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
 
             {/* AI-generated follow-up tasks */}
-            {isGenerating && (
+            {isGenerating && hasSubmitted && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2 p-3 rounded-lg border border-border bg-background">
                 <Loader2 className="w-4 h-4 animate-spin text-primary" />
                 {t("generating_tasks")}
@@ -698,19 +653,8 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                               return (
                                 <button
                                   key={level}
-                                  onClick={async () => {
-                                    const newDifficulty = { ...taskDifficulty, [key]: level };
-                                    setTaskDifficulty(newDifficulty);
-                                    const { data: { user } } = await supabase.auth.getUser();
-                                    if (!user) return;
-                                    await supabase.from("task_difficulty_ratings" as any).upsert({
-                                      quiz_id: quiz.id,
-                                      user_id: user.id,
-                                      task_index: globalIndex,
-                                      difficulty: level,
-                                    } as any, { onConflict: "quiz_id,user_id,task_index" });
-
-                                    // No additional rounds - single round only
+                                  onClick={() => {
+                                    setTaskDifficulty(prev => ({ ...prev, [key]: level }));
                                   }}
                                   className={`text-xs px-2.5 py-1 rounded-full border transition-all ${selected ? cfg.cls + " font-semibold ring-1 ring-offset-1 ring-current" : "border-muted text-muted-foreground hover:text-foreground"}`}
                                 >
