@@ -119,6 +119,7 @@ const translations: Translations = {
   "round": { ru: "раунд", de: "Runde" },
   "task_ratings_title": { ru: "Оценки сложности задач", de: "Aufgaben-Schwierigkeitsbewertungen" },
   "task_label": { ru: "Задача", de: "Aufgabe" },
+  "continue": { ru: "Продолжить", de: "Weiter" },
 };
 
 interface LangContextType {
