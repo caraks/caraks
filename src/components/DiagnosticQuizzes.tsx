@@ -558,48 +558,38 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
 
             {!hasSubmitted && (
               <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-foreground font-semibold">{t("question")}</TableHead>
-                      <TableHead className="w-[260px] text-center">{t("your_answer")}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {quiz.questions.map((q, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="text-sm">
-                          <span className="font-medium text-primary mr-1.5">{i + 1}.</span>
-                          {q}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1.5">
-                            {(["yes", "unsure", "no"] as const).map(val => {
-                              const cfg = getAnswerConfig(t)[val];
-                              const isSelected = currentAnswers[String(i)] === val;
-                              const Icon = val === "yes" ? Check : val === "unsure" ? HelpCircle : X;
-                              return (
-                                <Button
-                                  key={val}
-                                  size="sm"
-                                  variant={isSelected ? "default" : "outline"}
-                                  className={`text-xs h-7 px-2.5 ${isSelected ? cfg.color : "text-muted-foreground border-muted"}`}
-                                  onClick={() => setLocalAnswers(prev => ({
-                                    ...prev,
-                                    [quiz.id]: { ...(prev[quiz.id] ?? {}), [i]: val }
-                                  }))}
-                                >
-                                  <Icon className="w-3 h-3 mr-1" />
-                                  {cfg.label}
-                                </Button>
-                              );
-                            })}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="space-y-3">
+                  {quiz.questions.map((q, i) => (
+                    <div key={i} className="rounded-lg border border-border bg-background p-3 space-y-2">
+                      <p className="text-sm text-foreground">
+                        <span className="font-medium text-primary mr-1.5">{i + 1}.</span>
+                        {q}
+                      </p>
+                      <div className="flex flex-col gap-1.5">
+                        {(["yes", "unsure", "no"] as const).map(val => {
+                          const cfg = getAnswerConfig(t)[val];
+                          const isSelected = currentAnswers[String(i)] === val;
+                          const Icon = val === "yes" ? Check : val === "unsure" ? HelpCircle : X;
+                          return (
+                            <Button
+                              key={val}
+                              size="sm"
+                              variant={isSelected ? "default" : "outline"}
+                              className={`text-xs h-8 justify-start ${isSelected ? cfg.color : "text-muted-foreground border-muted"}`}
+                              onClick={() => setLocalAnswers(prev => ({
+                                ...prev,
+                                [quiz.id]: { ...(prev[quiz.id] ?? {}), [i]: val }
+                              }))}
+                            >
+                              <Icon className="w-3.5 h-3.5 mr-1.5" />
+                              {cfg.label}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 {allAnswered && (
                   <div className="flex justify-end">
                     <Button
