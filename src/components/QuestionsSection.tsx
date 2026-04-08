@@ -194,7 +194,7 @@ const QuestionsSection = () => {
                         {q}
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-1.5 justify-center">
+                        <div className="flex flex-col gap-1.5">
                           <Button
                             size="sm"
                             variant={answers[i] === "yes" ? "default" : "outline"}
