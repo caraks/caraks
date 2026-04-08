@@ -33,10 +33,10 @@ const ANSWER_STYLES = {
   no: { color: "bg-red-600 hover:bg-red-700 text-white border-red-600", textColor: "text-red-600" },
 };
 
-const getAnswerConfig = (t: (k: string) => string) => ({
-  yes: { label: t("answer_yes"), ...ANSWER_STYLES.yes },
-  unsure: { label: t("answer_unsure"), ...ANSWER_STYLES.unsure },
-  no: { label: t("answer_no"), ...ANSWER_STYLES.no },
+const getAnswerConfig = () => ({
+  yes: { label: "Ja", ...ANSWER_STYLES.yes },
+  unsure: { label: "Nicht sicher", ...ANSWER_STYLES.unsure },
+  no: { label: "Nein", ...ANSWER_STYLES.no },
 });
 
 const DiagnosticQuizzes = () => {
