@@ -573,7 +573,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                           {q}
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-1.5 justify-center">
+                          <div className="flex flex-col gap-1.5">
                             {(["yes", "unsure", "no"] as const).map(val => {
                               const cfg = getAnswerConfig(t)[val];
                               const isSelected = currentAnswers[String(i)] === val;
