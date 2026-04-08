@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send, MessageSquare, Trash2 } from "lucide-react";
+import { Loader2, Send, MessageSquare, Trash2, X } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useLang } from "@/hooks/useLang";
@@ -97,7 +97,19 @@ const StudentTeacherChat = () => {
             />
           </div>
           {questions.map((q) => (
-            <div key={q.id} className="rounded-lg border border-border bg-background p-3 text-sm text-foreground">
+            <div key={q.id} className="rounded-lg border border-border bg-background p-3 text-sm text-foreground relative group">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                onClick={async () => {
+                  await supabase.from("questions").delete().eq("id", q.id);
+                  fetchQuestions();
+                  toast.success(t("deleted"));
+                }}
+              >
+                <X className="w-3.5 h-3.5" />
+              </Button>
               {q.question_text}
               <p className="text-xs text-muted-foreground mt-1">
                 {new Date(q.created_at).toLocaleString()}
