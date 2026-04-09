@@ -349,7 +349,11 @@ const AiHistory = ({
           {grouped.map(([id, { items }]) => (
             <TabsContent key={id} value={id} className="space-y-2">
               {items.map((q) => (
-                <AiHistoryItem key={q.id} q={q} t={t} />
+                <AiHistoryItem key={q.id} q={q} t={t} onDelete={async () => {
+                  await supabase.from("questions").delete().eq("id", q.id);
+                  onClear();
+                  toast.success(t("deleted"));
+                }} />
               ))}
             </TabsContent>
           ))}
@@ -357,7 +361,11 @@ const AiHistory = ({
       ) : (
         <div className="space-y-2">
           {aiItems.map((q) => (
-            <AiHistoryItem key={q.id} q={q} t={t} />
+            <AiHistoryItem key={q.id} q={q} t={t} onDelete={async () => {
+              await supabase.from("questions").delete().eq("id", q.id);
+              onClear();
+              toast.success(t("deleted"));
+            }} />
           ))}
         </div>
       )}
@@ -371,8 +379,18 @@ const ANSWER_LABELS: Record<string, { label: string; color: string }> = {
   no: { label: "Nein", color: "text-red-600" },
 };
 
-const AiHistoryItem = ({ q, t }: { q: Question; t: (k: string) => string }) => (
-  <div className="rounded-lg border border-border bg-background p-3 space-y-1.5">
+const AiHistoryItem = ({ q, t, onDelete }: { q: Question; t: (k: string) => string; onDelete?: () => Promise<void> }) => (
+  <div className="rounded-lg border border-border bg-background p-3 pr-8 space-y-1.5 relative">
+    {onDelete && (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-1 right-1 h-6 w-6 text-muted-foreground hover:text-destructive"
+        onClick={onDelete}
+      >
+        <X className="w-3.5 h-3.5" />
+      </Button>
+    )}
     <p className="text-sm text-foreground font-medium flex items-center gap-1.5">
       <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
       {q.ai_topic}
