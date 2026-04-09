@@ -121,47 +121,56 @@
 
 .starry-sky::before {
   background-image:
-    radial-gradient(1.5px 1.5px at 10% 15%, hsl(var(--primary) / 0.35) 50%, transparent 50%),
-    radial-gradient(1px 1px at 25% 35%, hsl(var(--primary) / 0.25) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 40% 10%, hsl(var(--secondary) / 0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 55% 45%, hsl(var(--primary) / 0.2) 50%, transparent 50%),
-    radial-gradient(2px 2px at 70% 20%, hsl(var(--accent) / 0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 85% 55%, hsl(var(--primary) / 0.25) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 15% 65%, hsl(var(--secondary) / 0.2) 50%, transparent 50%),
-    radial-gradient(1px 1px at 35% 80%, hsl(var(--primary) / 0.3) 50%, transparent 50%),
-    radial-gradient(2px 2px at 50% 70%, hsl(var(--accent) / 0.25) 50%, transparent 50%),
-    radial-gradient(1px 1px at 65% 90%, hsl(var(--primary) / 0.2) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 80% 75%, hsl(var(--secondary) / 0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 92% 40%, hsl(var(--primary) / 0.25) 50%, transparent 50%),
-    radial-gradient(1px 1px at 5% 50%, hsl(var(--accent) / 0.2) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 48% 25%, hsl(var(--primary) / 0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 75% 60%, hsl(var(--secondary) / 0.2) 50%, transparent 50%);
+    radial-gradient(2px 2px at 10% 15%, hsl(var(--primary) / 0.6) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 25% 35%, hsl(var(--primary) / 0.5) 50%, transparent 50%),
+    radial-gradient(2px 2px at 40% 10%, hsl(var(--secondary) / 0.55) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 55% 45%, hsl(var(--primary) / 0.45) 50%, transparent 50%),
+    radial-gradient(2.5px 2.5px at 70% 20%, hsl(var(--accent) / 0.5) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 85% 55%, hsl(var(--primary) / 0.5) 50%, transparent 50%),
+    radial-gradient(2px 2px at 15% 65%, hsl(var(--secondary) / 0.45) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 35% 80%, hsl(var(--primary) / 0.55) 50%, transparent 50%),
+    radial-gradient(2.5px 2.5px at 50% 70%, hsl(var(--accent) / 0.5) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 65% 90%, hsl(var(--primary) / 0.45) 50%, transparent 50%),
+    radial-gradient(2px 2px at 80% 75%, hsl(var(--secondary) / 0.55) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 92% 40%, hsl(var(--primary) / 0.5) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 5% 50%, hsl(var(--accent) / 0.45) 50%, transparent 50%),
+    radial-gradient(2px 2px at 48% 25%, hsl(var(--primary) / 0.55) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 75% 60%, hsl(var(--secondary) / 0.45) 50%, transparent 50%),
+    radial-gradient(2px 2px at 3% 92%, hsl(var(--primary) / 0.5) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 18% 5%, hsl(var(--accent) / 0.5) 50%, transparent 50%),
+    radial-gradient(2px 2px at 62% 55%, hsl(var(--secondary) / 0.45) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 95% 85%, hsl(var(--primary) / 0.5) 50%, transparent 50%),
+    radial-gradient(2.5px 2.5px at 30% 50%, hsl(var(--accent) / 0.55) 50%, transparent 50%);
   animation: twinkle1 4s ease-in-out infinite alternate;
 }
 
 .starry-sky::after {
   background-image:
-    radial-gradient(1px 1px at 8% 28%, hsl(var(--primary) / 0.2) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 22% 52%, hsl(var(--accent) / 0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 38% 42%, hsl(var(--primary) / 0.25) 50%, transparent 50%),
-    radial-gradient(2px 2px at 52% 18%, hsl(var(--secondary) / 0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 68% 72%, hsl(var(--primary) / 0.2) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 82% 32%, hsl(var(--accent) / 0.25) 50%, transparent 50%),
-    radial-gradient(1px 1px at 18% 88%, hsl(var(--secondary) / 0.2) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 42% 62%, hsl(var(--primary) / 0.3) 50%, transparent 50%),
-    radial-gradient(1px 1px at 58% 38%, hsl(var(--accent) / 0.2) 50%, transparent 50%),
-    radial-gradient(2px 2px at 72% 48%, hsl(var(--primary) / 0.25) 50%, transparent 50%),
-    radial-gradient(1px 1px at 88% 82%, hsl(var(--secondary) / 0.3) 50%, transparent 50%),
-    radial-gradient(1.5px 1.5px at 32% 12%, hsl(var(--primary) / 0.2) 50%, transparent 50%);
+    radial-gradient(1.5px 1.5px at 8% 28%, hsl(var(--primary) / 0.45) 50%, transparent 50%),
+    radial-gradient(2px 2px at 22% 52%, hsl(var(--accent) / 0.55) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 38% 42%, hsl(var(--primary) / 0.5) 50%, transparent 50%),
+    radial-gradient(2.5px 2.5px at 52% 18%, hsl(var(--secondary) / 0.55) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 68% 72%, hsl(var(--primary) / 0.45) 50%, transparent 50%),
+    radial-gradient(2px 2px at 82% 32%, hsl(var(--accent) / 0.5) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 18% 88%, hsl(var(--secondary) / 0.45) 50%, transparent 50%),
+    radial-gradient(2px 2px at 42% 62%, hsl(var(--primary) / 0.55) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 58% 38%, hsl(var(--accent) / 0.45) 50%, transparent 50%),
+    radial-gradient(2.5px 2.5px at 72% 48%, hsl(var(--primary) / 0.5) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 88% 82%, hsl(var(--secondary) / 0.55) 50%, transparent 50%),
+    radial-gradient(2px 2px at 32% 12%, hsl(var(--primary) / 0.45) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 45% 95%, hsl(var(--accent) / 0.5) 50%, transparent 50%),
+    radial-gradient(2px 2px at 78% 8%, hsl(var(--secondary) / 0.5) 50%, transparent 50%),
+    radial-gradient(1.5px 1.5px at 12% 42%, hsl(var(--primary) / 0.45) 50%, transparent 50%),
+    radial-gradient(2px 2px at 90% 65%, hsl(var(--accent) / 0.55) 50%, transparent 50%);
   animation: twinkle2 5s ease-in-out infinite alternate;
 }
 
 @keyframes twinkle1 {
-  0% { opacity: 0.4; }
+  0% { opacity: 0.5; }
   100% { opacity: 1; }
 }
 
 @keyframes twinkle2 {
   0% { opacity: 1; }
-  100% { opacity: 0.3; }
+  100% { opacity: 0.4; }
 }
