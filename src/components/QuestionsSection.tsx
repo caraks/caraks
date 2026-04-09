@@ -40,6 +40,13 @@ const QuestionsSection = () => {
   const [submittingAnswers, setSubmittingAnswers] = useState(false);
   const [lastGeneratedQuestionId, setLastGeneratedQuestionId] = useState<string | null>(null);
 
+  // Round 2
+  const [round, setRound] = useState(1);
+  const [round1Questions, setRound1Questions] = useState<string[]>([]);
+  const [round1Answers, setRound1Answers] = useState<Record<number, "yes" | "unsure" | "no">>({});
+  const [round2Questions, setRound2Questions] = useState<string[]>([]);
+  const [round2Answers, setRound2Answers] = useState<Record<number, "yes" | "unsure" | "no">>({});
+
   const fetchQuestions = async () => {
     const { data, error } = await supabase
       .from("questions")
@@ -94,6 +101,11 @@ const QuestionsSection = () => {
     setGenerating(true);
     setAiQuestions([]);
     setAnswers({});
+    setRound(1);
+    setRound1Questions([]);
+    setRound1Answers({});
+    setRound2Questions([]);
+    setRound2Answers({});
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-questions", {
@@ -103,6 +115,7 @@ const QuestionsSection = () => {
       if (error) throw error;
       if (data?.questions) {
         setAiQuestions(data.questions);
+        setRound1Questions(data.questions);
         // Save AI interaction to DB
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -115,6 +128,34 @@ const QuestionsSection = () => {
           if (inserted) setLastGeneratedQuestionId(inserted.id);
           fetchQuestions();
         }
+      } else {
+        toast.error(t("ai_error"));
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error(t("ai_error"));
+    }
+    setGenerating(false);
+  };
+
+  const handleStartRound2 = async () => {
+    setGenerating(true);
+    setRound1Answers({ ...answers });
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-questions", {
+        body: {
+          topic: topic.trim(),
+          previousQuestions: round1Questions,
+          previousAnswers: answers,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.questions) {
+        setRound2Questions(data.questions);
+        setAiQuestions(data.questions);
+        setAnswers({});
+        setRound(2);
       } else {
         toast.error(t("ai_error"));
       }
@@ -179,6 +220,16 @@ const QuestionsSection = () => {
           </div>
           {aiQuestions.length > 0 && (
             <div className="mt-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                  Runde {round}/2
+                </span>
+                {round === 2 && (
+                  <span className="text-xs text-muted-foreground">
+                    (Fragen basierend auf deinen vorherigen Antworten)
+                  </span>
+                )}
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -228,15 +279,27 @@ const QuestionsSection = () => {
                   ))}
                 </TableBody>
               </Table>
-              <div className="flex justify-end mt-3">
-                <Button
-                  size="sm"
-                  onClick={handleSubmitAnswers}
-                  disabled={submittingAnswers || Object.keys(answers).length === 0}
-                >
-                  {submittingAnswers ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
-                  {t("send")}
-                </Button>
+              <div className="flex justify-end mt-3 gap-2">
+                {round === 1 && Object.keys(answers).length === aiQuestions.length && (
+                  <Button
+                    size="sm"
+                    onClick={handleStartRound2}
+                    disabled={generating}
+                  >
+                    {generating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                    Weiter (Runde 2)
+                  </Button>
+                )}
+                {round === 2 && Object.keys(answers).length === aiQuestions.length && (
+                  <Button
+                    size="sm"
+                    onClick={handleSubmitAnswers}
+                    disabled={submittingAnswers || Object.keys(answers).length === 0}
+                  >
+                    {submittingAnswers ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
+                    {t("send")}
+                  </Button>
+                )}
               </div>
             </div>
           )}
