@@ -53,7 +53,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background starry-sky">
       {/* Header */}
       <header className="pt-14 pb-8 text-center relative hero-gradient">
         {/* Language toggle - top left */}
