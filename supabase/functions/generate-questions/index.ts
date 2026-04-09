@@ -20,7 +20,7 @@ serve(async (req) => {
   }
 
   try {
-    const { topic, lang } = await req.json();
+    const { topic, lang, previousQuestions, previousAnswers } = await req.json();
     if (!topic || typeof topic !== "string") {
       return new Response(JSON.stringify({ error: "Topic is required" }), {
         status: 400,
@@ -29,6 +29,17 @@ serve(async (req) => {
     }
 
     const langInstruction = LANG_INSTRUCTIONS[lang] || LANG_INSTRUCTIONS["de"];
+
+    // Build context from previous rounds if available
+    let previousContext = "";
+    if (previousQuestions && previousAnswers && Array.isArray(previousQuestions) && previousQuestions.length > 0) {
+      const summary = previousQuestions.map((q: string, i: number) => {
+        const ans = previousAnswers[String(i)] || previousAnswers[i];
+        const label = ans === "yes" ? "Ja (weiß)" : ans === "unsure" ? "Nicht sicher" : "Nein (weiß nicht)";
+        return `${i + 1}. ${q} → ${label}`;
+      }).join("\n");
+      previousContext = `\n\nDer Schüler hat bereits folgende Fragen beantwortet:\n${summary}\n\nGeneriere nun 5 NEUE, ANDERE Fragen zum gleichen Thema, die gezielt die Wissenslücken des Schülers besser aufdecken. Berücksichtige seine bisherigen Antworten: stelle schwierigere Fragen zu Bereichen, die er kennt, und einfachere/detailliertere Fragen zu Bereichen, bei denen er unsicher war oder die er nicht kannte. Wiederhole KEINE der vorherigen Fragen.`;
+    }
 
     const MISTRAL_API_KEY = Deno.env.get("MISTRAL_API_KEY");
     if (!MISTRAL_API_KEY) {
