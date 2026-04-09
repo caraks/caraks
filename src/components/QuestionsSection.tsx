@@ -101,6 +101,11 @@ const QuestionsSection = () => {
     setGenerating(true);
     setAiQuestions([]);
     setAnswers({});
+    setRound(1);
+    setRound1Questions([]);
+    setRound1Answers({});
+    setRound2Questions([]);
+    setRound2Answers({});
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-questions", {
@@ -110,6 +115,7 @@ const QuestionsSection = () => {
       if (error) throw error;
       if (data?.questions) {
         setAiQuestions(data.questions);
+        setRound1Questions(data.questions);
         // Save AI interaction to DB
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -122,6 +128,34 @@ const QuestionsSection = () => {
           if (inserted) setLastGeneratedQuestionId(inserted.id);
           fetchQuestions();
         }
+      } else {
+        toast.error(t("ai_error"));
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error(t("ai_error"));
+    }
+    setGenerating(false);
+  };
+
+  const handleStartRound2 = async () => {
+    setGenerating(true);
+    setRound1Answers({ ...answers });
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-questions", {
+        body: {
+          topic: topic.trim(),
+          previousQuestions: round1Questions,
+          previousAnswers: answers,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.questions) {
+        setRound2Questions(data.questions);
+        setAiQuestions(data.questions);
+        setAnswers({});
+        setRound(2);
       } else {
         toast.error(t("ai_error"));
       }
