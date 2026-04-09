@@ -100,6 +100,31 @@
 /* Starry sky background */
 .starry-sky {
   position: relative;
+  background:
+    linear-gradient(
+      160deg,
+      transparent 0%,
+      transparent 30%,
+      hsl(230 60% 25% / 0.15) 38%,
+      hsl(250 50% 35% / 0.2) 42%,
+      hsl(270 40% 40% / 0.18) 46%,
+      hsl(230 50% 30% / 0.22) 50%,
+      hsl(210 60% 35% / 0.18) 54%,
+      hsl(240 50% 30% / 0.15) 58%,
+      transparent 66%,
+      transparent 100%
+    ),
+    linear-gradient(
+      160deg,
+      transparent 0%,
+      transparent 35%,
+      hsl(220 50% 50% / 0.08) 43%,
+      hsl(260 40% 50% / 0.1) 50%,
+      hsl(220 50% 50% / 0.08) 57%,
+      transparent 65%,
+      transparent 100%
+    ),
+    hsl(var(--background));
 }
 
 .starry-sky > * {
