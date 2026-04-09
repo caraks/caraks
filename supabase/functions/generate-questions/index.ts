@@ -77,7 +77,7 @@ serve(async (req) => {
         top_p: 1,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: `${systemPrompt}\n\n${langInstruction}` },
+          { role: "system", content: `${systemPrompt}\n\n${langInstruction}${previousContext}` },
           { role: "user", content: topic },
         ],
       }),
