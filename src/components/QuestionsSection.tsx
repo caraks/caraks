@@ -349,7 +349,11 @@ const AiHistory = ({
           {grouped.map(([id, { items }]) => (
             <TabsContent key={id} value={id} className="space-y-2">
               {items.map((q) => (
-                <AiHistoryItem key={q.id} q={q} t={t} />
+                <AiHistoryItem key={q.id} q={q} t={t} onDelete={async () => {
+                  await supabase.from("questions").delete().eq("id", q.id);
+                  onClear();
+                  toast.success(t("deleted"));
+                }} />
               ))}
             </TabsContent>
           ))}
@@ -357,7 +361,11 @@ const AiHistory = ({
       ) : (
         <div className="space-y-2">
           {aiItems.map((q) => (
-            <AiHistoryItem key={q.id} q={q} t={t} />
+            <AiHistoryItem key={q.id} q={q} t={t} onDelete={async () => {
+              await supabase.from("questions").delete().eq("id", q.id);
+              onClear();
+              toast.success(t("deleted"));
+            }} />
           ))}
         </div>
       )}
