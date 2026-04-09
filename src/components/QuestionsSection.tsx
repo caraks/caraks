@@ -40,6 +40,13 @@ const QuestionsSection = () => {
   const [submittingAnswers, setSubmittingAnswers] = useState(false);
   const [lastGeneratedQuestionId, setLastGeneratedQuestionId] = useState<string | null>(null);
 
+  // Round 2
+  const [round, setRound] = useState(1);
+  const [round1Questions, setRound1Questions] = useState<string[]>([]);
+  const [round1Answers, setRound1Answers] = useState<Record<number, "yes" | "unsure" | "no">>({});
+  const [round2Questions, setRound2Questions] = useState<string[]>([]);
+  const [round2Answers, setRound2Answers] = useState<Record<number, "yes" | "unsure" | "no">>({});
+
   const fetchQuestions = async () => {
     const { data, error } = await supabase
       .from("questions")
