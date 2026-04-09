@@ -220,6 +220,16 @@ const QuestionsSection = () => {
           </div>
           {aiQuestions.length > 0 && (
             <div className="mt-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                  Runde {round}/2
+                </span>
+                {round === 2 && (
+                  <span className="text-xs text-muted-foreground">
+                    (Fragen basierend auf deinen vorherigen Antworten)
+                  </span>
+                )}
+              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -269,15 +279,27 @@ const QuestionsSection = () => {
                   ))}
                 </TableBody>
               </Table>
-              <div className="flex justify-end mt-3">
-                <Button
-                  size="sm"
-                  onClick={handleSubmitAnswers}
-                  disabled={submittingAnswers || Object.keys(answers).length === 0}
-                >
-                  {submittingAnswers ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
-                  {t("send")}
-                </Button>
+              <div className="flex justify-end mt-3 gap-2">
+                {round === 1 && Object.keys(answers).length === aiQuestions.length && (
+                  <Button
+                    size="sm"
+                    onClick={handleStartRound2}
+                    disabled={generating}
+                  >
+                    {generating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                    Weiter (Runde 2)
+                  </Button>
+                )}
+                {round === 2 && Object.keys(answers).length === aiQuestions.length && (
+                  <Button
+                    size="sm"
+                    onClick={handleSubmitAnswers}
+                    disabled={submittingAnswers || Object.keys(answers).length === 0}
+                  >
+                    {submittingAnswers ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
+                    {t("send")}
+                  </Button>
+                )}
               </div>
             </div>
           )}
