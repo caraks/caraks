@@ -100,7 +100,11 @@
 /* Starry sky background */
 .starry-sky {
   position: relative;
-  overflow: hidden;
+}
+
+.starry-sky > * {
+  position: relative;
+  z-index: 1;
 }
 
 .starry-sky::before,
