@@ -12,7 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { topic, lecture, count } = await req.json();
+    const { topic, lecture, count, language } = await req.json();
+    const langCode = (language === "de" || language === "en" || language === "ru") ? language : "ru";
+    const langName = langCode === "de" ? "немецком" : langCode === "en" ? "английском" : "русском";
     if (!topic) {
       return new Response(JSON.stringify({ error: "topic is required" }), {
         status: 400,
@@ -32,7 +34,7 @@ serve(async (req) => {
 - Должны опираться на материал лекции (если он передан)
 - Быть конкретными, с числами/примерами, чтобы их можно было решить
 - Идти от простого к сложному
-- Быть на русском языке
+- Быть написаны на ${langName} языке
 
 Выдавай ответ строго в JSON: {"tasks": ["задание1", "задание2", ...]}`;
 

@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/hooks/useLang";
 
+type GenLang = "ru" | "de" | "en";
+
 const LessonSection = () => {
   const { t } = useLang();
   const [topic, setTopic] = useState("");
@@ -18,6 +20,14 @@ const LessonSection = () => {
   const [generatingTasks, setGeneratingTasks] = useState(false);
   const [savingLecture, setSavingLecture] = useState(false);
   const [previewLecture, setPreviewLecture] = useState(false);
+  const [genLang, setGenLang] = useState<GenLang>(() => {
+    const stored = typeof window !== "undefined" ? localStorage.getItem("gen_lang") : null;
+    return (stored as GenLang) || "ru";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("gen_lang", genLang);
+  }, [genLang]);
 
   // Load existing lesson content (so admin sees what students see)
   useEffect(() => {
@@ -60,7 +70,7 @@ const LessonSection = () => {
     setGeneratingLecture(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lecture", {
-        body: { topic: topicTrim },
+        body: { topic: topicTrim, language: genLang },
       });
       if (error) throw error;
       if (data?.lecture) {
@@ -85,7 +95,7 @@ const LessonSection = () => {
     setGeneratingTasks(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lesson-tasks", {
-        body: { topic: topicTrim, lecture, count: 5 },
+        body: { topic: topicTrim, lecture, count: 5, language: genLang },
       });
       if (error) throw error;
       if (Array.isArray(data?.tasks)) {
@@ -147,10 +157,30 @@ const LessonSection = () => {
     <div className="space-y-6">
       {/* 1. Topic */}
       <section className="space-y-2">
-        <label className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-primary" />
-          {t("lesson_topic")}
-        </label>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-primary" />
+            {t("lesson_topic")}
+          </label>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">{t("generation_language")}:</span>
+            <div className="flex items-center gap-1 rounded-full bg-muted p-1">
+              {(["ru", "de", "en"] as GenLang[]).map((lng) => (
+                <button
+                  key={lng}
+                  onClick={() => setGenLang(lng)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    genLang === lng
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {lng.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
         <div className="flex gap-2">
           <Input
             value={topic}

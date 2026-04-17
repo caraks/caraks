@@ -13,7 +13,9 @@ serve(async (req) => {
   }
 
   try {
-    const { pollQuestion, quizQuestions, options, freeTextAnswers, topic } = await req.json();
+    const { pollQuestion, quizQuestions, options, freeTextAnswers, topic, language } = await req.json();
+    const langCode = (language === "de" || language === "en" || language === "ru") ? language : "ru";
+    const langName = langCode === "de" ? "немецком" : langCode === "en" ? "английском" : "русском";
 
     const subject = topic || pollQuestion;
     if (!subject) {
@@ -56,7 +58,7 @@ serve(async (req) => {
 - Быть структурированным с заголовками (markdown) и пунктами
 - Содержать определения, примеры и пояснения
 - Если есть результаты диагностики — учитывай слабые места учеников
-- Быть на русском языке, в формате Markdown`;
+- Быть написан на ${langName} языке, в формате Markdown`;
 
     const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
       method: "POST",
