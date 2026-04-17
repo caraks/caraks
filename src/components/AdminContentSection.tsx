@@ -8,7 +8,7 @@ import ReactMarkdown from "react-markdown";
 import PollCreator from "@/components/PollCreator";
 import PollList from "@/components/PollList";
 
-const AdminContentSection = () => {
+const AdminContentSection = ({ showLesson = true, showPolls = true }: { showLesson?: boolean; showPolls?: boolean } = {}) => {
   const { isAdmin, loading: roleLoading } = useUserRole();
   const { t } = useLang();
   const [content, setContent] = useState("");
@@ -129,7 +129,7 @@ const AdminContentSection = () => {
 
   return (
     <div className="space-y-6">
-      {isAdmin && (
+      {isAdmin && showLesson && (
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-foreground">
             {t("edit_content")}
@@ -175,32 +175,34 @@ const AdminContentSection = () => {
         </div>
       )}
 
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-foreground">{t("polls")}</h2>
-        {isAdmin && <PollCreator onCreated={() => setPollRefresh((k) => k + 1)} />}
-        <PollList refreshKey={pollRefresh} isAdmin={isAdmin} />
-        {isAdmin && closedQuizzes.length > 0 && (
-          <div className="flex items-center gap-3 flex-wrap">
-            <select
-              value={selectedQuizId}
-              onChange={(e) => setSelectedQuizId(e.target.value)}
-              className="rounded-xl border border-border bg-muted/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-            >
-              {closedQuizzes.map((q) => (
-                <option key={q.id} value={q.id}>{q.title}</option>
-              ))}
-            </select>
-            <button
-              onClick={handleGenerateLecture}
-              disabled={generating || !selectedQuizId}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookOpen className="w-4 h-4" />}
-              {generating ? "Генерация..." : "Сгенерировать конспект"}
-            </button>
-          </div>
-        )}
-      </div>
+      {showPolls && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-foreground">{t("polls")}</h2>
+          {isAdmin && <PollCreator onCreated={() => setPollRefresh((k) => k + 1)} />}
+          <PollList refreshKey={pollRefresh} isAdmin={isAdmin} />
+          {isAdmin && closedQuizzes.length > 0 && (
+            <div className="flex items-center gap-3 flex-wrap">
+              <select
+                value={selectedQuizId}
+                onChange={(e) => setSelectedQuizId(e.target.value)}
+                className="rounded-xl border border-border bg-muted/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+              >
+                {closedQuizzes.map((q) => (
+                  <option key={q.id} value={q.id}>{q.title}</option>
+                ))}
+              </select>
+              <button
+                onClick={handleGenerateLecture}
+                disabled={generating || !selectedQuizId}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent text-accent-foreground font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <BookOpen className="w-4 h-4" />}
+                {generating ? "Генерация..." : "Сгенерировать конспект"}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
