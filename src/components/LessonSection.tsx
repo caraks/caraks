@@ -157,10 +157,30 @@ const LessonSection = () => {
     <div className="space-y-6">
       {/* 1. Topic */}
       <section className="space-y-2">
-        <label className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-primary" />
-          {t("lesson_topic")}
-        </label>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-primary" />
+            {t("lesson_topic")}
+          </label>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">{t("generation_language")}:</span>
+            <div className="flex items-center gap-1 rounded-full bg-muted p-1">
+              {(["ru", "de", "en"] as GenLang[]).map((lng) => (
+                <button
+                  key={lng}
+                  onClick={() => setGenLang(lng)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    genLang === lng
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {lng.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
         <div className="flex gap-2">
           <Input
             value={topic}
