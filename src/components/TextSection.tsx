@@ -1,4 +1,5 @@
 import AdminContentSection from "@/components/AdminContentSection";
+import DiagnosticQuizzes from "@/components/DiagnosticQuizzes";
 import StudentTeacherChat from "@/components/StudentTeacherChat";
 import AdminStudentQuestions from "@/components/AdminStudentQuestions";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -12,6 +13,8 @@ const TextSection = () => {
   if (isAdmin) {
     return (
       <div className="space-y-6">
+        <AdminContentSection />
+        <DiagnosticQuizzes />
         <AdminStudentQuestions />
       </div>
     );
