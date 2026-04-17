@@ -95,7 +95,7 @@ const LessonSection = () => {
     setGeneratingTasks(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lesson-tasks", {
-        body: { topic: topicTrim, lecture, count: 5 },
+        body: { topic: topicTrim, lecture, count: 5, language: genLang },
       });
       if (error) throw error;
       if (Array.isArray(data?.tasks)) {
