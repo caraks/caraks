@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/hooks/useLang";
 
+type GenLang = "ru" | "de" | "en";
+
 const LessonSection = () => {
   const { t } = useLang();
   const [topic, setTopic] = useState("");
@@ -18,6 +20,14 @@ const LessonSection = () => {
   const [generatingTasks, setGeneratingTasks] = useState(false);
   const [savingLecture, setSavingLecture] = useState(false);
   const [previewLecture, setPreviewLecture] = useState(false);
+  const [genLang, setGenLang] = useState<GenLang>(() => {
+    const stored = typeof window !== "undefined" ? localStorage.getItem("gen_lang") : null;
+    return (stored as GenLang) || "ru";
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("gen_lang", genLang);
+  }, [genLang]);
 
   // Load existing lesson content (so admin sees what students see)
   useEffect(() => {
