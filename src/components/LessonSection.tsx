@@ -52,51 +52,51 @@ const LessonSection = () => {
   }, []);
 
   const handleGenerateLecture = async () => {
-    const t = topic.trim();
-    if (!t) {
-      toast.error("Введите тему занятия");
+    const topicTrim = topic.trim();
+    if (!topicTrim) {
+      toast.error(t("enter_topic_first"));
       return;
     }
     setGeneratingLecture(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lecture", {
-        body: { topic: t },
+        body: { topic: topicTrim },
       });
       if (error) throw error;
       if (data?.lecture) {
         setLecture(data.lecture);
-        toast.success("Лекция сгенерирована");
+        toast.success(t("lecture_generated"));
       } else {
-        toast.error("Не удалось сгенерировать лекцию");
+        toast.error(t("lecture_generation_error"));
       }
     } catch (e) {
       console.error(e);
-      toast.error("Ошибка генерации лекции");
+      toast.error(t("lecture_generation_error"));
     }
     setGeneratingLecture(false);
   };
 
   const handleGenerateTasks = async () => {
-    const t = topic.trim();
-    if (!t) {
-      toast.error("Введите тему занятия");
+    const topicTrim = topic.trim();
+    if (!topicTrim) {
+      toast.error(t("enter_topic_first"));
       return;
     }
     setGeneratingTasks(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lesson-tasks", {
-        body: { topic: t, lecture, count: 5 },
+        body: { topic: topicTrim, lecture, count: 5 },
       });
       if (error) throw error;
       if (Array.isArray(data?.tasks)) {
         setTasks(data.tasks);
-        toast.success("Задания сгенерированы");
+        toast.success(t("tasks_generated"));
       } else {
-        toast.error("Не удалось сгенерировать задания");
+        toast.error(t("tasks_generation_error"));
       }
     } catch (e) {
       console.error(e);
-      toast.error("Ошибка генерации заданий");
+      toast.error(t("tasks_generation_error"));
     }
     setGeneratingTasks(false);
   };
