@@ -13,10 +13,11 @@ serve(async (req) => {
   }
 
   try {
-    const { pollQuestion, quizQuestions, options, freeTextAnswers } = await req.json();
+    const { pollQuestion, quizQuestions, options, freeTextAnswers, topic } = await req.json();
 
-    if (!pollQuestion) {
-      return new Response(JSON.stringify({ error: "pollQuestion is required" }), {
+    const subject = topic || pollQuestion;
+    if (!subject) {
+      return new Response(JSON.stringify({ error: "topic is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -27,17 +28,16 @@ serve(async (req) => {
       throw new Error("MISTRAL_API_KEY is not configured");
     }
 
-    // Build a summary based on quiz questions + student answers
-    let resultsSummary = `Тема: "${pollQuestion}"\n\n`;
+    let resultsSummary = `Тема: "${subject}"\n\n`;
 
-    if (quizQuestions && Array.isArray(quizQuestions)) {
+    if (quizQuestions && Array.isArray(quizQuestions) && quizQuestions.length > 0) {
       resultsSummary += `Результаты диагностики учеников:\n`;
       for (const q of quizQuestions) {
         resultsSummary += `- "${q.question}": Да — ${q.yes}, Не уверен — ${q.not_sure}, Нет — ${q.no}\n`;
       }
     }
 
-    if (options && Array.isArray(options)) {
+    if (options && Array.isArray(options) && options.length > 0) {
       resultsSummary += `\nРезультаты голосования:\n`;
       for (const opt of options) {
         resultsSummary += `- "${opt.text}": ${opt.count} голосов\n`;
@@ -50,13 +50,13 @@ serve(async (req) => {
       }
     }
 
-    const systemPrompt = `Ты опытный учитель. На основе темы и результатов диагностики учеников создай подробный, структурированный конспект лекции.
+    const systemPrompt = `Ты опытный учитель. Создай подробный, структурированный конспект лекции по заданной теме.
 Конспект должен:
-- Раскрывать тему, указанную в заголовке
-- Уделять больше внимания вопросам, на которые ученики ответили "Нет" или "Не уверен"
-- Быть структурированным с заголовками и пунктами
-- Содержать примеры и пояснения
-- Быть на русском языке`;
+- Полностью раскрывать тему
+- Быть структурированным с заголовками (markdown) и пунктами
+- Содержать определения, примеры и пояснения
+- Если есть результаты диагностики — учитывай слабые места учеников
+- Быть на русском языке, в формате Markdown`;
 
     const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
       method: "POST",
