@@ -217,8 +217,30 @@ const LessonSection = () => {
           </div>
         </div>
         {previewLecture ? (
-          <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[240px] max-h-[500px] overflow-y-auto text-foreground prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground break-words [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words">
-            {lecture ? <ReactMarkdown>{lecture}</ReactMarkdown> : <p className="text-muted-foreground text-sm">{t("lecture_empty")}</p>}
+          <div className="relative rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-8 min-h-[240px] max-h-[600px] overflow-y-auto shadow-lg shadow-primary/5">
+            <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+            {lecture ? (
+              <article className="prose prose-sm md:prose-base max-w-none dark:prose-invert break-words
+                prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-foreground
+                prose-h1:text-3xl prose-h1:bg-gradient-to-r prose-h1:from-primary prose-h1:to-accent prose-h1:bg-clip-text prose-h1:text-transparent prose-h1:mb-6 prose-h1:pb-3 prose-h1:border-b prose-h1:border-primary/20
+                prose-h2:text-2xl prose-h2:text-primary prose-h2:mt-8 prose-h2:mb-4 prose-h2:flex prose-h2:items-center prose-h2:before:content-[''] prose-h2:before:inline-block prose-h2:before:w-1 prose-h2:before:h-6 prose-h2:before:bg-gradient-to-b prose-h2:before:from-primary prose-h2:before:to-accent prose-h2:before:rounded-full prose-h2:before:mr-3
+                prose-h3:text-xl prose-h3:text-foreground/90 prose-h3:mt-6 prose-h3:mb-3
+                prose-p:text-foreground/85 prose-p:leading-relaxed prose-p:my-4
+                prose-strong:text-primary prose-strong:font-semibold
+                prose-em:text-accent-foreground prose-em:not-italic prose-em:bg-accent/20 prose-em:px-1 prose-em:rounded
+                prose-a:text-primary prose-a:no-underline prose-a:font-medium hover:prose-a:underline prose-a:underline-offset-4
+                prose-ul:my-4 prose-ol:my-4 prose-li:text-foreground/85 prose-li:my-1.5 prose-li:marker:text-primary
+                prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-blockquote:not-italic prose-blockquote:text-foreground/90 prose-blockquote:font-normal
+                prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium prose-code:before:content-none prose-code:after:content-none
+                prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded-xl prose-pre:shadow-inner [&_pre_code]:bg-transparent [&_pre_code]:text-foreground [&_pre]:whitespace-pre-wrap [&_pre]:break-words
+                prose-hr:border-primary/20 prose-hr:my-8
+                prose-table:rounded-lg prose-table:overflow-hidden prose-thead:bg-primary/10 prose-th:text-primary prose-th:font-semibold prose-td:border-border prose-tr:border-border
+                prose-img:rounded-xl prose-img:shadow-md">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{lecture}</ReactMarkdown>
+              </article>
+            ) : (
+              <p className="text-muted-foreground text-sm italic text-center py-8">{t("lecture_empty")}</p>
+            )}
           </div>
         ) : (
           <Textarea
