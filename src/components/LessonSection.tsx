@@ -216,7 +216,7 @@ const LessonSection = () => {
           </div>
         </div>
         {previewLecture ? (
-          <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[240px] text-foreground prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+          <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[240px] max-h-[500px] overflow-y-auto text-foreground prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground break-words [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words">
             {lecture ? <ReactMarkdown>{lecture}</ReactMarkdown> : <p className="text-muted-foreground text-sm">{t("lecture_empty")}</p>}
           </div>
         ) : (
@@ -224,7 +224,7 @@ const LessonSection = () => {
             value={lecture}
             onChange={(e) => setLecture(e.target.value)}
             placeholder={t("lecture_placeholder")}
-            className="min-h-[240px] font-mono text-sm bg-muted/50"
+            className="min-h-[240px] max-h-[500px] overflow-y-auto font-mono text-sm bg-muted/50 whitespace-pre-wrap break-words"
           />
         )}
       </section>
