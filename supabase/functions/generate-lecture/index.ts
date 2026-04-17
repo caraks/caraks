@@ -13,7 +13,9 @@ serve(async (req) => {
   }
 
   try {
-    const { pollQuestion, quizQuestions, options, freeTextAnswers, topic } = await req.json();
+    const { pollQuestion, quizQuestions, options, freeTextAnswers, topic, language } = await req.json();
+    const langCode = (language === "de" || language === "en" || language === "ru") ? language : "ru";
+    const langName = langCode === "de" ? "немецком" : langCode === "en" ? "английском" : "русском";
 
     const subject = topic || pollQuestion;
     if (!subject) {
