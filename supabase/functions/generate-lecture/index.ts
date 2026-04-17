@@ -58,7 +58,7 @@ serve(async (req) => {
 - Быть структурированным с заголовками (markdown) и пунктами
 - Содержать определения, примеры и пояснения
 - Если есть результаты диагностики — учитывай слабые места учеников
-- Быть на русском языке, в формате Markdown`;
+- Быть написан на ${langName} языке, в формате Markdown`;
 
     const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
       method: "POST",
