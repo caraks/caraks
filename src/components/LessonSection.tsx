@@ -70,7 +70,7 @@ const LessonSection = () => {
     setGeneratingLecture(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lecture", {
-        body: { topic: topicTrim },
+        body: { topic: topicTrim, language: genLang },
       });
       if (error) throw error;
       if (data?.lecture) {
