@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Save, Sparkles, BookOpen, Eye, Edit2, ListChecks, Plus, Trash2 } from "lucide-react";
+import { Loader2, Sparkles, BookOpen, Eye, Edit2, ListChecks, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { Input } from "@/components/ui/input";
@@ -216,7 +216,7 @@ const LessonSection = () => {
           </div>
         </div>
         {previewLecture ? (
-          <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[240px] text-foreground prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+          <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[240px] max-h-[500px] overflow-y-auto text-foreground prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground break-words [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words">
             {lecture ? <ReactMarkdown>{lecture}</ReactMarkdown> : <p className="text-muted-foreground text-sm">{t("lecture_empty")}</p>}
           </div>
         ) : (
@@ -224,7 +224,7 @@ const LessonSection = () => {
             value={lecture}
             onChange={(e) => setLecture(e.target.value)}
             placeholder={t("lecture_placeholder")}
-            className="min-h-[240px] font-mono text-sm bg-muted/50"
+            className="min-h-[240px] max-h-[500px] overflow-y-auto font-mono text-sm bg-muted/50 whitespace-pre-wrap break-words"
           />
         )}
       </section>
@@ -281,13 +281,6 @@ const LessonSection = () => {
         </div>
       </section>
 
-      {/* Save */}
-      <div className="flex justify-end pt-2 border-t border-border">
-        <Button onClick={handleSave} disabled={savingLecture}>
-          {savingLecture ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
-          {t("publish_to_students")}
-        </Button>
-      </div>
     </div>
   );
 };
