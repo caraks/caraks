@@ -12,7 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { topic, lecture, count } = await req.json();
+    const { topic, lecture, count, language } = await req.json();
+    const langCode = (language === "de" || language === "en" || language === "ru") ? language : "ru";
+    const langName = langCode === "de" ? "немецком" : langCode === "en" ? "английском" : "русском";
     if (!topic) {
       return new Response(JSON.stringify({ error: "topic is required" }), {
         status: 400,
