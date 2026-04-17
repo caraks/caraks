@@ -6,8 +6,10 @@ import ReactMarkdown from "react-markdown";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { useLang } from "@/hooks/useLang";
 
 const LessonSection = () => {
+  const { t } = useLang();
   const [topic, setTopic] = useState("");
   const [lecture, setLecture] = useState("");
   const [tasks, setTasks] = useState<string[]>([]);
@@ -50,51 +52,51 @@ const LessonSection = () => {
   }, []);
 
   const handleGenerateLecture = async () => {
-    const t = topic.trim();
-    if (!t) {
-      toast.error("Введите тему занятия");
+    const topicTrim = topic.trim();
+    if (!topicTrim) {
+      toast.error(t("enter_topic_first"));
       return;
     }
     setGeneratingLecture(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lecture", {
-        body: { topic: t },
+        body: { topic: topicTrim },
       });
       if (error) throw error;
       if (data?.lecture) {
         setLecture(data.lecture);
-        toast.success("Лекция сгенерирована");
+        toast.success(t("lecture_generated"));
       } else {
-        toast.error("Не удалось сгенерировать лекцию");
+        toast.error(t("lecture_generation_error"));
       }
     } catch (e) {
       console.error(e);
-      toast.error("Ошибка генерации лекции");
+      toast.error(t("lecture_generation_error"));
     }
     setGeneratingLecture(false);
   };
 
   const handleGenerateTasks = async () => {
-    const t = topic.trim();
-    if (!t) {
-      toast.error("Введите тему занятия");
+    const topicTrim = topic.trim();
+    if (!topicTrim) {
+      toast.error(t("enter_topic_first"));
       return;
     }
     setGeneratingTasks(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lesson-tasks", {
-        body: { topic: t, lecture, count: 5 },
+        body: { topic: topicTrim, lecture, count: 5 },
       });
       if (error) throw error;
       if (Array.isArray(data?.tasks)) {
         setTasks(data.tasks);
-        toast.success("Задания сгенерированы");
+        toast.success(t("tasks_generated"));
       } else {
-        toast.error("Не удалось сгенерировать задания");
+        toast.error(t("tasks_generation_error"));
       }
     } catch (e) {
       console.error(e);
-      toast.error("Ошибка генерации заданий");
+      toast.error(t("tasks_generation_error"));
     }
     setGeneratingTasks(false);
   };
@@ -104,8 +106,8 @@ const LessonSection = () => {
     if (topic.trim()) parts.push(`# ${topic.trim()}`);
     if (lecture.trim()) parts.push(lecture.trim());
     if (tasks.length > 0) {
-      parts.push("## Задания");
-      parts.push(tasks.map((t, i) => `${i + 1}. ${t}`).join("\n"));
+      parts.push(`## ${t("tasks")}`);
+      parts.push(tasks.map((task, i) => `${i + 1}. ${task}`).join("\n"));
     }
     return parts.join("\n\n");
   };
@@ -121,14 +123,14 @@ const LessonSection = () => {
         .from("admin_content")
         .update({ content, updated_by: user?.id, updated_at: new Date().toISOString() })
         .eq("id", rows[0].id);
-      if (error) toast.error("Ошибка сохранения");
-      else toast.success("Сохранено для учеников");
+      if (error) toast.error(t("save_error"));
+      else toast.success(t("published_to_students"));
     } else {
       const { error } = await supabase
         .from("admin_content")
         .insert({ content, updated_by: user?.id });
-      if (error) toast.error("Ошибка сохранения");
-      else toast.success("Сохранено для учеников");
+      if (error) toast.error(t("save_error"));
+      else toast.success(t("published_to_students"));
     }
     setSavingLecture(false);
   };
@@ -147,17 +149,17 @@ const LessonSection = () => {
       <section className="space-y-2">
         <label className="text-sm font-semibold text-foreground flex items-center gap-2">
           <BookOpen className="w-4 h-4 text-primary" />
-          Тема занятия
+          {t("lesson_topic")}
         </label>
         <div className="flex gap-2">
           <Input
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="Например: Закон Ома, квадратные уравнения..."
+            placeholder={t("lesson_topic_placeholder")}
           />
           <Button onClick={handleGenerateLecture} disabled={generatingLecture || !topic.trim()}>
             {generatingLecture ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
-            Сгенерировать лекцию
+            {t("generate_lecture")}
           </Button>
         </div>
       </section>
@@ -165,33 +167,33 @@ const LessonSection = () => {
       {/* 2. Lecture */}
       <section className="space-y-2">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <h3 className="text-sm font-semibold text-foreground">Лекция</h3>
+          <h3 className="text-sm font-semibold text-foreground">{t("lecture")}</h3>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPreviewLecture(false)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${!previewLecture ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
             >
               <Edit2 className="w-3.5 h-3.5" />
-              Редактировать
+              {t("edit")}
             </button>
             <button
               onClick={() => setPreviewLecture(true)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${previewLecture ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
             >
               <Eye className="w-3.5 h-3.5" />
-              Предпросмотр
+              {t("preview")}
             </button>
           </div>
         </div>
         {previewLecture ? (
           <div className="rounded-xl border border-border bg-muted/50 p-6 min-h-[240px] text-foreground prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
-            {lecture ? <ReactMarkdown>{lecture}</ReactMarkdown> : <p className="text-muted-foreground text-sm">Лекция пока пуста</p>}
+            {lecture ? <ReactMarkdown>{lecture}</ReactMarkdown> : <p className="text-muted-foreground text-sm">{t("lecture_empty")}</p>}
           </div>
         ) : (
           <Textarea
             value={lecture}
             onChange={(e) => setLecture(e.target.value)}
-            placeholder="Текст лекции (Markdown). Можно сгенерировать кнопкой выше или написать вручную."
+            placeholder={t("lecture_placeholder")}
             className="min-h-[240px] font-mono text-sm bg-muted/50"
           />
         )}
@@ -202,7 +204,7 @@ const LessonSection = () => {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
             <ListChecks className="w-4 h-4 text-primary" />
-            Задания
+            {t("tasks")}
           </h3>
           <Button
             size="sm"
@@ -211,7 +213,7 @@ const LessonSection = () => {
             disabled={generatingTasks || !topic.trim()}
           >
             {generatingTasks ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
-            Сгенерировать задания
+            {t("generate_tasks")}
           </Button>
         </div>
         <div className="space-y-2">
@@ -244,7 +246,7 @@ const LessonSection = () => {
             className="gap-1"
           >
             <Plus className="w-4 h-4" />
-            Добавить задание
+            {t("add_task")}
           </Button>
         </div>
       </section>
@@ -253,7 +255,7 @@ const LessonSection = () => {
       <div className="flex justify-end pt-2 border-t border-border">
         <Button onClick={handleSave} disabled={savingLecture}>
           {savingLecture ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
-          Опубликовать ученикам
+          {t("publish_to_students")}
         </Button>
       </div>
     </div>
