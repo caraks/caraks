@@ -6,8 +6,10 @@ import ReactMarkdown from "react-markdown";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { useLang } from "@/hooks/useLang";
 
 const LessonSection = () => {
+  const { t } = useLang();
   const [topic, setTopic] = useState("");
   const [lecture, setLecture] = useState("");
   const [tasks, setTasks] = useState<string[]>([]);
