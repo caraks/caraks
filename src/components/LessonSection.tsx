@@ -281,13 +281,6 @@ const LessonSection = () => {
         </div>
       </section>
 
-      {/* Save */}
-      <div className="flex justify-end pt-2 border-t border-border">
-        <Button onClick={handleSave} disabled={savingLecture}>
-          {savingLecture ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
-          {t("publish_to_students")}
-        </Button>
-      </div>
     </div>
   );
 };
