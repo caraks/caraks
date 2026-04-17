@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom } from "lucide-react";
+import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
 import QuestionsSection from "@/components/QuestionsSection";
+import LessonSection from "@/components/LessonSection";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -12,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
-type Tab = "text" | "questions";
+type Tab = "text" | "questions" | "lesson";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<Tab>("text");
@@ -22,10 +23,16 @@ const Index = () => {
   const { lang, setLang, t } = useLang();
   const [editOpen, setEditOpen] = useState(false);
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "text", label: role === "admin" ? t("text_admin") : t("text"), icon: <Type className="w-5 h-5" /> },
-    { id: "questions", label: t("questions_tab"), icon: <HelpCircle className="w-5 h-5" /> },
-  ];
+  const isAdmin = role === "admin";
+  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = isAdmin
+    ? [
+        { id: "text", label: t("text_admin"), icon: <Type className="w-5 h-5" /> },
+        { id: "lesson", label: t("lesson"), icon: <BookOpen className="w-5 h-5" /> },
+      ]
+    : [
+        { id: "text", label: t("text"), icon: <Type className="w-5 h-5" /> },
+        { id: "questions", label: t("questions_tab"), icon: <HelpCircle className="w-5 h-5" /> },
+      ];
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -151,6 +158,7 @@ const Index = () => {
         <div className="bg-card rounded-2xl border border-border shadow-sm hover:shadow-md transition-shadow duration-300 p-6 md:p-10 min-h-[400px] animate-fade-in">
           {activeTab === "text" && <TextSection />}
           {activeTab === "questions" && <QuestionsSection />}
+          {activeTab === "lesson" && <LessonSection />}
         </div>
       </main>
     </div>
