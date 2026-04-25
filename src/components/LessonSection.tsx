@@ -4,6 +4,9 @@ import { Loader2, Sparkles, BookOpen, Eye, Edit2, ListChecks, Plus, Trash2 } fro
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -236,7 +239,7 @@ const LessonSection = () => {
                 prose-hr:border-primary/20 prose-hr:my-8
                 prose-table:rounded-lg prose-table:overflow-hidden prose-thead:bg-primary/10 prose-th:text-primary prose-th:font-semibold prose-td:border-border prose-tr:border-border
                 prose-img:rounded-xl prose-img:shadow-md">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{lecture}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{lecture}</ReactMarkdown>
               </article>
             ) : (
               <p className="text-muted-foreground text-sm italic text-center py-8">{t("lecture_empty")}</p>
