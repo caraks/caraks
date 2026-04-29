@@ -24,6 +24,7 @@ const LessonSection = () => {
   const [generatingTasks, setGeneratingTasks] = useState(false);
   const [savingLecture, setSavingLecture] = useState(false);
   const [previewLecture, setPreviewLecture] = useState(false);
+  const [previewTasks, setPreviewTasks] = useState(false);
   const [genLang, setGenLang] = useState<GenLang>(() => {
     const stored = typeof window !== "undefined" ? localStorage.getItem("gen_lang") : null;
     return (stored as GenLang) || "ru";
@@ -262,49 +263,94 @@ const LessonSection = () => {
             <ListChecks className="w-4 h-4 text-primary" />
             {t("tasks")}
           </h3>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleGenerateTasks}
-            disabled={generatingTasks || !topic.trim()}
-          >
-            {generatingTasks ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
-            {t("generate_tasks")}
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {tasks.map((task, i) => (
-            <div key={i} className="flex gap-2 items-start">
-              <span className="text-xs font-semibold text-primary mt-2.5 w-6 shrink-0">{i + 1}.</span>
-              <Textarea
-                value={task}
-                onChange={(e) => {
-                  const next = [...tasks];
-                  next[i] = e.target.value;
-                  setTasks(next);
-                }}
-                className="min-h-[60px] text-sm bg-muted/50"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTasks(tasks.filter((_, idx) => idx !== i))}
-                className="text-muted-foreground hover:text-destructive shrink-0"
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPreviewTasks(false)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${!previewTasks ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
               >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+                <Edit2 className="w-3.5 h-3.5" />
+                {t("edit")}
+              </button>
+              <button
+                onClick={() => setPreviewTasks(true)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${previewTasks ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                {t("preview")}
+              </button>
             </div>
-          ))}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setTasks([...tasks, ""])}
-            className="gap-1"
-          >
-            <Plus className="w-4 h-4" />
-            {t("add_task")}
-          </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleGenerateTasks}
+              disabled={generatingTasks || !topic.trim()}
+            >
+              {generatingTasks ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
+              {t("generate_tasks")}
+            </Button>
+          </div>
         </div>
+        {previewTasks ? (
+          <div className="relative rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-8 min-h-[160px] max-h-[600px] overflow-y-auto shadow-lg shadow-primary/5">
+            <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+            {tasks.length > 0 ? (
+              <ol className="space-y-4 list-none counter-reset-tasks">
+                {tasks.map((task, i) => (
+                  <li key={i} className="flex gap-3 items-start">
+                    <span className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-bold shadow-md">
+                      {i + 1}
+                    </span>
+                    <article className="prose prose-sm md:prose-base max-w-none dark:prose-invert break-words flex-1
+                      prose-p:text-foreground/85 prose-p:leading-relaxed prose-p:my-1
+                      prose-strong:text-primary prose-strong:font-semibold
+                      prose-em:text-accent-foreground prose-em:not-italic
+                      prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:font-medium prose-code:before:content-none prose-code:after:content-none
+                      prose-ul:my-2 prose-ol:my-2 prose-li:text-foreground/85 prose-li:my-0.5 prose-li:marker:text-primary">
+                      <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{task}</ReactMarkdown>
+                    </article>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-muted-foreground text-sm italic text-center py-8">{t("lecture_empty")}</p>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {tasks.map((task, i) => (
+              <div key={i} className="flex gap-2 items-start">
+                <span className="text-xs font-semibold text-primary mt-2.5 w-6 shrink-0">{i + 1}.</span>
+                <Textarea
+                  value={task}
+                  onChange={(e) => {
+                    const next = [...tasks];
+                    next[i] = e.target.value;
+                    setTasks(next);
+                  }}
+                  className="min-h-[60px] text-sm bg-muted/50"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTasks(tasks.filter((_, idx) => idx !== i))}
+                  className="text-muted-foreground hover:text-destructive shrink-0"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setTasks([...tasks, ""])}
+              className="gap-1"
+            >
+              <Plus className="w-4 h-4" />
+              {t("add_task")}
+            </Button>
+          </div>
+        )}
       </section>
 
     </div>
