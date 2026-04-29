@@ -24,6 +24,7 @@ const LessonSection = () => {
   const [generatingTasks, setGeneratingTasks] = useState(false);
   const [savingLecture, setSavingLecture] = useState(false);
   const [previewLecture, setPreviewLecture] = useState(false);
+  const [previewTasks, setPreviewTasks] = useState(false);
   const [genLang, setGenLang] = useState<GenLang>(() => {
     const stored = typeof window !== "undefined" ? localStorage.getItem("gen_lang") : null;
     return (stored as GenLang) || "ru";
