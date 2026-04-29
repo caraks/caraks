@@ -35,6 +35,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_lesson_drafts: {
+        Row: {
+          created_at: string
+          id: string
+          lecture: string
+          tasks: Json
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lecture?: string
+          tasks?: Json
+          topic?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lecture?: string
+          tasks?: Json
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_settings: {
         Row: {
           id: string
