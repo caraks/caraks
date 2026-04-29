@@ -104,6 +104,10 @@ const AdminStudentQuestions = () => {
                 >
                   <X className="w-3.5 h-3.5" />
                 </Button>
+                <div className="flex items-center gap-1.5 mb-1.5 text-xs font-semibold text-primary">
+                  <User className="w-3 h-3" />
+                  {q.display_name}
+                </div>
                 {q.question_text}
                 <p className="text-xs text-muted-foreground mt-1">
                   {new Date(q.created_at).toLocaleString()}
