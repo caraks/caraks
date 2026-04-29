@@ -34,32 +34,20 @@ const LessonSection = () => {
     if (typeof window !== "undefined") localStorage.setItem("gen_lang", genLang);
   }, [genLang]);
 
-  // Load existing lesson content (so admin sees what students see)
+  // Load private admin draft (visible only to the admin who created it)
   useEffect(() => {
     const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
       const { data } = await supabase
-        .from("admin_content")
-        .select("content")
-        .limit(1)
+        .from("admin_lesson_drafts")
+        .select("topic, lecture, tasks")
+        .eq("user_id", user.id)
         .maybeSingle();
-      if (data?.content) {
-        // Parse stored format: optional first line "# TOPIC", then lecture, then "## Задания" + list
-        const raw = data.content;
-        const topicMatch = raw.match(/^#\s+(.+)\n/);
-        if (topicMatch) setTopic(topicMatch[1].trim());
-
-        const tasksIdx = raw.indexOf("\n## Задания\n");
-        if (tasksIdx >= 0) {
-          setLecture(raw.slice(topicMatch ? topicMatch[0].length : 0, tasksIdx).trim());
-          const tasksBlock = raw.slice(tasksIdx + "\n## Задания\n".length);
-          const parsed = tasksBlock
-            .split(/\n/)
-            .map((l) => l.replace(/^\d+\.\s*/, "").replace(/^[-*]\s*/, "").trim())
-            .filter(Boolean);
-          setTasks(parsed);
-        } else {
-          setLecture(raw.slice(topicMatch ? topicMatch[0].length : 0).trim());
-        }
+      if (data) {
+        setTopic(data.topic ?? "");
+        setLecture(data.lecture ?? "");
+        setTasks(Array.isArray(data.tasks) ? (data.tasks as string[]) : []);
       }
       setLoading(false);
     };
