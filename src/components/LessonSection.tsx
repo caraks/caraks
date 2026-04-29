@@ -118,23 +118,23 @@ const LessonSection = () => {
   const handleSave = async () => {
     setSavingLecture(true);
     const { data: { user } } = await supabase.auth.getUser();
-    const { data: rows } = await supabase.from("admin_content").select("id").limit(1);
-    const content = buildContent();
+    if (!user) { setSavingLecture(false); return; }
 
-    if (rows && rows.length > 0) {
-      const { error } = await supabase
-        .from("admin_content")
-        .update({ content, updated_by: user?.id, updated_at: new Date().toISOString() })
-        .eq("id", rows[0].id);
-      if (error) toast.error(t("save_error"));
-      else toast.success(t("published_to_students"));
-    } else {
-      const { error } = await supabase
-        .from("admin_content")
-        .insert({ content, updated_by: user?.id });
-      if (error) toast.error(t("save_error"));
-      else toast.success(t("published_to_students"));
-    }
+    const { error } = await supabase
+      .from("admin_lesson_drafts")
+      .upsert(
+        {
+          user_id: user.id,
+          topic,
+          lecture,
+          tasks,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" }
+      );
+
+    if (error) toast.error(t("save_error"));
+    else toast.success(t("saved"));
     setSavingLecture(false);
   };
 
