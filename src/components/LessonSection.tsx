@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Sparkles, BookOpen, Eye, Edit2, ListChecks, Plus, Trash2 } from "lucide-react";
+import { Loader2, Sparkles, BookOpen, Eye, Edit2, ListChecks, Plus, Trash2, Save } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -254,6 +254,17 @@ const LessonSection = () => {
             className="min-h-[240px] max-h-[500px] overflow-y-auto font-mono text-sm bg-muted/50 whitespace-pre-wrap break-words"
           />
         )}
+        <div className="flex justify-end">
+          <Button
+            onClick={handleSave}
+            disabled={savingLecture || !lecture.trim()}
+            size="sm"
+            className="gap-1.5"
+          >
+            {savingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {t("save")}
+          </Button>
+        </div>
       </section>
 
       {/* 3. Tasks */}
