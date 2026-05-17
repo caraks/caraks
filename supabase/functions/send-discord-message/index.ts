@@ -19,8 +19,12 @@ serve(async (req) => {
     const DISCORD_CHANNEL_ID = Deno.env.get('DISCORD_CHANNEL_ID');
     if (!DISCORD_CHANNEL_ID) throw new Error('DISCORD_CHANNEL_ID is not configured');
 
-    const { message } = await req.json();
-    if (!message) throw new Error('Message is required');
+    const { message, embeds } = await req.json();
+    if (!message && !embeds) throw new Error('Message or embeds is required');
+
+    const payload: Record<string, unknown> = {};
+    if (message) payload.content = message;
+    if (embeds) payload.embeds = embeds;
 
     const response = await fetch(`${DISCORD_API}/channels/${DISCORD_CHANNEL_ID}/messages`, {
       method: 'POST',
@@ -28,7 +32,7 @@ serve(async (req) => {
         'Authorization': `Bot ${DISCORD_BOT_TOKEN}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ content: message }),
+      body: JSON.stringify(payload),
     });
 
     const data = await response.json();
