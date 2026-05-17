@@ -149,6 +149,8 @@ const LessonSection = () => {
 
   return (
     <div className="space-y-6">
+      <ClosedPollsList />
+
       {/* 1. Topic */}
       <section className="space-y-2">
         <div className="flex items-center justify-between gap-2 flex-wrap">
