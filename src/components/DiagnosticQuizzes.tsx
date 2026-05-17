@@ -254,6 +254,14 @@ const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string })
                 )}
               </div>
             ))}
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground">{t("poll_deadline")}</label>
+              <Input
+                type="datetime-local"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+              />
+            </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setGeneratedQuestions([...generatedQuestions, ""])} className="text-xs">
                 <Plus className="w-3.5 h-3.5 mr-1" />
