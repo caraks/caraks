@@ -206,7 +206,7 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                   return (
                     <p className={`text-xs flex items-center gap-1 ${overdue ? "text-destructive" : "text-muted-foreground"}`}>
                       <Clock className="w-3 h-3" />
-                      {t("deadline_until")}: {d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                      {t("deadline_until")}: {d.toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" })}
                     </p>
                   );
                 })()}
