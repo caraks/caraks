@@ -157,8 +157,17 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
         })
         .join("\n");
       const siteUrl = "https://caraks.lovable.app";
-      const msg = `🔒 **Umfrage beendet!**\n\n❓ ${poll.question}\n\n📈 Ergebnisse (${totalVotes} Stimmen):\n${resultsList}\n\n🔗 ${siteUrl}`;
-      supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
+      const embed = {
+        title: "🔒 Umfrage beendet!",
+        url: siteUrl,
+        description: `**${poll.question}**\n\n📈 Ergebnisse (${totalVotes} Stimmen):\n${resultsList}`,
+        color: 0x8b5cf6,
+      };
+      supabase.functions
+        .invoke("send-discord-message", {
+          body: { message: `🔒 Umfrage beendet: ${siteUrl}`, embeds: [embed] },
+        })
+        .catch(() => {});
     }
 
     fetchPolls();
