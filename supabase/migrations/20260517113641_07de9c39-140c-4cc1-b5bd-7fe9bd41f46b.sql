@@ -1,0 +1,1 @@
+ALTER TABLE public.diagnostic_quizzes ADD COLUMN deadline timestamptz;
