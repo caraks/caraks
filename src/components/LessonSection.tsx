@@ -88,11 +88,11 @@ const LessonSection = () => {
     setGeneratingTasks(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-lesson-tasks", {
-        body: { topic: topicTrim, lecture, count: 5, language: genLang },
+        body: { topic: topicTrim, lecture, count: 1, existingTasks: tasks, language: genLang },
       });
       if (error) throw error;
-      if (Array.isArray(data?.tasks)) {
-        setTasks(data.tasks);
+      if (Array.isArray(data?.tasks) && data.tasks.length > 0) {
+        setTasks((prev) => [...prev, ...data.tasks]);
         toast.success(t("tasks_generated"));
       } else {
         toast.error(t("tasks_generation_error"));
