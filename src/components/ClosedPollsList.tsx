@@ -122,9 +122,27 @@ const ClosedPollsList = () => {
                 <BarChart3 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                 <span>{poll.question}</span>
               </h4>
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
-                {t("closed")}
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  {t("closed")}
+                </span>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                    onClick={() => handleDelete(poll.id)}
+                    disabled={deletingId === poll.id}
+                    title={t("delete") || "Löschen"}
+                  >
+                    {deletingId === poll.id ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-3.5 h-3.5" />
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               {poll.options.map((opt) => {
