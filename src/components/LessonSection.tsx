@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/hooks/useLang";
+import ClosedPollsList from "@/components/ClosedPollsList";
 
 type GenLang = "ru" | "de" | "en";
 
@@ -148,6 +149,8 @@ const LessonSection = () => {
 
   return (
     <div className="space-y-6">
+      <ClosedPollsList />
+
       {/* 1. Topic */}
       <section className="space-y-2">
         <div className="flex items-center justify-between gap-2 flex-wrap">
