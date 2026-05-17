@@ -108,6 +108,8 @@ const translations: Translations = {
   "individual_responses": { ru: "Индивидуальные ответы", de: "Einzelantworten" },
   "update_answers": { ru: "Обновить ответы", de: "Antworten aktualisieren" },
   "closed": { ru: "закрыт", de: "geschlossen" },
+  "closed_polls": { ru: "Завершённые опросы", de: "Abgeschlossene Umfragen" },
+  "votes": { ru: "голосов", de: "Stimmen" },
   "diagnostic_quizzes": { ru: "Опросы-диагностика", de: "Diagnosequiz" },
   "answer_yes": { ru: "Да", de: "Ja" },
   "answer_unsure": { ru: "Не уверен", de: "Nicht sicher" },
