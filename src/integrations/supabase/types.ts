@@ -224,6 +224,7 @@ export type Database = {
           allow_free_text: boolean
           created_at: string
           created_by: string
+          deadline: string | null
           id: string
           is_active: boolean
           question: string
@@ -232,6 +233,7 @@ export type Database = {
           allow_free_text?: boolean
           created_at?: string
           created_by: string
+          deadline?: string | null
           id?: string
           is_active?: boolean
           question: string
@@ -240,6 +242,7 @@ export type Database = {
           allow_free_text?: boolean
           created_at?: string
           created_by?: string
+          deadline?: string | null
           id?: string
           is_active?: boolean
           question?: string

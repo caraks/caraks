@@ -18,6 +18,7 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
   const [options, setOptions] = useState(["", ""]);
   const [saving, setSaving] = useState(false);
   const [allowFreeText, setAllowFreeText] = useState(false);
+  const [deadline, setDeadline] = useState("");
 
   const addOption = () => {
     if (options.length < 6) setOptions([...options, ""]);
@@ -45,9 +46,10 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
 
+    const deadlineIso = deadline ? new Date(deadline).toISOString() : null;
     const { data: poll, error } = await supabase
       .from("polls")
-      .insert({ question: trimmedQ, created_by: user.id, allow_free_text: allowFreeText })
+      .insert({ question: trimmedQ, created_by: user.id, allow_free_text: allowFreeText, deadline: deadlineIso })
       .select("id")
       .single();
 
@@ -75,15 +77,19 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
       setQuestion("");
       setOptions(["", ""]);
       setAllowFreeText(false);
+      setDeadline("");
       onCreated();
 
       // Discord notification
       const optsList = trimmedOpts.map((o, i) => `${i + 1}. ${o}`).join("\n");
       const siteUrl = "https://caraks.lovable.app";
+      const deadlineLine = deadlineIso
+        ? `\n\n⏰ Frist: ${new Date(deadlineIso).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" })}`
+        : "";
       const embed = {
         title: "📊 Neue Umfrage erstellt!",
         url: siteUrl,
-        description: `**${trimmedQ}**\n\n${optsList}${allowFreeText ? "\n\n✏️ Freitextantwort: aktiviert" : ""}`,
+        description: `**${trimmedQ}**\n\n${optsList}${allowFreeText ? "\n\n✏️ Freitextantwort: aktiviert" : ""}${deadlineLine}`,
         color: 0x8b5cf6,
       };
       supabase.functions
@@ -126,6 +132,17 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
           <MessageSquare className="w-3.5 h-3.5" />
           {t("allow_free_text")}
         </Label>
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="poll-deadline" className="text-sm text-muted-foreground">
+          {t("poll_deadline")}
+        </Label>
+        <Input
+          id="poll-deadline"
+          type="datetime-local"
+          value={deadline}
+          onChange={(e) => setDeadline(e.target.value)}
+        />
       </div>
       <div className="flex gap-2">
         {options.length < 6 && (
