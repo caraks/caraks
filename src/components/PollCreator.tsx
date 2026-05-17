@@ -77,15 +77,19 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
       setQuestion("");
       setOptions(["", ""]);
       setAllowFreeText(false);
+      setDeadline("");
       onCreated();
 
       // Discord notification
       const optsList = trimmedOpts.map((o, i) => `${i + 1}. ${o}`).join("\n");
       const siteUrl = "https://caraks.lovable.app";
+      const deadlineLine = deadlineIso
+        ? `\n\n⏰ Frist: ${new Date(deadlineIso).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" })}`
+        : "";
       const embed = {
         title: "📊 Neue Umfrage erstellt!",
         url: siteUrl,
-        description: `**${trimmedQ}**\n\n${optsList}${allowFreeText ? "\n\n✏️ Freitextantwort: aktiviert" : ""}`,
+        description: `**${trimmedQ}**\n\n${optsList}${allowFreeText ? "\n\n✏️ Freitextantwort: aktiviert" : ""}${deadlineLine}`,
         color: 0x8b5cf6,
       };
       supabase.functions
