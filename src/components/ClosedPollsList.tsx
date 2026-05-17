@@ -25,55 +25,75 @@ interface ClosedPoll {
 
 const ClosedPollsList = () => {
   const { t } = useLang();
+  const { isAdmin } = useUserRole();
   const [polls, setPolls] = useState<ClosedPoll[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const load = async () => {
+    const { data: pollsData } = await supabase
+      .from("polls")
+      .select("id, question, created_at, allow_free_text")
+      .eq("is_active", false)
+      .order("created_at", { ascending: false });
+
+    if (!pollsData || pollsData.length === 0) {
+      setPolls([]);
+      setLoading(false);
+      return;
+    }
+
+    const ids = pollsData.map((p) => p.id);
+    const [{ data: optionsData }, { data: votesData }] = await Promise.all([
+      supabase.from("poll_options").select("*").in("poll_id", ids).order("sort_order"),
+      supabase.from("poll_votes").select("option_id, poll_id, free_text").in("poll_id", ids),
+    ]);
+
+    const result: ClosedPoll[] = pollsData.map((p) => {
+      const options = (optionsData ?? []).filter((o) => o.poll_id === p.id);
+      const votes = (votesData ?? []).filter((v) => v.poll_id === p.id);
+      const counts: Record<string, number> = {};
+      const freeTexts: string[] = [];
+      votes.forEach((v) => {
+        if (v.option_id) counts[v.option_id] = (counts[v.option_id] || 0) + 1;
+        if (v.free_text) freeTexts.push(v.free_text);
+      });
+      return {
+        id: p.id,
+        question: p.question,
+        created_at: p.created_at,
+        allow_free_text: p.allow_free_text,
+        options,
+        counts,
+        freeTexts,
+        total: votes.filter((v) => v.option_id).length,
+      };
+    });
+
+    setPolls(result);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const load = async () => {
-      const { data: pollsData } = await supabase
-        .from("polls")
-        .select("id, question, created_at, allow_free_text")
-        .eq("is_active", false)
-        .order("created_at", { ascending: false });
-
-      if (!pollsData || pollsData.length === 0) {
-        setPolls([]);
-        setLoading(false);
-        return;
-      }
-
-      const ids = pollsData.map((p) => p.id);
-      const [{ data: optionsData }, { data: votesData }] = await Promise.all([
-        supabase.from("poll_options").select("*").in("poll_id", ids).order("sort_order"),
-        supabase.from("poll_votes").select("option_id, poll_id, free_text").in("poll_id", ids),
-      ]);
-
-      const result: ClosedPoll[] = pollsData.map((p) => {
-        const options = (optionsData ?? []).filter((o) => o.poll_id === p.id);
-        const votes = (votesData ?? []).filter((v) => v.poll_id === p.id);
-        const counts: Record<string, number> = {};
-        const freeTexts: string[] = [];
-        votes.forEach((v) => {
-          if (v.option_id) counts[v.option_id] = (counts[v.option_id] || 0) + 1;
-          if (v.free_text) freeTexts.push(v.free_text);
-        });
-        return {
-          id: p.id,
-          question: p.question,
-          created_at: p.created_at,
-          allow_free_text: p.allow_free_text,
-          options,
-          counts,
-          freeTexts,
-          total: votes.filter((v) => v.option_id).length,
-        };
-      });
-
-      setPolls(result);
-      setLoading(false);
-    };
     load();
   }, []);
+
+  const handleDelete = async (pollId: string) => {
+    if (!confirm(t("confirm_delete_poll"))) return;
+    setDeletingId(pollId);
+    // Delete child rows first (no ON DELETE CASCADE at DB level)
+    await supabase.from("poll_votes").delete().eq("poll_id", pollId);
+    await supabase.from("poll_options").delete().eq("poll_id", pollId);
+    const { error } = await supabase.from("polls").delete().eq("id", pollId);
+    setDeletingId(null);
+    if (error) {
+      toast.error(t("delete_error") || "Fehler");
+      return;
+    }
+    toast.success(t("deleted") || "Gelöscht");
+    setPolls((prev) => prev.filter((p) => p.id !== pollId));
+  };
+
 
   if (loading) {
     return (
