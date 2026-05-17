@@ -18,6 +18,7 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
   const [options, setOptions] = useState(["", ""]);
   const [saving, setSaving] = useState(false);
   const [allowFreeText, setAllowFreeText] = useState(false);
+  const [deadline, setDeadline] = useState("");
 
   const addOption = () => {
     if (options.length < 6) setOptions([...options, ""]);
