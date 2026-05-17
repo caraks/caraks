@@ -80,8 +80,17 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
       // Discord notification
       const optsList = trimmedOpts.map((o, i) => `${i + 1}. ${o}`).join("\n");
       const siteUrl = "https://caraks.lovable.app";
-      const msg = `📊 **Neue Umfrage erstellt!**\n\n❓ ${trimmedQ}\n\n${optsList}${allowFreeText ? "\n\n✏️ Freitextantwort: aktiviert" : ""}\n\n🔗 ${siteUrl}`;
-      supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
+      const embed = {
+        title: "📊 Neue Umfrage erstellt!",
+        url: siteUrl,
+        description: `**${trimmedQ}**\n\n${optsList}${allowFreeText ? "\n\n✏️ Freitextantwort: aktiviert" : ""}`,
+        color: 0x8b5cf6,
+      };
+      supabase.functions
+        .invoke("send-discord-message", {
+          body: { message: `📊 Neue Umfrage: ${siteUrl}`, embeds: [embed] },
+        })
+        .catch(() => {});
     }
   };
 
