@@ -610,6 +610,16 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
               <Sparkles className="w-4 h-4 text-primary" />
               {quiz.title}
             </h3>
+            {quiz.deadline && (() => {
+              const d = new Date(quiz.deadline);
+              const overdue = d.getTime() < Date.now();
+              return (
+                <p className={`text-xs flex items-center gap-1 ${overdue ? "text-destructive" : "text-muted-foreground"}`}>
+                  <Clock className="w-3 h-3" />
+                  {t("deadline_until")}: {d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                </p>
+              );
+            })()}
 
             {!hasSubmitted && (
               <>
