@@ -60,6 +60,8 @@ const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string })
   const [generating, setGenerating] = useState(false);
   const [creating, setCreating] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
+  const [deadline, setDeadline] = useState("");
+  const SITE_URL = "https://caraks.lovable.app";
 
   const handleTestDiscord = async () => {
     setSendingTest(true);
