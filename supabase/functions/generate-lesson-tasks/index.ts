@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { topic, lecture, count, language } = await req.json();
+    const { topic, lecture, count, existingTasks, language } = await req.json();
     const langCode = (language === "de" || language === "en" || language === "ru") ? language : "ru";
     const langName = langCode === "de" ? "немецком" : langCode === "en" ? "английском" : "русском";
     if (!topic) {
@@ -27,20 +27,26 @@ serve(async (req) => {
       throw new Error("MISTRAL_API_KEY is not configured");
     }
 
-    const n = Math.max(2, Math.min(10, Number(count) || 5));
+    const n = Math.max(1, Math.min(10, Number(count) || 1));
+    const existing: string[] = Array.isArray(existingTasks) ? existingTasks.filter((s) => typeof s === "string" && s.trim()) : [];
 
-    const systemPrompt = `Ты опытный учитель. Составь ${n} практических заданий для учеников по теме "${topic}".
-Задания:
-- Должны опираться на материал лекции (если он передан)
-- Быть конкретными, с числами/примерами, чтобы их можно было решить
-- Идти от простого к сложному
-- Быть написаны на ${langName} языке
+    const systemPrompt = `Ты опытный учитель. Составь ${n} НОВОЕ практическое задание для учеников по теме "${topic}".
+Задание:
+- Должно опираться на материал лекции (если он передан)
+- Быть конкретным, с числами/примерами, чтобы его можно было решить
+- НЕ должно повторять или дублировать уже существующие задания (см. ниже), быть другим по формулировке и подходу
+- Усложняться постепенно: если уже есть простые задания, сделай чуть сложнее
+- Быть написано на ${langName} языке
 
-Выдавай ответ строго в JSON: {"tasks": ["задание1", "задание2", ...]}`;
+Выдавай ответ строго в JSON: {"tasks": ["задание"]}`;
 
-    const userContent = lecture
+    const existingBlock = existing.length
+      ? `\n\nУже существующие задания (НЕ повторяй их):\n${existing.map((t, i) => `${i + 1}. ${t}`).join("\n")}`
+      : "";
+
+    const userContent = (lecture
       ? `Тема: ${topic}\n\nКонспект лекции:\n${lecture}`
-      : `Тема: ${topic}`;
+      : `Тема: ${topic}`) + existingBlock;
 
     const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
       method: "POST",
