@@ -133,6 +133,17 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
           {t("allow_free_text")}
         </Label>
       </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="poll-deadline" className="text-sm text-muted-foreground">
+          {t("poll_deadline")}
+        </Label>
+        <Input
+          id="poll-deadline"
+          type="datetime-local"
+          value={deadline}
+          onChange={(e) => setDeadline(e.target.value)}
+        />
+      </div>
       <div className="flex gap-2">
         {options.length < 6 && (
           <Button variant="outline" size="sm" onClick={addOption}>
