@@ -350,6 +350,17 @@ const LessonSection = () => {
             </Button>
           </div>
         )}
+        <div className="flex justify-end">
+          <Button
+            onClick={handleSave}
+            disabled={savingLecture}
+            size="sm"
+            className="gap-1.5"
+          >
+            {savingLecture ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {t("save")}
+          </Button>
+        </div>
       </section>
 
     </div>
