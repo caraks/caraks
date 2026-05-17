@@ -41,7 +41,7 @@ interface PollListProps {
 }
 
 const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
-  const { t } = useLang();
+  const t = tDe;
   const [polls, setPolls] = useState<PollWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
