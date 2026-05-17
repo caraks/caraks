@@ -198,7 +198,19 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
         return (
           <div key={poll.id} className="rounded-xl border border-border bg-muted/20 p-4 space-y-3">
             <div className="flex items-start justify-between gap-2">
-              <h4 className="font-semibold text-foreground">{poll.question}</h4>
+              <div className="space-y-1">
+                <h4 className="font-semibold text-foreground">{poll.question}</h4>
+                {poll.deadline && (() => {
+                  const d = new Date(poll.deadline);
+                  const overdue = d.getTime() < Date.now();
+                  return (
+                    <p className={`text-xs flex items-center gap-1 ${overdue ? "text-destructive" : "text-muted-foreground"}`}>
+                      <Clock className="w-3 h-3" />
+                      {t("deadline_until")}: {d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                    </p>
+                  );
+                })()}
+              </div>
               {isAdmin && (
                 <Button variant="ghost" size="sm" onClick={() => handleDeactivate(poll.id)} className="text-xs text-muted-foreground shrink-0">
                   {t("close_poll")}
