@@ -24,7 +24,7 @@ interface ClosedPoll {
 }
 
 const ClosedPollsList = () => {
-  const { t } = useLang();
+  const t = tDe;
   const { isAdmin } = useUserRole();
   const [polls, setPolls] = useState<ClosedPoll[]>([]);
   const [loading, setLoading] = useState(true);
