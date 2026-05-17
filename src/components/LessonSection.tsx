@@ -151,6 +151,7 @@ const LessonSection = () => {
   return (
     <div className="space-y-6">
       <ClosedPollsList />
+      <ClosedQuizzesList />
 
       {/* 1. Topic */}
       <section className="space-y-2">
