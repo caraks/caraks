@@ -188,3 +188,7 @@ export const LangProvider = ({ children }: { children: ReactNode }) => {
     </LangContext.Provider>
   );
 };
+
+// Always-German translator. Use in components that must stay in German
+// regardless of the user's UI language (e.g. polls and diagnostic quizzes).
+export const tDe = (key: string) => translations[key]?.de ?? key;
