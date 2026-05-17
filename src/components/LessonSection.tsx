@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/hooks/useLang";
 import ClosedPollsList from "@/components/ClosedPollsList";
+import ClosedQuizzesList from "@/components/ClosedQuizzesList";
 
 type GenLang = "ru" | "de" | "en";
 
