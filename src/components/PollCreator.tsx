@@ -46,9 +46,10 @@ const PollCreator = ({ onCreated }: PollCreatorProps) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
 
+    const deadlineIso = deadline ? new Date(deadline).toISOString() : null;
     const { data: poll, error } = await supabase
       .from("polls")
-      .insert({ question: trimmedQ, created_by: user.id, allow_free_text: allowFreeText })
+      .insert({ question: trimmedQ, created_by: user.id, allow_free_text: allowFreeText, deadline: deadlineIso })
       .select("id")
       .single();
 
