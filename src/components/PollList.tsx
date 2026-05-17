@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, CheckCircle2, BarChart3, MessageSquare, Send, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { useLang } from "@/hooks/useLang";
+import { tDe } from "@/hooks/useLang";
 
 interface PollOption {
   id: string;
