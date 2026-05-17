@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, BarChart3, Lock } from "lucide-react";
+import { Loader2, BarChart3, Lock, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { useLang } from "@/hooks/useLang";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface PollOption {
   id: string;
