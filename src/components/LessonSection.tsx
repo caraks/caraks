@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/hooks/useLang";
 import ClosedPollsList from "@/components/ClosedPollsList";
+import ClosedQuizzesList from "@/components/ClosedQuizzesList";
 
 type GenLang = "ru" | "de" | "en";
 
@@ -150,6 +151,7 @@ const LessonSection = () => {
   return (
     <div className="space-y-6">
       <ClosedPollsList />
+      <ClosedQuizzesList />
 
       {/* 1. Topic */}
       <section className="space-y-2">
