@@ -19,6 +19,7 @@ interface Poll {
   is_active: boolean;
   created_at: string;
   allow_free_text: boolean;
+  deadline: string | null;
 }
 
 interface PollVote {
