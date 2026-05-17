@@ -138,8 +138,29 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
   };
 
   const handleDeactivate = async (pollId: string) => {
+    const poll = polls.find((p) => p.id === pollId);
     await supabase.from("polls").update({ is_active: false }).eq("id", pollId);
     toast.success(t("poll_closed"));
+
+    // Discord notification with results
+    if (poll) {
+      const totalVotes = poll.votes.length;
+      const counts: Record<string, number> = {};
+      poll.votes.forEach((v) => {
+        if (v.option_id) counts[v.option_id] = (counts[v.option_id] || 0) + 1;
+      });
+      const resultsList = poll.options
+        .map((o) => {
+          const c = counts[o.id] || 0;
+          const pct = totalVotes > 0 ? Math.round((c / totalVotes) * 100) : 0;
+          return `• ${o.option_text} — ${c} (${pct}%)`;
+        })
+        .join("\n");
+      const siteUrl = "https://caraks.lovable.app";
+      const msg = `🔒 **Umfrage beendet!**\n\n❓ ${poll.question}\n\n📈 Ergebnisse (${totalVotes} Stimmen):\n${resultsList}\n\n🔗 ${siteUrl}`;
+      supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
+    }
+
     fetchPolls();
   };
 
