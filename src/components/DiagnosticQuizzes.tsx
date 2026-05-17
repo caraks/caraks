@@ -123,10 +123,12 @@ const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string })
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setCreating(false); return; }
 
+    const deadlineIso = deadline ? new Date(deadline).toISOString() : null;
     const { error } = await supabase.from("diagnostic_quizzes").insert({
       title: trimmedTopic,
       questions: trimmedQs as any,
       created_by: user.id,
+      deadline: deadlineIso,
     });
     setCreating(false);
     if (error) {
@@ -135,19 +137,61 @@ const AdminQuizPanel = ({ t, lang }: { t: (k: string) => string; lang: string })
       toast.success(t("quiz_created"));
       setTopic("");
       setGeneratedQuestions([]);
+      setDeadline("");
       fetchQuizzes();
 
-      // Discord notification
+      // Discord notification (embed with clickable site link)
       const qList = trimmedQs.map((q, i) => `${i + 1}. ${q}`).join("\n");
-      const msg = `📋 **Neues Diagnosequiz!**\n\n📝 ${trimmedTopic}\n\n${qList}`;
-      supabase.functions.invoke("send-discord-message", { body: { message: msg } }).catch(() => {});
+      const deadlineLine = deadlineIso
+        ? `\n\n⏰ Frist: ${new Date(deadlineIso).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" })}`
+        : "";
+      const embed = {
+        title: "📋 Neues Diagnosequiz!",
+        url: SITE_URL,
+        description: `**${trimmedTopic}**\n\n${qList}${deadlineLine}`,
+        color: 0x8b5cf6,
+      };
+      supabase.functions
+        .invoke("send-discord-message", {
+          body: { message: `📋 Neues Diagnosequiz: ${SITE_URL}`, embeds: [embed] },
+        })
+        .catch(() => {});
     }
   };
 
   const handleClose = async (id: string) => {
+    const quiz = quizzes.find((q) => q.id === id);
     await supabase.from("diagnostic_quizzes").update({ is_active: false }).eq("id", id);
     fetchQuizzes();
     toast.success(t("quiz_closed"));
+
+    // Discord notification with response summary
+    if (quiz) {
+      const { data: responses } = await supabase
+        .from("diagnostic_responses")
+        .select("answers")
+        .eq("quiz_id", id);
+      const total = responses?.length ?? 0;
+      const lines = quiz.questions.map((q, i) => {
+        const c = { yes: 0, unsure: 0, no: 0 };
+        responses?.forEach((r: any) => {
+          const a = r.answers?.[String(i)];
+          if (a && c[a as keyof typeof c] !== undefined) c[a as keyof typeof c]++;
+        });
+        return `${i + 1}. ${q}\n   ✅ ${c.yes} · 🤔 ${c.unsure} · ❌ ${c.no}`;
+      }).join("\n");
+      const embed = {
+        title: "🔒 Diagnosequiz beendet!",
+        url: SITE_URL,
+        description: `**${quiz.title}**\n\n📈 Antworten gesamt: ${total}\n\n${lines}`,
+        color: 0x8b5cf6,
+      };
+      supabase.functions
+        .invoke("send-discord-message", {
+          body: { message: `🔒 Quiz beendet: ${SITE_URL}`, embeds: [embed] },
+        })
+        .catch(() => {});
+    }
   };
 
   const handleDelete = async (id: string) => {
