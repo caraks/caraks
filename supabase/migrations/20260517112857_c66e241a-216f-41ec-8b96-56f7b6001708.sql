@@ -1,0 +1,3 @@
+CREATE POLICY "Admins can delete polls" ON public.polls FOR DELETE TO authenticated USING (has_role(auth.uid(), 'admin'::app_role));
+CREATE POLICY "Admins can delete poll options" ON public.poll_options FOR DELETE TO authenticated USING (has_role(auth.uid(), 'admin'::app_role));
+CREATE POLICY "Admins can delete poll votes" ON public.poll_votes FOR DELETE TO authenticated USING (has_role(auth.uid(), 'admin'::app_role));
