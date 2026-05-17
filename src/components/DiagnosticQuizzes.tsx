@@ -16,6 +16,7 @@ interface Quiz {
   questions: string[];
   is_active: boolean;
   created_at: string;
+  deadline: string | null;
 }
 
 interface QuizResponse {
