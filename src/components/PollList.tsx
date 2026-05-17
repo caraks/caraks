@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, CheckCircle2, BarChart3, MessageSquare, Send, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { useLang } from "@/hooks/useLang";
+import { tDe } from "@/hooks/useLang";
 
 interface PollOption {
   id: string;
@@ -41,7 +41,7 @@ interface PollListProps {
 }
 
 const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
-  const { t } = useLang();
+  const t = tDe;
   const [polls, setPolls] = useState<PollWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
@@ -206,7 +206,7 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                   return (
                     <p className={`text-xs flex items-center gap-1 ${overdue ? "text-destructive" : "text-muted-foreground"}`}>
                       <Clock className="w-3 h-3" />
-                      {t("deadline_until")}: {d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                      {t("deadline_until")}: {d.toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" })}
                     </p>
                   );
                 })()}

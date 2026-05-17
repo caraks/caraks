@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, BarChart3, Lock, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { useLang } from "@/hooks/useLang";
+import { tDe } from "@/hooks/useLang";
 import { useUserRole } from "@/hooks/useUserRole";
 
 interface PollOption {
@@ -24,7 +24,7 @@ interface ClosedPoll {
 }
 
 const ClosedPollsList = () => {
-  const { t } = useLang();
+  const t = tDe;
   const { isAdmin } = useUserRole();
   const [polls, setPolls] = useState<ClosedPoll[]>([]);
   const [loading, setLoading] = useState(true);

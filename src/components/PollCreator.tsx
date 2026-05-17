@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X, Send, Loader2, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
-import { useLang } from "@/hooks/useLang";
+import { tDe } from "@/hooks/useLang";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -13,7 +13,7 @@ interface PollCreatorProps {
 }
 
 const PollCreator = ({ onCreated }: PollCreatorProps) => {
-  const { t } = useLang();
+  const t = tDe;
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
   const [saving, setSaving] = useState(false);
