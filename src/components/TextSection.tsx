@@ -28,6 +28,7 @@ const TextSection = () => {
           {t("polls")}
         </h2>
         <AdminContentSection />
+        <DiagnosticQuizzes />
       </section>
 
       <section className="rounded-xl border border-border bg-muted/20 p-5 space-y-4">
