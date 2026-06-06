@@ -585,11 +585,55 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
     setGeneratingTasks(null);
   };
 
+  const [submitting, setSubmitting] = useState<string | null>(null);
+  const [submittedQuizzes, setSubmittedQuizzes] = useState<Set<string>>(new Set());
+
   const handleContinue = (quizId: string) => {
     const answers = localAnswers[quizId];
     if (!answers || Object.keys(answers).length === 0) return;
     setAnsweredQuizzes(prev => new Set(prev).add(quizId));
     generateFollowUpTasks(quizId, answers as any);
+  };
+
+  const handleSubmit = async (quizId: string) => {
+    const answers = localAnswers[quizId];
+    const rounds = followUpTasks[quizId] ?? [];
+    const flatTasks = rounds.flat();
+    if (!answers) return;
+    for (let i = 0; i < flatTasks.length; i++) {
+      if (!taskDifficulty[`${quizId}-${i}`]) {
+        toast.error("Bitte bewerten Sie alle Aufgaben");
+        return;
+      }
+    }
+    setSubmitting(quizId);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSubmitting(null); return; }
+
+    const { error: respErr } = await supabase.from("diagnostic_responses").insert({
+      quiz_id: quizId,
+      user_id: user.id,
+      answers: answers as any,
+      follow_up_tasks: flatTasks as any,
+    } as any);
+
+    if (flatTasks.length > 0) {
+      const ratings = flatTasks.map((_, i) => ({
+        quiz_id: quizId,
+        user_id: user.id,
+        task_index: i,
+        difficulty: taskDifficulty[`${quizId}-${i}`],
+      }));
+      await supabase.from("task_difficulty_ratings" as any).insert(ratings as any);
+    }
+
+    setSubmitting(null);
+    if (respErr) {
+      toast.error(t("save_error"));
+    } else {
+      toast.success("Antworten gesendet");
+      setSubmittedQuizzes(prev => new Set(prev).add(quizId));
+    }
   };
 
   if (loading) return <Loader2 className="w-5 h-5 animate-spin text-muted-foreground mx-auto" />;
@@ -608,7 +652,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
           <div key={quiz.id} className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-primary" />
-              {quiz.title}
+              {`Nehmen Sie an der Umfrage zum Thema "${quiz.title}" teil. Wissen Sie:`}
             </h3>
             {quiz.deadline && (() => {
               const d = new Date(quiz.deadline);
@@ -616,12 +660,12 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
               return (
                 <p className={`text-xs flex items-center gap-1 ${overdue ? "text-destructive" : "text-muted-foreground"}`}>
                   <Clock className="w-3 h-3" />
-                  {t("deadline_until")}: {d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                  {t("deadline_until")}: {d.toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" })}
                 </p>
               );
             })()}
 
-            {!hasSubmitted && (
+            {!submittedQuizzes.has(quiz.id) && (
               <>
                 <div className="space-y-3">
                   {quiz.questions.map((q, i) => (
@@ -640,6 +684,7 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                               key={val}
                               size="sm"
                               variant={isSelected ? "default" : "outline"}
+                              disabled={hasSubmitted}
                               className={`text-xs h-8 justify-start ${isSelected ? cfg.color : "text-muted-foreground border-muted"}`}
                               onClick={() => setLocalAnswers(prev => ({
                                 ...prev,
@@ -655,76 +700,92 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
                     </div>
                   ))}
                 </div>
-                {allAnswered && (
-                  <div className="flex justify-end">
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={() => handleContinue(quiz.id)}
+                    disabled={!allAnswered || isGenerating || hasSubmitted}
+                  >
+                    {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                    Weiter
+                  </Button>
+                </div>
+
+                {/* AI-generated follow-up tasks */}
+                {isGenerating && hasSubmitted && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2 p-3 rounded-lg border border-border bg-background">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    {t("generating_tasks")}
+                  </div>
+                )}
+                {taskRounds.length > 0 && taskRounds.map((roundTasks, roundIndex) => {
+                  const globalOffset = taskRounds.slice(0, roundIndex).reduce((sum, r) => sum + r.length, 0);
+                  return (
+                    <div key={roundIndex} className="mt-3 p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-2">
+                      <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        Können Sie lösen:
+                      </h4>
+                      <ol className="space-y-2 mt-2">
+                        {roundTasks.map((task, i) => {
+                          const globalIndex = globalOffset + i;
+                          return (
+                            <li key={i} className="text-sm text-foreground space-y-1.5">
+                              <div className="flex gap-2">
+                                <span className="font-semibold text-primary shrink-0">{globalIndex + 1}.</span>
+                                <span>{task}</span>
+                              </div>
+                              <div className="flex gap-1.5 ml-5">
+                                {(["easy", "think", "impossible"] as const).map(level => {
+                                  const key = `${quiz.id}-${globalIndex}`;
+                                  const selected = taskDifficulty[key] === level;
+                                  const labels = {
+                                    easy: { text: t("difficulty_easy"), cls: "bg-green-500/10 text-green-700 border-green-300 hover:bg-green-500/20" },
+                                    think: { text: t("difficulty_think"), cls: "bg-yellow-500/10 text-yellow-700 border-yellow-300 hover:bg-yellow-500/20" },
+                                    impossible: { text: t("difficulty_impossible"), cls: "bg-red-500/10 text-red-700 border-red-300 hover:bg-red-500/20" },
+                                  };
+                                  const cfg = labels[level];
+                                  return (
+                                    <button
+                                      key={level}
+                                      onClick={() => {
+                                        setTaskDifficulty(prev => ({ ...prev, [key]: level }));
+                                      }}
+                                      className={`text-xs px-2.5 py-1 rounded-full border transition-all ${selected ? cfg.cls + " font-semibold ring-1 ring-offset-1 ring-current" : "border-muted text-muted-foreground hover:text-foreground"}`}
+                                    >
+                                      {cfg.text}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    </div>
+                  );
+                })}
+
+                {taskRounds.length > 0 && !isGenerating && (
+                  <div className="flex justify-end pt-2">
                     <Button
                       size="sm"
-                      onClick={() => handleContinue(quiz.id)}
-                      disabled={isGenerating}
+                      onClick={() => handleSubmit(quiz.id)}
+                      disabled={submitting === quiz.id}
                     >
-                      {isGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
-                      {t("continue")}
+                      {submitting === quiz.id ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Send className="w-4 h-4 mr-1" />}
+                      Absenden
                     </Button>
                   </div>
                 )}
               </>
             )}
 
-            {/* AI-generated follow-up tasks */}
-            {isGenerating && hasSubmitted && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2 p-3 rounded-lg border border-border bg-background">
-                <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                {t("generating_tasks")}
-              </div>
+            {submittedQuizzes.has(quiz.id) && (
+              <p className="text-sm text-green-700 font-medium flex items-center gap-1.5">
+                <Check className="w-4 h-4" /> Antworten gesendet
+              </p>
             )}
-            {taskRounds.length > 0 && taskRounds.map((roundTasks, roundIndex) => {
-              const globalOffset = taskRounds.slice(0, roundIndex).reduce((sum, r) => sum + r.length, 0);
-              return (
-                <div key={roundIndex} className="mt-3 p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-2">
-                  <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    {t("follow_up_tasks")} {roundIndex > 0 && `(${t("round")} ${roundIndex + 1})`}
-                  </h4>
-                  <p className="text-xs text-muted-foreground">{t("follow_up_tasks_hint")}</p>
-                  <ol className="space-y-2 mt-2">
-                    {roundTasks.map((task, i) => {
-                      const globalIndex = globalOffset + i;
-                      return (
-                        <li key={i} className="text-sm text-foreground space-y-1.5">
-                          <div className="flex gap-2">
-                            <span className="font-semibold text-primary shrink-0">{i + 1}.</span>
-                            <span>{task}</span>
-                          </div>
-                          <div className="flex gap-1.5 ml-5">
-                            {(["easy", "think", "impossible"] as const).map(level => {
-                              const key = `${quiz.id}-${globalIndex}`;
-                              const selected = taskDifficulty[key] === level;
-                              const labels = {
-                                easy: { text: t("difficulty_easy"), cls: "bg-green-500/10 text-green-700 border-green-300 hover:bg-green-500/20" },
-                                think: { text: t("difficulty_think"), cls: "bg-yellow-500/10 text-yellow-700 border-yellow-300 hover:bg-yellow-500/20" },
-                                impossible: { text: t("difficulty_impossible"), cls: "bg-red-500/10 text-red-700 border-red-300 hover:bg-red-500/20" },
-                              };
-                              const cfg = labels[level];
-                              return (
-                                <button
-                                  key={level}
-                                  onClick={() => {
-                                    setTaskDifficulty(prev => ({ ...prev, [key]: level }));
-                                  }}
-                                  className={`text-xs px-2.5 py-1 rounded-full border transition-all ${selected ? cfg.cls + " font-semibold ring-1 ring-offset-1 ring-current" : "border-muted text-muted-foreground hover:text-foreground"}`}
-                                >
-                                  {cfg.text}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </div>
-              );
-            })}
           </div>
         );
       })}
