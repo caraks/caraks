@@ -288,14 +288,16 @@ const PollList = ({ refreshKey, isAdmin }: PollListProps) => {
                     }
                   }}
                 >
-                  {poll.options.map((opt) => (
-                    <div key={opt.id} className="flex items-center gap-2">
-                      <RadioGroupItem value={opt.id} id={opt.id} />
-                      <label htmlFor={opt.id} className="text-sm text-foreground cursor-pointer">
-                        {opt.option_text}
-                      </label>
-                    </div>
-                  ))}
+                  <div className="flex flex-col md:flex-row md:flex-wrap md:gap-x-4 gap-y-2">
+                    {poll.options.map((opt) => (
+                      <div key={opt.id} className="flex items-center gap-2">
+                        <RadioGroupItem value={opt.id} id={opt.id} />
+                        <label htmlFor={opt.id} className="text-sm text-foreground cursor-pointer">
+                          {opt.option_text}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                   {poll.allow_free_text && (
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
