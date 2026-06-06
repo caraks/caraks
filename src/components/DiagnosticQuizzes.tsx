@@ -585,11 +585,55 @@ const StudentQuizPanel = ({ t }: { t: (k: string) => string }) => {
     setGeneratingTasks(null);
   };
 
+  const [submitting, setSubmitting] = useState<string | null>(null);
+  const [submittedQuizzes, setSubmittedQuizzes] = useState<Set<string>>(new Set());
+
   const handleContinue = (quizId: string) => {
     const answers = localAnswers[quizId];
     if (!answers || Object.keys(answers).length === 0) return;
     setAnsweredQuizzes(prev => new Set(prev).add(quizId));
     generateFollowUpTasks(quizId, answers as any);
+  };
+
+  const handleSubmit = async (quizId: string) => {
+    const answers = localAnswers[quizId];
+    const rounds = followUpTasks[quizId] ?? [];
+    const flatTasks = rounds.flat();
+    if (!answers) return;
+    for (let i = 0; i < flatTasks.length; i++) {
+      if (!taskDifficulty[`${quizId}-${i}`]) {
+        toast.error("Bitte bewerten Sie alle Aufgaben");
+        return;
+      }
+    }
+    setSubmitting(quizId);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSubmitting(null); return; }
+
+    const { error: respErr } = await supabase.from("diagnostic_responses").insert({
+      quiz_id: quizId,
+      user_id: user.id,
+      answers: answers as any,
+      follow_up_tasks: flatTasks as any,
+    } as any);
+
+    if (flatTasks.length > 0) {
+      const ratings = flatTasks.map((_, i) => ({
+        quiz_id: quizId,
+        user_id: user.id,
+        task_index: i,
+        difficulty: taskDifficulty[`${quizId}-${i}`],
+      }));
+      await supabase.from("task_difficulty_ratings" as any).insert(ratings as any);
+    }
+
+    setSubmitting(null);
+    if (respErr) {
+      toast.error(t("save_error"));
+    } else {
+      toast.success("Antworten gesendet");
+      setSubmittedQuizzes(prev => new Set(prev).add(quizId));
+    }
   };
 
   if (loading) return <Loader2 className="w-5 h-5 animate-spin text-muted-foreground mx-auto" />;
