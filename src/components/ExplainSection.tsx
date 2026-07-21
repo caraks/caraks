@@ -9,6 +9,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { supabase } from "@/integrations/supabase/client";
+import SpeakingAvatar from "./SpeakingAvatar";
 
 // Raw markdown prompt files
 import explainPrompt from "../../prompts/explain_to_me_prompt.md?raw";
@@ -188,6 +189,7 @@ const ExplainSection = () => {
 
   return (
     <div className="space-y-6">
+      <SpeakingAvatar speaking={isLoading} />
 
       {/* Chat */}
       <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
