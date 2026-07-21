@@ -151,6 +151,27 @@ export type Database = {
           },
         ]
       }
+      explain_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       poll_options: {
         Row: {
           id: string
