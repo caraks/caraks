@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send, Sparkles, Trash2, FileText } from "lucide-react";
+import { Loader2, Send, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -188,32 +188,6 @@ const ExplainSection = () => {
 
   return (
     <div className="space-y-6">
-      {/* Prompt files preview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[
-          { title: "explain_to_me_prompt.md", body: explainPrompt },
-          { title: "lesson_ml_basics.md", body: lessonMlBasics },
-        ].map((f) => (
-          <div
-            key={f.title}
-            className="rounded-xl border border-border bg-muted/30 p-3 flex flex-col"
-            style={{ maxHeight: "33vh" }}
-          >
-            <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold text-muted-foreground">
-              <FileText className="w-3.5 h-3.5 text-primary" />
-              {f.title}
-            </div>
-            <div className="overflow-auto text-xs prose prose-sm dark:prose-invert max-w-none flex-1">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeKatex]}
-              >
-                {f.body || "_(leer)_"}
-              </ReactMarkdown>
-            </div>
-          </div>
-        ))}
-      </div>
 
       {/* Chat */}
       <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
