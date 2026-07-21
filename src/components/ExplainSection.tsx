@@ -36,6 +36,29 @@ const ExplainSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const initStartedRef = useRef(false);
+  const conversationIdRef = useRef<string | null>(null);
+
+  const persistConversation = async (msgs: Msg[]) => {
+    try {
+      if (!conversationIdRef.current) {
+        const { data, error } = await supabase
+          .from("explain_conversations")
+          .insert({ messages: msgs as any })
+          .select("id")
+          .single();
+        if (error) throw error;
+        conversationIdRef.current = data.id;
+      } else {
+        const { error } = await supabase
+          .from("explain_conversations")
+          .update({ messages: msgs as any })
+          .eq("id", conversationIdRef.current);
+        if (error) throw error;
+      }
+    } catch (e) {
+      console.error("persistConversation failed:", e);
+    }
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
