@@ -162,6 +162,7 @@ const Index = () => {
           {activeTab === "text" && <TextSection />}
           {activeTab === "questions" && <QuestionsSection />}
           {activeTab === "lesson" && <LessonSection />}
+          {activeTab === "explain" && <ExplainSection />}
         </div>
       </main>
     </div>
