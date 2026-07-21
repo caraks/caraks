@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Volume2, VolumeX } from "lucide-react";
+import voiceAsset from "@/assets/teacher-voice.mp3.asset.json";
 
 const shapes = [
   { h: 6, y: 83 },
@@ -11,13 +13,35 @@ const shapes = [
 
 const SpeakingAvatar = ({ speaking }: { speaking: boolean }) => {
   const mouthRef = useRef<SVGRectElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [muted, setMuted] = useState(false);
 
   useEffect(() => {
+    if (!audioRef.current) {
+      const a = new Audio(voiceAsset.url);
+      a.loop = true;
+      a.volume = 0.6;
+      audioRef.current = a;
+    }
+    audioRef.current.muted = muted;
+  }, [muted]);
+
+  useEffect(() => {
+    const a = audioRef.current;
     if (!speaking) {
-      // reset to closed/neutral
       mouthRef.current?.setAttribute("height", "7");
       mouthRef.current?.setAttribute("y", "82");
+      if (a) {
+        a.pause();
+        a.currentTime = 0;
+      }
       return;
+    }
+    if (a) {
+      a.currentTime = 0;
+      a.play().catch(() => {
+        /* autoplay blocked until user interacts */
+      });
     }
     let i = 0;
     const id = setInterval(() => {
@@ -29,9 +53,15 @@ const SpeakingAvatar = ({ speaking }: { speaking: boolean }) => {
     return () => clearInterval(id);
   }, [speaking]);
 
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
+
   return (
     <div className="flex justify-center py-4">
-      <div className="w-40 h-40 rounded-full bg-muted border border-border flex items-center justify-center">
+      <div className="relative w-40 h-40 rounded-full bg-muted border border-border flex items-center justify-center">
         <svg width="130" height="130" viewBox="0 0 120 120">
           <ellipse cx="30" cy="70" rx="14" ry="16" fill="#8a6a4f" />
           <ellipse cx="90" cy="70" rx="14" ry="16" fill="#8a6a4f" />
@@ -47,6 +77,18 @@ const SpeakingAvatar = ({ speaking }: { speaking: boolean }) => {
           <ellipse cx="60" cy="72" rx="5" ry="4" fill="#7a5c42" />
           <rect ref={mouthRef} x="46" y="82" width="28" height="7" rx="3.5" fill="#5a3f2b" />
         </svg>
+        <button
+          type="button"
+          onClick={() => setMuted((m) => !m)}
+          aria-label={muted ? "Ton einschalten" : "Ton ausschalten"}
+          className="absolute bottom-1 right-1 rounded-full bg-background/80 border border-border p-1.5 hover:bg-background transition-colors"
+        >
+          {muted ? (
+            <VolumeX className="w-4 h-4 text-muted-foreground" />
+          ) : (
+            <Volume2 className="w-4 h-4 text-foreground" />
+          )}
+        </button>
       </div>
     </div>
   );
