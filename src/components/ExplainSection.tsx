@@ -9,6 +9,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { supabase } from "@/integrations/supabase/client";
+import SpeakingAvatar from "./SpeakingAvatar";
 
 // Raw markdown prompt files
 import explainPrompt from "../../prompts/explain_to_me_prompt.md?raw";
