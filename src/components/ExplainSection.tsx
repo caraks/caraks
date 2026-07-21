@@ -173,6 +173,7 @@ const ExplainSection = () => {
   const clearChat = () => {
     setMessages([]);
     setVisibleMessages([]);
+    conversationIdRef.current = null;
     initStartedRef.current = false;
     // trigger a new intro
     setTimeout(() => {
