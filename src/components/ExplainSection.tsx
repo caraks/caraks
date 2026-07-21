@@ -8,6 +8,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
+import { supabase } from "@/integrations/supabase/client";
 
 // Raw markdown prompt files
 import explainPrompt from "../../prompts/explain_to_me_prompt.md?raw";
@@ -35,6 +36,29 @@ const ExplainSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const initStartedRef = useRef(false);
+  const conversationIdRef = useRef<string | null>(null);
+
+  const persistConversation = async (msgs: Msg[]) => {
+    try {
+      if (!conversationIdRef.current) {
+        const { data, error } = await supabase
+          .from("explain_conversations")
+          .insert({ messages: msgs as any })
+          .select("id")
+          .single();
+        if (error) throw error;
+        conversationIdRef.current = data.id;
+      } else {
+        const { error } = await supabase
+          .from("explain_conversations")
+          .update({ messages: msgs as any })
+          .eq("id", conversationIdRef.current);
+        if (error) throw error;
+      }
+    } catch (e) {
+      console.error("persistConversation failed:", e);
+    }
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -115,9 +139,11 @@ const ExplainSection = () => {
       toast.error("Fehler");
     }
 
-    // Save the full assistant reply into hidden history
+    // Save the full assistant reply into hidden history and persist
     if (assistantSoFar) {
-      setMessages((prev) => [...prev, { role: "assistant", content: assistantSoFar }]);
+      const updated = [...allMessages, { role: "assistant" as const, content: assistantSoFar }];
+      setMessages(updated);
+      persistConversation(updated);
     }
     setIsLoading(false);
   };
@@ -147,6 +173,7 @@ const ExplainSection = () => {
   const clearChat = () => {
     setMessages([]);
     setVisibleMessages([]);
+    conversationIdRef.current = null;
     initStartedRef.current = false;
     // trigger a new intro
     setTimeout(() => {
