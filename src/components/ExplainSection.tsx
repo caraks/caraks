@@ -139,9 +139,11 @@ const ExplainSection = () => {
       toast.error("Fehler");
     }
 
-    // Save the full assistant reply into hidden history
+    // Save the full assistant reply into hidden history and persist
     if (assistantSoFar) {
-      setMessages((prev) => [...prev, { role: "assistant", content: assistantSoFar }]);
+      const updated = [...allMessages, { role: "assistant" as const, content: assistantSoFar }];
+      setMessages(updated);
+      persistConversation(updated);
     }
     setIsLoading(false);
   };
