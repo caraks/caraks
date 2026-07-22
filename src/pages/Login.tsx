@@ -28,7 +28,9 @@ const Login = () => {
         variant: "destructive",
       });
     } else {
-      navigate("/");
+      const dest = sessionStorage.getItem("postLoginRedirect");
+      sessionStorage.removeItem("postLoginRedirect");
+      navigate(dest || "/", { replace: true });
     }
 
     setLoading(false);
