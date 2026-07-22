@@ -144,7 +144,11 @@ const ExplainSection = () => {
     if (assistantSoFar) {
       const updated = [...allMessages, { role: "assistant" as const, content: assistantSoFar }];
       setMessages(updated);
-      persistConversation(updated);
+      // Only persist once the user has sent a real message (not just the hidden init)
+      const hasRealUserMessage = updated.some(
+        (m) => m.role === "user" && m.content !== INIT_MESSAGE,
+      );
+      if (hasRealUserMessage) persistConversation(updated);
     }
     setIsLoading(false);
   };
