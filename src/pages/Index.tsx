@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom, BookOpen, Lightbulb } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
 import QuestionsSection from "@/components/QuestionsSection";
