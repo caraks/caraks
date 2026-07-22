@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom, BookOpen, Lightbulb } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
 import QuestionsSection from "@/components/QuestionsSection";
@@ -16,9 +16,19 @@ import { toast } from "sonner";
 
 type Tab = "text" | "questions" | "lesson" | "explain";
 
+const TAB_SLUGS: Record<Tab, string> = {
+  text: "text",
+  questions: "fragen",
+  lesson: "lektion",
+  explain: "erklare_es_mir",
+};
+const SLUG_TO_TAB: Record<string, Tab> = Object.fromEntries(
+  Object.entries(TAB_SLUGS).map(([k, v]) => [v, k as Tab]),
+) as Record<string, Tab>;
+
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<Tab>("text");
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { displayName } = useProfile();
   const { role } = useUserRole();
   const { lang, setLang, t } = useLang();
@@ -36,6 +46,26 @@ const Index = () => {
         { id: "questions", label: t("questions_tab"), icon: <HelpCircle className="w-5 h-5" /> },
         { id: "explain", label: "Erkläre es mir", icon: <Lightbulb className="w-5 h-5" /> },
       ];
+
+  const allowedIds = useMemo(() => tabs.map((x) => x.id), [tabs]);
+  const urlTab = SLUG_TO_TAB[searchParams.get("tab") ?? ""];
+  const activeTab: Tab = urlTab && allowedIds.includes(urlTab) ? urlTab : "text";
+
+  const setActiveTab = (tab: Tab) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", TAB_SLUGS[tab]);
+    setSearchParams(next, { replace: false });
+  };
+
+  useEffect(() => {
+    if (!searchParams.get("tab") || !urlTab || !allowedIds.includes(urlTab)) {
+      const next = new URLSearchParams(searchParams);
+      next.set("tab", TAB_SLUGS[allowedIds[0]]);
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role]);
+
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);
 
