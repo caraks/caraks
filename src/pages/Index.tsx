@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
 import QuestionsSection from "@/components/QuestionsSection";
 import ExplainSection from "@/components/ExplainSection";
+import GrillPromptSection from "@/components/GrillPromptSection";
 import LessonSection from "@/components/LessonSection";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
