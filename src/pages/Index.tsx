@@ -15,13 +15,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
-type Tab = "text" | "questions" | "lesson" | "explain";
+type Tab = "text" | "questions" | "lesson" | "explain" | "grill";
 
 const TAB_SLUGS: Record<Tab, string> = {
   text: "text",
   questions: "fragen",
   lesson: "lektion",
   explain: "erklare_es_mir",
+  grill: "grill_prompt",
 };
 const SLUG_TO_TAB: Record<string, Tab> = Object.fromEntries(
   Object.entries(TAB_SLUGS).map(([k, v]) => [v, k as Tab]),
