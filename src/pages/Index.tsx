@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom, BookOpen, Lightbulb } from "lucide-react";
+import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom, BookOpen, Lightbulb, Flame } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
