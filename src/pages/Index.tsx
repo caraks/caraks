@@ -42,11 +42,13 @@ const Index = () => {
         { id: "text", label: t("text_admin"), icon: <Type className="w-5 h-5" /> },
         { id: "lesson", label: t("lesson"), icon: <BookOpen className="w-5 h-5" /> },
         { id: "explain", label: "Erkläre es mir", icon: <Lightbulb className="w-5 h-5" /> },
+        { id: "grill", label: "Grill mal meinen Prompt", icon: <Flame className="w-5 h-5" /> },
       ]
     : [
         { id: "text", label: t("text"), icon: <Type className="w-5 h-5" /> },
         { id: "questions", label: t("questions_tab"), icon: <HelpCircle className="w-5 h-5" /> },
         { id: "explain", label: "Erkläre es mir", icon: <Lightbulb className="w-5 h-5" /> },
+        { id: "grill", label: "Grill mal meinen Prompt", icon: <Flame className="w-5 h-5" /> },
       ];
 
   const allowedIds = useMemo(() => tabs.map((x) => x.id), [tabs]);
