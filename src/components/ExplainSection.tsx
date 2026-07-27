@@ -230,6 +230,27 @@ const ExplainSection = () => {
     <div className="space-y-6">
       <SpeakingAvatar speaking={isLoading} />
 
+      {/* Lesson selector */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium text-foreground flex items-center gap-1.5">
+          <BookOpen className="w-4 h-4 text-primary" />
+          Lektion
+        </span>
+        <Select value={lesson.slug} onValueChange={setLesson}>
+          <SelectTrigger className="w-[260px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {LESSONS.map((l) => (
+              <SelectItem key={l.slug} value={l.slug}>
+                {prettyLabel(l.slug)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+
       {/* Chat */}
       <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
         <div className="flex items-center justify-between">
