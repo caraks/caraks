@@ -125,7 +125,7 @@ const ExplainSection = () => {
         },
         body: JSON.stringify({
           messages: allMessages,
-          systemContext: buildSystemContext(),
+          systemContext: buildSystemContext(lessonRef.current.slug, lessonRef.current.content),
         }),
       });
 
