@@ -187,16 +187,17 @@ const ExplainSection = () => {
     setIsLoading(false);
   };
 
-  // Initiate conversation with hidden user message on first mount
+  // Initiate conversation with hidden user message on mount / lesson change
   useEffect(() => {
-    if (initStartedRef.current) return;
     initStartedRef.current = true;
+    conversationIdRef.current = null;
+    setVisibleMessages([]);
     const initial: Msg[] = [{ role: "user", content: INIT_MESSAGE }];
     setMessages(initial);
     // do not push init user message into visibleMessages
     streamChat(initial);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [lesson.slug]);
 
   const send = async () => {
     const trimmed = input.trim();
