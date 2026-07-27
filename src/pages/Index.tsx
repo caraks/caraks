@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
-import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom, BookOpen, Lightbulb, Flame } from "lucide-react";
+import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom, BookOpen, Lightbulb, Flame, Bug } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
 import QuestionsSection from "@/components/QuestionsSection";
 import ExplainSection from "@/components/ExplainSection";
 import GrillPromptSection from "@/components/GrillPromptSection";
+import FindErrorSection from "@/components/FindErrorSection";
 import LessonSection from "@/components/LessonSection";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
@@ -15,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
-type Tab = "text" | "questions" | "lesson" | "explain" | "grill";
+type Tab = "text" | "questions" | "lesson" | "explain" | "grill" | "finderror";
 
 const TAB_SLUGS: Record<Tab, string> = {
   text: "text",
@@ -23,6 +24,7 @@ const TAB_SLUGS: Record<Tab, string> = {
   lesson: "lektion",
   explain: "erklare_es_mir",
   grill: "grill_prompt",
+  finderror: "finde_den_fehler",
 };
 const SLUG_TO_TAB: Record<string, Tab> = Object.fromEntries(
   Object.entries(TAB_SLUGS).map(([k, v]) => [v, k as Tab]),
@@ -43,12 +45,14 @@ const Index = () => {
         { id: "lesson", label: t("lesson"), icon: <BookOpen className="w-5 h-5" /> },
         { id: "explain", label: "Erkläre es mir", icon: <Lightbulb className="w-5 h-5" /> },
         { id: "grill", label: "Grill mal meinen Prompt", icon: <Flame className="w-5 h-5" /> },
+        { id: "finderror", label: "Finde den Fehler", icon: <Bug className="w-5 h-5" /> },
       ]
     : [
         { id: "text", label: t("text"), icon: <Type className="w-5 h-5" /> },
         { id: "questions", label: t("questions_tab"), icon: <HelpCircle className="w-5 h-5" /> },
         { id: "explain", label: "Erkläre es mir", icon: <Lightbulb className="w-5 h-5" /> },
         { id: "grill", label: "Grill mal meinen Prompt", icon: <Flame className="w-5 h-5" /> },
+        { id: "finderror", label: "Finde den Fehler", icon: <Bug className="w-5 h-5" /> },
       ];
 
   const allowedIds = useMemo(() => tabs.map((x) => x.id), [tabs]);
@@ -198,6 +202,7 @@ const Index = () => {
           {activeTab === "lesson" && <LessonSection />}
           {activeTab === "explain" && <ExplainSection />}
           {activeTab === "grill" && <GrillPromptSection />}
+          {activeTab === "finderror" && <FindErrorSection />}
         </div>
       </main>
     </div>
