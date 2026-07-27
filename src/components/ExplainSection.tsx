@@ -1,7 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Send, Sparkles, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Send, Sparkles, Trash2, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -13,7 +15,23 @@ import SpeakingAvatar from "./SpeakingAvatar";
 
 // Raw markdown prompt files
 import explainPrompt from "../../prompts/explain_to_me_prompt.md?raw";
-import lessonMlBasics from "../../prompts/lesson_ml_basics.md?raw";
+
+// All lesson_*.md files in prompts/
+const lessonModules = import.meta.glob("../../prompts/lesson_*.md", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+}) as Record<string, string>;
+
+const LESSONS = Object.entries(lessonModules)
+  .map(([path, content]) => ({
+    slug: path.split("/").pop()!.replace(/\.md$/, ""),
+    content,
+  }))
+  .sort((a, b) => a.slug.localeCompare(b.slug));
+
+const prettyLabel = (slug: string) =>
+  slug.replace(/^lesson_/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -21,16 +39,17 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/explain-chat
 
 const INIT_MESSAGE = "Начни разговор со своего вступительного сообщения.";
 
-const buildSystemContext = () =>
+const buildSystemContext = (lessonSlug: string, lessonContent: string) =>
   `Du bist ein Lern-Tutor. Nutze ausschließlich die folgenden Materialien als Grundlage für deine Antworten. Antworte auf Deutsch.
 
 === SYSTEM PROMPT (explain_to_me_prompt.md) ===
 ${explainPrompt}
 
-=== LEKTION (lesson_ml_basics.md) ===
-${lessonMlBasics}`;
+=== LEKTION (${lessonSlug}.md) ===
+${lessonContent}`;
 
 const ExplainSection = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [visibleMessages, setVisibleMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -38,6 +57,21 @@ const ExplainSection = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const initStartedRef = useRef(false);
   const conversationIdRef = useRef<string | null>(null);
+
+  const urlLesson = searchParams.get("lesson") ?? "";
+  const lesson = useMemo(
+    () => LESSONS.find((l) => l.slug === urlLesson) ?? LESSONS[0],
+    [urlLesson],
+  );
+  const lessonRef = useRef(lesson);
+  lessonRef.current = lesson;
+
+  const setLesson = (slug: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("lesson", slug);
+    setSearchParams(next, { replace: false });
+  };
+
 
   const persistConversation = async (msgs: Msg[]) => {
     try {
