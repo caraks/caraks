@@ -60,7 +60,7 @@ const Index = () => {
 
   const allowedIds = useMemo(() => tabs.map((x) => x.id), [tabs]);
   const urlTab = SLUG_TO_TAB[searchParams.get("tab") ?? ""];
-  const activeTab: Tab = urlTab && allowedIds.includes(urlTab) ? urlTab : "text";
+  const activeTab: Tab = urlTab && allowedIds.includes(urlTab) ? urlTab : allowedIds[0];
 
   const setActiveTab = (tab: Tab) => {
     const next = new URLSearchParams(searchParams);
