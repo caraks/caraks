@@ -18,7 +18,7 @@ export const useUserRole = () => {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      setRole((data?.role as AppRole) ?? "user");
+      setRole((data?.role as AppRole) ?? "att_user");
       setLoading(false);
     };
 
