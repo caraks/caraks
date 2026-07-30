@@ -40,7 +40,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Media Hub</CardTitle>
+          <CardTitle className="text-2xl">LernPhy Portal</CardTitle>
           <CardDescription>Войдите в свой аккаунт</CardDescription>
         </CardHeader>
         <CardContent>
