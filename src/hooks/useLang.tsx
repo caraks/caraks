@@ -7,7 +7,7 @@ interface Translations {
 }
 
 const translations: Translations = {
-  "media_hub": { ru: "Media Hub", de: "Media Hub" },
+  "media_hub": { ru: "LernPhy Portal", de: "LernPhy Portal" },
   "site_description": { ru: "Платформа для интеллектуального обучения: все образовательные технологии на базе ИИ в одном приложении", de: "Eine Plattform für intelligentes Lernen: alle KI-basierten Bildungstechnologien in einer App" },
   "subtitle": { ru: "Текст · Видео · Изображения", de: "Text · Video · Bilder" },
   "text": { ru: "Общение с учителем", de: "Kommunikation mit dem Lehrer" },
