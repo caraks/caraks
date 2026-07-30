@@ -8,7 +8,7 @@ interface Translations {
 
 const translations: Translations = {
   "media_hub": { ru: "Media Hub", de: "Media Hub" },
-  "site_description": { ru: "Платформа для изучения физики: общайся с учителем, проходи опросы и проверяй свои знания", de: "Plattform zum Physiklernen: kommuniziere mit dem Lehrer, nimm an Umfragen teil und teste dein Wissen" },
+  "site_description": { ru: "Платформа для интеллектуального обучения: все образовательные технологии на базе ИИ в одном приложении", de: "Eine Plattform für intelligentes Lernen: alle KI-basierten Bildungstechnologien in einer App" },
   "subtitle": { ru: "Текст · Видео · Изображения", de: "Text · Video · Bilder" },
   "text": { ru: "Общение с учителем", de: "Kommunikation mit dem Lehrer" },
   "text_admin": { ru: "Общение с учениками", de: "Kommunikation mit Schülern" },
