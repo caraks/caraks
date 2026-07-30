@@ -39,25 +39,28 @@ const Index = () => {
   const [editOpen, setEditOpen] = useState(false);
 
   const isAdmin = role === "admin";
+  const isAttUser = role === "att_user";
+  const chatTabs = [
+    { id: "explain" as Tab, label: "Erkläre es mir", icon: <Lightbulb className="w-5 h-5" /> },
+    { id: "grill" as Tab, label: "Grill mal meinen Prompt", icon: <Flame className="w-5 h-5" /> },
+    { id: "finderror" as Tab, label: "Finde den Fehler", icon: <Bug className="w-5 h-5" /> },
+  ];
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = isAdmin
     ? [
         { id: "text", label: t("text_admin"), icon: <Type className="w-5 h-5" /> },
         { id: "lesson", label: t("lesson"), icon: <BookOpen className="w-5 h-5" /> },
-        { id: "explain", label: "Erkläre es mir", icon: <Lightbulb className="w-5 h-5" /> },
-        { id: "grill", label: "Grill mal meinen Prompt", icon: <Flame className="w-5 h-5" /> },
-        { id: "finderror", label: "Finde den Fehler", icon: <Bug className="w-5 h-5" /> },
+        ...chatTabs,
       ]
+    : isAttUser
+    ? chatTabs
     : [
         { id: "text", label: t("text"), icon: <Type className="w-5 h-5" /> },
         { id: "questions", label: t("questions_tab"), icon: <HelpCircle className="w-5 h-5" /> },
-        { id: "explain", label: "Erkläre es mir", icon: <Lightbulb className="w-5 h-5" /> },
-        { id: "grill", label: "Grill mal meinen Prompt", icon: <Flame className="w-5 h-5" /> },
-        { id: "finderror", label: "Finde den Fehler", icon: <Bug className="w-5 h-5" /> },
       ];
 
   const allowedIds = useMemo(() => tabs.map((x) => x.id), [tabs]);
   const urlTab = SLUG_TO_TAB[searchParams.get("tab") ?? ""];
-  const activeTab: Tab = urlTab && allowedIds.includes(urlTab) ? urlTab : "text";
+  const activeTab: Tab = urlTab && allowedIds.includes(urlTab) ? urlTab : allowedIds[0];
 
   const setActiveTab = (tab: Tab) => {
     const next = new URLSearchParams(searchParams);
