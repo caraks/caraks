@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom, BookOpen, Lightbulb, Flame, Bug } from "lucide-react";
+import { Type, LogOut, User, Pencil, Globe, HelpCircle, Atom, BookOpen, Lightbulb, Flame, Bug, Bot } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import TextSection from "@/components/TextSection";
@@ -7,6 +7,7 @@ import QuestionsSection from "@/components/QuestionsSection";
 import ExplainSection from "@/components/ExplainSection";
 import GrillPromptSection from "@/components/GrillPromptSection";
 import FindErrorSection from "@/components/FindErrorSection";
+import TuringTestSection from "@/components/TuringTestSection";
 import LessonSection from "@/components/LessonSection";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
@@ -16,7 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
-type Tab = "text" | "questions" | "lesson" | "explain" | "grill" | "finderror";
+type Tab = "text" | "questions" | "lesson" | "explain" | "grill" | "finderror" | "turing";
 
 const TAB_SLUGS: Record<Tab, string> = {
   text: "text",
@@ -25,6 +26,7 @@ const TAB_SLUGS: Record<Tab, string> = {
   explain: "erklare_es_mir",
   grill: "grill_prompt",
   finderror: "finde_den_fehler",
+  turing: "turing_test",
 };
 const SLUG_TO_TAB: Record<string, Tab> = Object.fromEntries(
   Object.entries(TAB_SLUGS).map(([k, v]) => [v, k as Tab]),
@@ -44,6 +46,7 @@ const Index = () => {
     { id: "explain" as Tab, label: "Erkläre es mir", icon: <Lightbulb className="w-5 h-5" /> },
     { id: "grill" as Tab, label: "Grill mal meinen Prompt", icon: <Flame className="w-5 h-5" /> },
     { id: "finderror" as Tab, label: "Finde den Fehler", icon: <Bug className="w-5 h-5" /> },
+    { id: "turing" as Tab, label: "Turing Test", icon: <Bot className="w-5 h-5" /> },
   ];
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = isAdmin
     ? [
@@ -206,6 +209,7 @@ const Index = () => {
           {activeTab === "explain" && <ExplainSection />}
           {activeTab === "grill" && <GrillPromptSection />}
           {activeTab === "finderror" && <FindErrorSection />}
+          {activeTab === "turing" && <TuringTestSection />}
         </div>
       </main>
     </div>
