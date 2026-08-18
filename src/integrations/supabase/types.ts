@@ -391,6 +391,106 @@ export type Database = {
           },
         ]
       }
+      turing_assignments: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          grp: string
+          id: string
+          pair_id: string | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          grp: string
+          id?: string
+          pair_id?: string | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          grp?: string
+          id?: string
+          pair_id?: string | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "turing_assignments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "turing_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      turing_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          pair_id: string
+          sender_id: string
+          sender_name: string | null
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          pair_id: string
+          sender_id: string
+          sender_name?: string | null
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          pair_id?: string
+          sender_id?: string
+          sender_name?: string | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "turing_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "turing_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      turing_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          started_by: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          started_by: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          started_by?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -419,6 +519,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      turing_is_pair_member: {
+        Args: { _pair_id: string; _user_id: string }
         Returns: boolean
       }
     }
