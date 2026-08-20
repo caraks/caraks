@@ -36,7 +36,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { displayName } = useProfile();
-  const { role } = useUserRole();
+  const { role, loading: roleLoading } = useUserRole();
   const { lang, setLang, t } = useLang();
   const [editOpen, setEditOpen] = useState(false);
 
@@ -72,13 +72,14 @@ const Index = () => {
   };
 
   useEffect(() => {
+    if (roleLoading) return;
     if (!searchParams.get("tab") || !urlTab || !allowedIds.includes(urlTab)) {
       const next = new URLSearchParams(searchParams);
       next.set("tab", TAB_SLUGS[allowedIds[0]]);
       setSearchParams(next, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role]);
+  }, [role, roleLoading]);
 
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);
