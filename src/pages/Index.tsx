@@ -107,6 +107,12 @@ const Index = () => {
     }
   };
 
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background starry-sky" />
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background starry-sky">
       {/* Header */}
