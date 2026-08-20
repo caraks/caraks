@@ -11,10 +11,14 @@ const shapes = [
   { h: 10, y: 81 },
 ];
 
+const MIN_SPEAK_MS = 3000;
+
 const SpeakingAvatar = ({ speaking }: { speaking: boolean }) => {
   const mouthRef = useRef<SVGRectElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [muted, setMuted] = useState(false);
+  const [active, setActive] = useState(false);
+  const startedAtRef = useRef<number>(0);
 
   useEffect(() => {
     if (!audioRef.current) {
@@ -26,9 +30,27 @@ const SpeakingAvatar = ({ speaking }: { speaking: boolean }) => {
     audioRef.current.muted = muted;
   }, [muted]);
 
+  // Keep the animation/sound alive for at least MIN_SPEAK_MS
+  useEffect(() => {
+    if (speaking) {
+      startedAtRef.current = Date.now();
+      setActive(true);
+      return;
+    }
+    if (!active) return;
+    const remaining = MIN_SPEAK_MS - (Date.now() - startedAtRef.current);
+    if (remaining <= 0) {
+      setActive(false);
+      return;
+    }
+    const id = setTimeout(() => setActive(false), remaining);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speaking]);
+
   useEffect(() => {
     const a = audioRef.current;
-    if (!speaking) {
+    if (!active) {
       mouthRef.current?.setAttribute("height", "7");
       mouthRef.current?.setAttribute("y", "82");
       if (a) {
@@ -51,7 +73,7 @@ const SpeakingAvatar = ({ speaking }: { speaking: boolean }) => {
       i++;
     }, 180);
     return () => clearInterval(id);
-  }, [speaking]);
+  }, [active]);
 
   useEffect(() => {
     return () => {
