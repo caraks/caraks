@@ -54,6 +54,7 @@ const ExplainSection = () => {
   const [visibleMessages, setVisibleMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [started, setStarted] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const initStartedRef = useRef(false);
   const conversationIdRef = useRef<string | null>(null);
@@ -187,17 +188,24 @@ const ExplainSection = () => {
     setIsLoading(false);
   };
 
-  // Initiate conversation with hidden user message on mount / lesson change
+  // Reset chat when lesson changes — conversation starts only on "Start"
   useEffect(() => {
-    initStartedRef.current = true;
+    initStartedRef.current = false;
     conversationIdRef.current = null;
+    setStarted(false);
+    setMessages([]);
     setVisibleMessages([]);
-    const initial: Msg[] = [{ role: "user", content: INIT_MESSAGE }];
-    setMessages(initial);
-    // do not push init user message into visibleMessages
-    streamChat(initial);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson.slug]);
+
+  const startChat = () => {
+    if (initStartedRef.current) return;
+    initStartedRef.current = true;
+    setStarted(true);
+    const initial: Msg[] = [{ role: "user", content: INIT_MESSAGE }];
+    setMessages(initial);
+    streamChat(initial);
+  };
 
   const send = async () => {
     const trimmed = input.trim();
@@ -215,15 +223,7 @@ const ExplainSection = () => {
     setVisibleMessages([]);
     conversationIdRef.current = null;
     initStartedRef.current = false;
-    // trigger a new intro
-    setTimeout(() => {
-      if (!initStartedRef.current) {
-        initStartedRef.current = true;
-        const initial: Msg[] = [{ role: "user", content: INIT_MESSAGE }];
-        setMessages(initial);
-        streamChat(initial);
-      }
-    }, 50);
+    setStarted(false);
   };
 
   return (
@@ -271,6 +271,18 @@ const ExplainSection = () => {
           )}
         </div>
 
+        {!started ? (
+          <div className="flex flex-col items-center gap-3 py-8">
+            <p className="text-xs text-muted-foreground">
+              Klicken Sie auf „Start“, um das Gespräch zu beginnen.
+            </p>
+            <Button onClick={startChat}>
+              <Sparkles className="w-4 h-4 mr-1.5" />
+              Start
+            </Button>
+          </div>
+        ) : (
+        <>
         <div className="max-h-[420px] overflow-y-auto space-y-2 min-h-[120px]">
           {visibleMessages.length === 0 && isLoading && (
             <div className="flex items-start">
@@ -342,6 +354,8 @@ const ExplainSection = () => {
             )}
           </Button>
         </div>
+        </>
+        )}
       </div>
     </div>
   );
