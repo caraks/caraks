@@ -212,7 +212,7 @@ const TuringTestSection = () => {
   /* ---------------- Admin: start ---------------- */
   const startSession = async () => {
     if (!userId) return;
-    const participants = online.filter((u) => !u.is_admin);
+    if (participants.length < 1) {
     if (participants.length < 1) {
       toast.error("Keine Teilnehmer online.");
       return;
