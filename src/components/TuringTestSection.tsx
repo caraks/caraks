@@ -50,6 +50,9 @@ const TuringTestSection = () => {
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [allAssignments, setAllAssignments] = useState<Assignment[]>([]);
   const [starting, setStarting] = useState(false);
+  const [optedInAt, setOptedInAt] = useState<number | null>(null);
+  const [, setTick] = useState(0);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   // Chat state (group A: bot, group B: peer)
   const [messages, setMessages] = useState<Msg[]>([]);
