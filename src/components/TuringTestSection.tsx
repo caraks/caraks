@@ -20,7 +20,14 @@ const PRESENCE_CHANNEL = "turing-test-room";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-type OnlineUser = { user_id: string; display_name: string; is_admin: boolean };
+type OnlineUser = {
+  user_id: string;
+  display_name: string;
+  is_admin: boolean;
+  opted_in_at?: number | null;
+};
+
+const OPT_IN_WINDOW_MS = 5 * 60 * 1000;
 
 type Assignment = {
   id: string;
