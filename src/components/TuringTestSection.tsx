@@ -463,15 +463,40 @@ const TuringTestSection = () => {
         </div>
       )}
 
-      {/* Waiting state for participants */}
+      {/* Opt-in / waiting state for participants */}
       {!isAdmin && !assignment && (
         <div className="rounded-xl border border-border bg-muted/30 p-8 text-center">
-          <Loader2 className="w-5 h-5 animate-spin mx-auto mb-3 text-primary" />
-          <p className="text-sm text-muted-foreground">
-            Warte auf den Start des Turing Tests…
-          </p>
+          {optInActive ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin mx-auto mb-3 text-primary" />
+              <p className="text-sm text-muted-foreground">
+                Angemeldet. Warte auf den Start des Turing Tests…
+              </p>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="mt-3"
+                onClick={() => setOptedInAt(Date.now())}
+              >
+                Anmeldung verlängern
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground mb-4">
+                {optedInAt
+                  ? "Deine Anmeldung ist abgelaufen. Melde dich erneut an."
+                  : "Möchtest du am Turing Test teilnehmen?"}
+              </p>
+              <Button size="sm" onClick={() => setOptedInAt(Date.now())}>
+                <Users className="w-4 h-4 mr-1" />
+                Ich möchte teilnehmen
+              </Button>
+            </>
+          )}
         </div>
       )}
+
 
       {/* Chat (identical UI for both groups) */}
       {assignment && (
