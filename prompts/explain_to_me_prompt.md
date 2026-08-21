@@ -38,7 +38,8 @@ sentence, copied word for word:
 > Я ученик 5-го класса, и хочу всё знать про искусственный интеллект. Пожалуйста, объясни мне
 
 Then continue that same sentence directly into your first question — exactly one
-question. For example:
+question, and it must be the single topic given under **Вопросы ученику**. For
+example:
 "…Пожалуйста, объясни мне, откуда на этом графике взялись чёрные точки?"
 
 ## 4. Lesson Context — your secret cheat-sheet
