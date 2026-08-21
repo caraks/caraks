@@ -20,7 +20,14 @@ const PRESENCE_CHANNEL = "turing-test-room";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-type OnlineUser = { user_id: string; display_name: string; is_admin: boolean };
+type OnlineUser = {
+  user_id: string;
+  display_name: string;
+  is_admin: boolean;
+  opted_in_at?: number | null;
+};
+
+const OPT_IN_WINDOW_MS = 5 * 60 * 1000;
 
 type Assignment = {
   id: string;
@@ -43,6 +50,9 @@ const TuringTestSection = () => {
   const [assignment, setAssignment] = useState<Assignment | null>(null);
   const [allAssignments, setAllAssignments] = useState<Assignment[]>([]);
   const [starting, setStarting] = useState(false);
+  const [optedInAt, setOptedInAt] = useState<number | null>(null);
+  const [, setTick] = useState(0);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   // Chat state (group A: bot, group B: peer)
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -67,13 +77,14 @@ const TuringTestSection = () => {
     const channel = supabase.channel(PRESENCE_CHANNEL, {
       config: { presence: { key: userId } },
     });
+    channelRef.current = channel;
 
     channel
       .on("presence", { event: "sync" }, () => {
         const state = channel.presenceState<OnlineUser>();
         const users: OnlineUser[] = [];
         Object.values(state).forEach((entries) => {
-          const e = entries[0] as unknown as OnlineUser;
+          const e = entries[entries.length - 1] as unknown as OnlineUser;
           if (e?.user_id && !users.some((u) => u.user_id === e.user_id)) users.push(e);
         });
         setOnline(users);
@@ -84,14 +95,42 @@ const TuringTestSection = () => {
             user_id: userId,
             display_name: displayName ?? "Teilnehmer",
             is_admin: isAdmin,
+            opted_in_at: optedInAt,
           });
         }
       });
 
     return () => {
+      channelRef.current = null;
       supabase.removeChannel(channel);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, displayName, isAdmin, roleLoading]);
+
+  // Re-broadcast presence when the user opts in
+  useEffect(() => {
+    if (!userId || !channelRef.current) return;
+    channelRef.current.track({
+      user_id: userId,
+      display_name: displayName ?? "Teilnehmer",
+      is_admin: isAdmin,
+      opted_in_at: optedInAt,
+    });
+  }, [optedInAt, userId, displayName, isAdmin]);
+
+  // Keep the 5-minute window fresh
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 15000);
+    return () => clearInterval(id);
+  }, []);
+
+  const now = Date.now();
+  const participants = online.filter(
+    (u) => !u.is_admin && u.opted_in_at && now - u.opted_in_at <= OPT_IN_WINDOW_MS,
+  );
+  const optInActive = optedInAt !== null && now - optedInAt <= OPT_IN_WINDOW_MS;
+
+
 
   /* ---------------- Active session + assignment ---------------- */
   const loadSession = useCallback(async () => {
@@ -173,9 +212,8 @@ const TuringTestSection = () => {
   /* ---------------- Admin: start ---------------- */
   const startSession = async () => {
     if (!userId) return;
-    const participants = online.filter((u) => !u.is_admin);
     if (participants.length < 1) {
-      toast.error("Keine Teilnehmer online.");
+      toast.error("Keine angemeldeten Teilnehmer (letzte 5 Minuten).");
       return;
     }
     setStarting(true);
@@ -361,7 +399,7 @@ const TuringTestSection = () => {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
               <Users className="w-4 h-4 text-primary" />
-              Online: {online.filter((u) => !u.is_admin).length}
+              Angemeldet (letzte 5 Min.): {participants.length}
             </h3>
             <div className="flex gap-2">
               <Button size="sm" onClick={startSession} disabled={starting}>
@@ -378,14 +416,21 @@ const TuringTestSection = () => {
           </div>
 
           <div className="flex flex-wrap gap-1.5">
-            {online
-              .filter((u) => !u.is_admin)
-              .map((u) => (
-                <span key={u.user_id} className="text-xs bg-card border border-border rounded-full px-2.5 py-0.5">
-                  {u.display_name}
+            {participants.length === 0 && (
+              <span className="text-xs text-muted-foreground italic">
+                Noch keine Teilnahme-Anmeldungen.
+              </span>
+            )}
+            {participants.map((u) => (
+              <span key={u.user_id} className="text-xs bg-card border border-border rounded-full px-2.5 py-0.5">
+                {u.display_name}
+                <span className="text-muted-foreground ml-1">
+                  {Math.max(0, Math.round((now - (u.opted_in_at ?? now)) / 1000))}s
                 </span>
-              ))}
+              </span>
+            ))}
           </div>
+
 
           {allAssignments.length > 0 && (
             <div className="grid gap-4 md:grid-cols-2">
@@ -418,15 +463,40 @@ const TuringTestSection = () => {
         </div>
       )}
 
-      {/* Waiting state for participants */}
+      {/* Opt-in / waiting state for participants */}
       {!isAdmin && !assignment && (
         <div className="rounded-xl border border-border bg-muted/30 p-8 text-center">
-          <Loader2 className="w-5 h-5 animate-spin mx-auto mb-3 text-primary" />
-          <p className="text-sm text-muted-foreground">
-            Warte auf den Start des Turing Tests…
-          </p>
+          {optInActive ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin mx-auto mb-3 text-primary" />
+              <p className="text-sm text-muted-foreground">
+                Angemeldet. Warte auf den Start des Turing Tests…
+              </p>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="mt-3"
+                onClick={() => setOptedInAt(Date.now())}
+              >
+                Anmeldung verlängern
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground mb-4">
+                {optedInAt
+                  ? "Deine Anmeldung ist abgelaufen. Melde dich erneut an."
+                  : "Möchtest du am Turing Test teilnehmen?"}
+              </p>
+              <Button size="sm" onClick={() => setOptedInAt(Date.now())}>
+                <Users className="w-4 h-4 mr-1" />
+                Ich möchte teilnehmen
+              </Button>
+            </>
+          )}
         </div>
       )}
+
 
       {/* Chat (identical UI for both groups) */}
       {assignment && (
