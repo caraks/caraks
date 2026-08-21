@@ -213,8 +213,7 @@ const TuringTestSection = () => {
   const startSession = async () => {
     if (!userId) return;
     if (participants.length < 1) {
-    if (participants.length < 1) {
-      toast.error("Keine Teilnehmer online.");
+      toast.error("Keine angemeldeten Teilnehmer (letzte 5 Minuten).");
       return;
     }
     setStarting(true);
