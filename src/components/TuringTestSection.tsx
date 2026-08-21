@@ -399,7 +399,7 @@ const TuringTestSection = () => {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
               <Users className="w-4 h-4 text-primary" />
-              Online: {online.filter((u) => !u.is_admin).length}
+              Angemeldet (letzte 5 Min.): {participants.length}
             </h3>
             <div className="flex gap-2">
               <Button size="sm" onClick={startSession} disabled={starting}>
@@ -416,14 +416,21 @@ const TuringTestSection = () => {
           </div>
 
           <div className="flex flex-wrap gap-1.5">
-            {online
-              .filter((u) => !u.is_admin)
-              .map((u) => (
-                <span key={u.user_id} className="text-xs bg-card border border-border rounded-full px-2.5 py-0.5">
-                  {u.display_name}
+            {participants.length === 0 && (
+              <span className="text-xs text-muted-foreground italic">
+                Noch keine Teilnahme-Anmeldungen.
+              </span>
+            )}
+            {participants.map((u) => (
+              <span key={u.user_id} className="text-xs bg-card border border-border rounded-full px-2.5 py-0.5">
+                {u.display_name}
+                <span className="text-muted-foreground ml-1">
+                  {Math.max(0, Math.round((now - (u.opted_in_at ?? now)) / 1000))}s
                 </span>
-              ))}
+              </span>
+            ))}
           </div>
+
 
           {allAssignments.length > 0 && (
             <div className="grid gap-4 md:grid-cols-2">
