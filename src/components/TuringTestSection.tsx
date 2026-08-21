@@ -77,13 +77,14 @@ const TuringTestSection = () => {
     const channel = supabase.channel(PRESENCE_CHANNEL, {
       config: { presence: { key: userId } },
     });
+    channelRef.current = channel;
 
     channel
       .on("presence", { event: "sync" }, () => {
         const state = channel.presenceState<OnlineUser>();
         const users: OnlineUser[] = [];
         Object.values(state).forEach((entries) => {
-          const e = entries[0] as unknown as OnlineUser;
+          const e = entries[entries.length - 1] as unknown as OnlineUser;
           if (e?.user_id && !users.some((u) => u.user_id === e.user_id)) users.push(e);
         });
         setOnline(users);
@@ -94,14 +95,42 @@ const TuringTestSection = () => {
             user_id: userId,
             display_name: displayName ?? "Teilnehmer",
             is_admin: isAdmin,
+            opted_in_at: optedInAt,
           });
         }
       });
 
     return () => {
+      channelRef.current = null;
       supabase.removeChannel(channel);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, displayName, isAdmin, roleLoading]);
+
+  // Re-broadcast presence when the user opts in
+  useEffect(() => {
+    if (!userId || !channelRef.current) return;
+    channelRef.current.track({
+      user_id: userId,
+      display_name: displayName ?? "Teilnehmer",
+      is_admin: isAdmin,
+      opted_in_at: optedInAt,
+    });
+  }, [optedInAt, userId, displayName, isAdmin]);
+
+  // Keep the 5-minute window fresh
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 15000);
+    return () => clearInterval(id);
+  }, []);
+
+  const now = Date.now();
+  const participants = online.filter(
+    (u) => !u.is_admin && u.opted_in_at && now - u.opted_in_at <= OPT_IN_WINDOW_MS,
+  );
+  const optInActive = optedInAt !== null && now - optedInAt <= OPT_IN_WINDOW_MS;
+
+
 
   /* ---------------- Active session + assignment ---------------- */
   const loadSession = useCallback(async () => {
