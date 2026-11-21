@@ -429,6 +429,86 @@ export type Database = {
           },
         ]
       }
+      turing_guest_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          pair_id: string
+          participant_id: string
+          test_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          pair_id: string
+          participant_id: string
+          test_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          pair_id?: string
+          participant_id?: string
+          test_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "turing_guest_messages_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "turing_guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "turing_guest_messages_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "turing_tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      turing_guests: {
+        Row: {
+          created_at: string
+          grp: string | null
+          id: string
+          name: string
+          pair_id: string | null
+          test_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          grp?: string | null
+          id?: string
+          name: string
+          pair_id?: string | null
+          test_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          grp?: string | null
+          id?: string
+          name?: string
+          pair_id?: string | null
+          test_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "turing_guests_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "turing_tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       turing_messages: {
         Row: {
           content: string
@@ -491,6 +571,27 @@ export type Database = {
         }
         Relationships: []
       }
+      turing_tests: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -520,6 +621,20 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      turing_admin: {
+        Args: { p_action: string; p_test?: string }
+        Returns: Json
+      }
+      turing_guest: {
+        Args: {
+          p_action: string
+          p_content?: string
+          p_name?: string
+          p_test: string
+          p_token?: string
+        }
+        Returns: Json
       }
       turing_is_pair_member: {
         Args: { _pair_id: string; _user_id: string }

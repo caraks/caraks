@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AuthGuard from "./components/AuthGuard";
 import { LangProvider } from "@/hooks/useLang";
+import TuringGuestPage from "./components/TuringGuestPage";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/turing/:testId" element={<TuringGuestPage />} />
             <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
