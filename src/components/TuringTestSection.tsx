@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useUserRole } from "@/hooks/useUserRole";
 import { adminAction, testLink, validTestId, type TuringTest } from "@/lib/turing";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 
 const TuringTestSection = () => {
   const { isAdmin, loading } = useUserRole();
@@ -72,6 +73,19 @@ const TuringTestSection = () => {
             catch { toast.error("Bitte den Link im Feld auswählen und kopieren."); }
           }}><Copy className="w-4 h-4" /></Button>
           <Button size="icon" variant="outline" className="shrink-0" asChild><a href={testLink(test.id)} target="_blank" rel="noopener noreferrer" aria-label="Test öffnen" title="Test öffnen"><ExternalLink className="w-4 h-4" /></a></Button>
+        </div>
+        <div className="flex justify-center pt-4">
+          <QRCodeSVG
+            value={testLink(test.id)}
+            size={360}
+            level="M"
+            marginSize={4}
+            bgColor="transparent"
+            fgColor="currentColor"
+            role="img"
+            aria-label="QR-Code zum Turing Test"
+            className="test-qr w-full max-w-[360px] h-auto aspect-square rounded-lg"
+          />
         </div>
       </div>
       <section className="border-t border-border pt-5 space-y-4">

@@ -33,6 +33,8 @@
     --border: 225 22% 20%;
     --input: 225 22% 20%;
     --ring: 230 75% 60%;
+    --qr-paper: 0 0% 100%;
+    --qr-ink: 0 0% 0%;
 
     --radius: 1rem;
 
@@ -94,6 +96,10 @@
 @layer utilities {
   .hero-gradient {
     background: var(--gradient-hero);
+  }
+  .test-qr {
+    background: hsl(var(--qr-paper));
+    color: hsl(var(--qr-ink));
   }
 }
 
